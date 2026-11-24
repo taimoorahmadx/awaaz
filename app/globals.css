@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  @apply bg-civic-bg text-slate-100 antialiased;
+}
+
+/* Urdu text renders right-to-left with comfortable Nastaliq line height */
+.urdu {
+  @apply font-urdu;
+  direction: rtl;
+  line-height: 2;
+}
+
+/* Hide horizontal scrollbars on pill rows while keeping them scrollable */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Leaflet map: dark civic look. Tiles are recoloured with a filter; offline shows the plain surface. */
+.awaaz-map.leaflet-container {
+  @apply bg-civic-surface font-sans;
+}
+.awaaz-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+}
+/* SVG divIcon pins: strip Leaflet's default white divIcon box */
+.awaaz-pin {
+  background: none;
+  border: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/*
+ * shadcn/ui variables mapped to the civic-* palette (tailwind.config.ts). Bare HSL triplets,
+ * because tailwind.config.ts wraps every token as hsl(var(--x)). The app is dark-only, so
+ * :root and .dark share one rule and can never drift apart.
+ */
+@layer base {
+  :root,
+  .dark {
+    --background: 218.2 44% 4.9%; /* #070b12 civic.bg */
+    --foreground: 210 40% 96.1%; /* #f1f5f9 slate-100, current body text */
+    --card: 217.9 38.8% 9.6%; /* #0f1622 civic.surface */
+    --card-foreground: 210 40% 96.1%;
+    --popover: 217.9 38.8% 9.6%;
+    --popover-foreground: 210 40% 96.1%;
+    --primary: 160.1 84.1% 39.4%; /* #10b981 civic.accent */
+    --primary-foreground: 165.7 91.3% 9%; /* #022c22, ~5.9:1 on #10b981 */
+    --secondary: 216.9 37.1% 13.7%; /* #162030 civic.raised */
+    --secondary-foreground: 210 40% 96.1%;
+    --muted: 216.9 37.1% 13.7%;
+    --muted-foreground: 216.6 21.2% 62.2%; /* #8a9ab3 civic.muted */
+    --accent: 216.9 37.1% 13.7%;
+    --accent-foreground: 210 40% 96.1%;
+    --destructive: 0 84.2% 60.2%; /* #ef4444, ~5.2:1 on civic.bg */
+    --destructive-foreground: 210 40% 96.1%;
+    --border: 217.3 35.2% 20.6%; /* #223047 civic.border */
+    --input: 217.3 35.2% 20.6%;
+    --ring: 160.1 84.1% 39.4%;
+    --chart-1: 160.1 84.1% 39.4%;
+    --chart-2: 198.6 88.7% 48.4%;
+    --chart-3: 37.7 92.1% 50.2%;
+    --chart-4: 0 84.2% 60.2%;
+    --chart-5: 258.3 89.5% 66.3%;
+    --radius: 0.5rem;
+    --sidebar: 217.9 38.8% 9.6%;
+    --sidebar-foreground: 210 40% 96.1%;
+    --sidebar-primary: 160.1 84.1% 39.4%;
+    --sidebar-primary-foreground: 165.7 91.3% 9%;
+    --sidebar-accent: 216.9 37.1% 13.7%;
+    --sidebar-accent-foreground: 210 40% 96.1%;
+    --sidebar-border: 217.3 35.2% 20.6%;
+    --sidebar-ring: 160.1 84.1% 39.4%;
+  }
+}
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
