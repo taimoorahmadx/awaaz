@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Garbage heap on a street corner">
+  <rect width="400" height="300" fill="#1e293b"/>
+  <rect y="170" width="400" height="130" fill="#57534e"/>
+  <rect x="270" y="90" width="90" height="110" rx="6" fill="#166534"/><rect x="262" y="82" width="106" height="14" rx="4" fill="#14532d"/>
+  <path d="M60 230 Q110 120 170 170 Q210 110 260 180 Q300 160 330 235 Z" fill="#78716c"/>
+  <circle cx="120" cy="200" r="18" fill="#a16207"/><circle cx="190" cy="185" r="22" fill="#1f2937"/><circle cx="240" cy="210" r="16" fill="#9a3412"/>
+  <rect x="150" y="205" width="30" height="18" fill="#e7e5e4" transform="rotate(20 165 214)"/>
+  <rect x="0" y="0" width="400" height="34" fill="#000" opacity=".45"/>
+  <text x="14" y="23" fill="#fdba74" font-family="sans-serif" font-size="15" font-weight="700">GARBAGE HEAP · BEFORE</text>
+</svg>
