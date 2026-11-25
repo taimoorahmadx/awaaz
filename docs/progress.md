@@ -3,8 +3,8 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** Work normally on the current branch (`master`); do not create task branches; nothing is pushed.
-- **Last Completed:** `T4.4` — implemented Dynamic Sector Civic Health Scorecard (`CivicGrade` + `SectorHealth` in `lib/types.ts`, `computeSectorHealth` + `computeCityHealth` + `scoreToGrade` + `gradeColorClasses` in `lib/utils.ts`, live KPIs + citywide/sector Civic Health cards in `MayorPortalView.tsx`, sector grade badges in `FeedFilters.tsx` / `ComplaintFeed.tsx`, and `e2e/civic-health.spec.ts`).
-- **Next Task:** `T4.5` — Worker Home Route Card (small).
+- **Last Completed:** `T4.5` — implemented Worker Home Route Card (`components/worker/WorkerHome.tsx` filtering `assignedTo.workerId` with mini `LeafletMap` centered on pin, landmark, coordinates, Google Maps link, and `BeforeAfterViewer`; optional `center`/`zoom`/`showZoomControl` props on `LeafletMap.tsx`; offline badge fallback in `BeforeAfterViewer.tsx`; `workerId` passed from `app/page.tsx` via `WorkerPortalView.tsx`; extended `e2e/golden-path.spec.ts`).
+- **Next Task:** `T5.2` — PWA Manifest (T5.1 parked).
 
 ---
 
@@ -12,7 +12,7 @@
 - Sprint 1 (Scaffold, Map, Seed Data, Feed): `[x]` Completed
 - Sprint 2 (Core AI Endpoints & Basic Portals): `[x]` Completed
 - Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[x]` Completed (T3.0, T3.0b, T3.1, T3.2, T3.3, T3.4 done)
-- Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[ ]` In progress (next `T4.5`)
+- Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[x]` Completed (T4.1–T4.5 done)
 - Sprint 5 (PWA, final verification): `[ ]` Planned — T5.1 evals parked (see Parking Lot)
 
 ---
@@ -131,3 +131,4 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T4.2:** Implemented Location Resolution (GPS → `landmarks.json` → Sector Centre) and 50m Haversine proximity duplicate detection (`LocationSource` + `Landmark` in `lib/types.ts`; `source: "LANDMARK"` on seeds in `lib/data/seedComplaints.json`; 12 landmarks + 4 sector centres in `lib/data/landmarks.json`; `haversineMeters`, `resolveComplaintLocation`, `findDuplicateComplaint` in `lib/utils.ts`; `addImpactConfirmation` with 2/4 confirmation urgency boost + `IMPACT_ADDED`/`URGENCY_RAISED` events in `lib/data/storage.ts`; `Anonymous Citizen` profile in `components/common/AppHeader.tsx`; `DuplicateCard.tsx` and parallel GPS + duplicate check in `HomeChatIntake.tsx`; `e2e/location-duplicates.spec.ts`). Verified via `npm run build && npm run lint && npm run test:e2e` (24 passed).
 - **T4.3:** Implemented Interactive Mayor Desk (`Contractor` in `lib/types.ts`, `lib/data/seedContractors.json`, `awaaz.contractors.v1` + `toggleContractorPayout`/`useContractors` + `resetSystemData` integration in `lib/data/storage.ts`; shadcn `Tabs` in `MayorPortalView.tsx`, `MayorContractorsTab.tsx` with shadcn `Switch` Freeze/Unfreeze Payout + status pill + AI fraud flags, `MayorAlertsTab.tsx` with live critical escalations + editable Emergency Broadcast form posting official alerts to `grp-municipal-alerts`; `e2e/mayor-desk.spec.ts`). Verified via `npm run build && npm run lint && npm run test:e2e` (25 passed).
 - **T4.4:** Implemented Dynamic Civic Health Scorecard (`CivicGrade` and `SectorHealth` in `lib/types.ts`; `computeSectorHealth`, `computeCityHealth`, `scoreToGrade`, and `gradeColorClasses` in `lib/utils.ts`; live KPIs + citywide/sector scorecard in `components/mayor/MayorPortalView.tsx`; live sector grade chips in `components/feed/ComplaintFeed.tsx` + `components/feed/FeedFilters.tsx`; `e2e/civic-health.spec.ts` verifying AC-12.3 seed math and live 66 C → 86 B transition on `cmp-001` resolution). Verified via `npm run build && npm run lint && npm run test:e2e` (27 passed).
+- **T4.5:** Implemented Worker Home Route Card (`components/worker/WorkerHome.tsx` filtering `assignedTo.workerId` with mini `LeafletMap`, landmark, coordinates, Google Maps link, and `BeforeAfterViewer`; optional `center`/`zoom`/`showZoomControl` on `components/map/LeafletMap.tsx`; offline fallback badge persistence in `components/worker/BeforeAfterViewer.tsx`; `workerId` prop wired through `app/page.tsx` and `components/worker/WorkerPortalView.tsx`; `e2e/golden-path.spec.ts` verifying route card, Google Maps link, and worker assignment filter). Verified via `npm run build && npm run lint && npm run test:e2e` (28 passed).

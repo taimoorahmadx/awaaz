@@ -101,7 +101,7 @@ export default function Page() {
       ) : (
         <main className="flex flex-1 flex-col">
           {role.kind === "worker" ? (
-            <WorkerPortalView complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
+            <WorkerPortalView complaints={complaints} workerId={role.profileId} onUpdateComplaint={onUpdateComplaint} />
           ) : (
             <MayorPortalView complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
           )}

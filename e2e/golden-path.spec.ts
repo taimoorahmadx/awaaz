@@ -56,8 +56,22 @@ async function claimAndSubmitFix(page: Page, id: string, afterPhoto: string): Pr
   await queued.getByRole("button", { name: "Claim Ticket" }).click();
 
   // The portal switches to the worker Home tab on its own after a claim.
+  await expect(
+    page.getByRole("navigation", { name: "Worker navigation" }).getByRole("button", { name: /^Home/ }),
+  ).toHaveAttribute("aria-current", "page");
   const card = page.locator(`[data-testid="worker-ticket"][data-complaint-id="${id}"]`);
   await expect(card).toBeVisible();
+
+  // T4.5: Worker Home route card shows mini Leaflet map, landmark, coordinates, and Google Maps link.
+  const routeCard = card.getByTestId("worker-route-card");
+  await expect(routeCard).toBeVisible();
+  await expect(routeCard.locator(".leaflet-marker-pane .awaaz-pin")).toHaveCount(1);
+  await expect(routeCard.getByTestId("worker-route-coords")).toHaveText(/^-?\d+\.\d{4}, -?\d+\.\d{4}$/);
+  const mapsLink = routeCard.getByRole("link", { name: /Open in Google Maps/ });
+  await expect(mapsLink).toHaveAttribute("href", /^https:\/\/www\.google\.com\/maps\/dir\/\?api=1&destination=-?\d+(\.\d+)?,-?\d+(\.\d+)?$/);
+  await expect(mapsLink).toHaveAttribute("target", "_blank");
+  await expect(mapsLink).toHaveAttribute("rel", "noopener noreferrer");
+
   await card.getByTestId("after-photo-input").setInputFiles(afterPhoto);
   await card.getByTestId("verify-fix-button").click();
   return card;
@@ -228,4 +242,27 @@ test("modal opens from explore card and shows lifecycle timeline", async ({ page
   // Escape closes the modal.
   await page.keyboard.press("Escape");
   await expect(modal).not.toBeVisible();
+});
+
+test("worker Home only shows tickets assigned to the active worker", async ({ page }) => {
+  await page.waitForFunction((key) => Boolean(localStorage.getItem(key)), STORAGE_KEY);
+  await page.evaluate((key) => {
+    const list = JSON.parse(localStorage.getItem(key) ?? "[]") as {
+      id: string;
+      status: string;
+      assignedTo?: { workerId: string; workerName: string };
+    }[];
+    const other = list.find((c) => c.id === "cmp-002");
+    if (other) {
+      other.assignedTo = { workerId: "worker-other", workerName: "Other" };
+    }
+    localStorage.setItem(key, JSON.stringify(list));
+  }, STORAGE_KEY);
+
+  await page.reload();
+  await switchRole(page, "Sajid");
+  await page.getByRole("navigation", { name: "Worker navigation" }).getByRole("button", { name: /^Home/ }).click();
+
+  await expect(page.locator('[data-testid="worker-ticket"][data-complaint-id="cmp-006"]')).toBeVisible();
+  await expect(page.locator('[data-testid="worker-ticket"][data-complaint-id="cmp-002"]')).toHaveCount(0);
 });

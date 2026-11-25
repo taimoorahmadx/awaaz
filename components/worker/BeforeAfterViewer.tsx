@@ -219,26 +219,32 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
         )}
         {result && <OfflineBadge visible={result.isOfflineFallback === true} className="mt-2" />}
         {!result && alreadyVerified && complaint.aiVerification && (
-          <p
-            data-testid="ai-verified-badge"
-            className="flex items-start gap-2 rounded-lg bg-green-500/15 px-3 py-2 text-xs text-green-300 ring-1 ring-green-500/40">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>
-              <strong>AI Verified</strong> ({pct(complaint.aiVerification.confidence)}):{" "}
-              {complaint.aiVerification.reasoning}
-            </span>
-          </p>
+          <>
+            <p
+              data-testid="ai-verified-badge"
+              className="flex items-start gap-2 rounded-lg bg-green-500/15 px-3 py-2 text-xs text-green-300 ring-1 ring-green-500/40">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>AI Verified</strong> ({pct(complaint.aiVerification.confidence)}):{" "}
+                {complaint.aiVerification.reasoning}
+              </span>
+            </p>
+            <OfflineBadge visible={complaint.aiVerification.isOfflineFallback === true} className="mt-2" />
+          </>
         )}
         {!result && !alreadyVerified && complaint.aiVerification && !complaint.aiVerification.passed && (
-          <p
-            data-testid="ai-rejected-badge"
-            className="flex items-start gap-2 rounded-lg bg-red-500/15 px-3 py-2 text-xs text-red-300 ring-1 ring-red-500/40">
-            <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span>
-              <strong>AI Rejected</strong> ({pct(complaint.aiVerification.confidence)}):{" "}
-              {complaint.aiVerification.reasoning}
-            </span>
-          </p>
+          <>
+            <p
+              data-testid="ai-rejected-badge"
+              className="flex items-start gap-2 rounded-lg bg-red-500/15 px-3 py-2 text-xs text-red-300 ring-1 ring-red-500/40">
+              <XCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>
+                <strong>AI Rejected</strong> ({pct(complaint.aiVerification.confidence)}):{" "}
+                {complaint.aiVerification.reasoning}
+              </span>
+            </p>
+            <OfflineBadge visible={complaint.aiVerification.isOfflineFallback === true} className="mt-2" />
+          </>
         )}
         {error && <p className="text-xs text-red-300" role="alert">{error}</p>}
       </div>

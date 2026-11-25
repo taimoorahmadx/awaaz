@@ -20,6 +20,12 @@ export interface LeafletMapProps {
   selectedId: string | null;
   /** Called with a complaint id on pin tap, or `null` when the empty map is tapped. */
   onSelect: (id: string | null) => void;
+  /** Optional explicit center `[lat, lng]` (e.g. mini route card centered on a single pin). */
+  center?: [number, number];
+  /** Optional zoom level when `center` is supplied (default 15). */
+  zoom?: number;
+  /** Whether to show Leaflet's +/- zoom control (default true). */
+  showZoomControl?: boolean;
 }
 
 /** Teardrop pin as inline SVG. Never use Leaflet's default PNG markers (404s in Next.js). */
@@ -42,11 +48,23 @@ function pinIcon(color: string, selected: boolean): L.DivIcon {
   });
 }
 
-export default function LeafletMap({ complaints, selectedId, onSelect }: LeafletMapProps) {
+export default function LeafletMap({
+  complaints,
+  selectedId,
+  onSelect,
+  center,
+  zoom,
+  showZoomControl = true,
+}: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const layerRef = useRef<L.LayerGroup | null>(null);
   const fittedRef = useRef(false);
+  const centerLat = center?.[0];
+  const centerLng = center?.[1];
+  const initialCenterRef = useRef<L.LatLngTuple>(center ?? F10_CENTER);
+  const initialZoomRef = useRef<number>(center ? (zoom ?? MAX_FIT_ZOOM) : DEFAULT_ZOOM);
+  const showZoomRef = useRef<boolean>(showZoomControl);
   // Keep the latest callback without re-binding Leaflet handlers on every render.
   const onSelectRef = useRef(onSelect);
   useEffect(() => {
@@ -58,8 +76,14 @@ export default function LeafletMap({ complaints, selectedId, onSelect }: Leaflet
     const el = containerRef.current;
     if (!el) return;
 
-    const map = L.map(el, { center: F10_CENTER, zoom: DEFAULT_ZOOM, zoomControl: false });
-    L.control.zoom({ position: "topright" }).addTo(map);
+    const map = L.map(el, {
+      center: initialCenterRef.current,
+      zoom: initialZoomRef.current,
+      zoomControl: false,
+    });
+    if (showZoomRef.current) {
+      L.control.zoom({ position: "topright" }).addTo(map);
+    }
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -104,6 +128,12 @@ export default function LeafletMap({ complaints, selectedId, onSelect }: Leaflet
         .addTo(layer);
     }
 
+    if (centerLat !== undefined && centerLng !== undefined) {
+      fittedRef.current = true;
+      map.setView([centerLat, centerLng], zoom ?? MAX_FIT_ZOOM, { animate: false });
+      return;
+    }
+
     // First load: stay centred on F-10 but zoom out just enough to show every pin.
     if (!fittedRef.current && complaints.length > 0) {
       fittedRef.current = true;
@@ -115,10 +145,10 @@ export default function LeafletMap({ complaints, selectedId, onSelect }: Leaflet
         dLng = Math.max(dLng, Math.abs(c.location.lng - lng0));
       }
       const bounds = L.latLngBounds([lat0 - dLat, lng0 - dLng], [lat0 + dLat, lng0 + dLng]);
-      const zoom = Math.min(map.getBoundsZoom(bounds, false, L.point(48, 48)), MAX_FIT_ZOOM);
-      map.setView(F10_CENTER, zoom, { animate: false });
+      const fitZoom = Math.min(map.getBoundsZoom(bounds, false, L.point(48, 48)), MAX_FIT_ZOOM);
+      map.setView(F10_CENTER, fitZoom, { animate: false });
     }
-  }, [complaints, selectedId]);
+  }, [complaints, selectedId, centerLat, centerLng, zoom]);
 
   return (
     <div

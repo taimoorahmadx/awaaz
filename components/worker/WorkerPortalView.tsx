@@ -3,15 +3,15 @@
 import { useState } from "react";
 import { ClipboardList, Home, User } from "lucide-react";
 import type { Complaint } from "@/lib/types";
-import { STATUS_BADGE, STATUS_LABELS, URGENCY_BADGE, URGENCY_LABELS } from "@/lib/labels";
 import WorkerQueue from "./WorkerQueue";
-import BeforeAfterViewer from "./BeforeAfterViewer";
+import WorkerHome from "./WorkerHome";
 import WorkerProfile from "./WorkerProfile";
 
 type WorkerTab = "queue" | "home" | "profile";
 
 interface WorkerPortalViewProps {
   complaints: Complaint[];
+  workerId?: string;
   onUpdateComplaint: (complaint: Complaint) => void;
 }
 
@@ -21,12 +21,17 @@ const TABS: { id: WorkerTab; label: string; icon: typeof Home }[] = [
   { id: "profile", label: "Profile", icon: User },
 ];
 
-/** Worker portal: Queue (claim) → Home (upload fix + AI verify) → Profile. */
-export default function WorkerPortalView({ complaints, onUpdateComplaint }: WorkerPortalViewProps) {
+/** Worker portal: Queue (claim) → Home (route card + upload fix + AI verify) → Profile. */
+export default function WorkerPortalView({
+  complaints,
+  workerId = "worker-sajid",
+  onUpdateComplaint,
+}: WorkerPortalViewProps) {
   const [tab, setTab] = useState<WorkerTab>("queue");
 
-  // Claimed work: in progress, plus tickets awaiting community sign-off.
-  const myWork = complaints.filter((c) => c.status === "IN_PROGRESS" || c.status === "PENDING_COMMUNITY_VERIFICATION");
+  const activeWorkCount = complaints.filter(
+    (c) => c.assignedTo?.workerId === workerId && c.status === "IN_PROGRESS",
+  ).length;
 
   function handleUpdate(c: Complaint) {
     onUpdateComplaint(c);
@@ -38,32 +43,11 @@ export default function WorkerPortalView({ complaints, onUpdateComplaint }: Work
       <main className="flex-1 overflow-y-auto pb-20">
         {tab === "queue" && <WorkerQueue complaints={complaints} onUpdateComplaint={handleUpdate} />}
         {tab === "home" && (
-          <section className="flex flex-col gap-3 p-4">
-            {myWork.length === 0 && (
-              <p className="py-12 text-center text-sm text-civic-muted">No claimed tickets. Claim one from the Queue.</p>
-            )}
-            {myWork.map((c) => (
-              <article
-                key={c.id}
-                data-testid="worker-ticket"
-                data-complaint-id={c.id}
-                className="flex flex-col gap-3 rounded-2xl bg-civic-raised p-3 ring-1 ring-civic-border">
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${URGENCY_BADGE[c.urgency]}`}>
-                    {URGENCY_LABELS[c.urgency]}
-                  </span>
-                  <span className={`rounded-full px-2 py-0.5 text-[11px] ring-1 ${STATUS_BADGE[c.status]}`}>
-                    {STATUS_LABELS[c.status]}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-50">{c.title}</h3>
-                  <p className="text-xs text-civic-muted">{c.location.landmark}</p>
-                </div>
-                <BeforeAfterViewer complaint={c} onUpdateComplaint={onUpdateComplaint} />
-              </article>
-            ))}
-          </section>
+          <WorkerHome
+            complaints={complaints}
+            workerId={workerId}
+            onUpdateComplaint={onUpdateComplaint}
+          />
         )}
         {tab === "profile" && <WorkerProfile />}
       </main>
@@ -84,7 +68,7 @@ export default function WorkerPortalView({ complaints, onUpdateComplaint }: Work
           >
             <Icon className="h-5 w-5" aria-hidden="true" />
             {label}
-            {id === "home" && myWork.length > 0 && <span className="sr-only">({myWork.length})</span>}
+            {id === "home" && activeWorkCount > 0 && <span className="sr-only">({activeWorkCount})</span>}
           </button>
         ))}
       </nav>

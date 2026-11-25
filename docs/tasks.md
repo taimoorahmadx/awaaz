@@ -142,7 +142,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: Mayor Home shows city 84 / B on seed data; resolve `cmp-001` via the worker + confirm flow (or storage helper in test setup) → F-10 shows 86 / B.
   - **Files:** `lib/utils.ts`, `components/mayor/MayorPortalView.tsx`, `components/feed/FeedFilters.tsx`, `e2e/*`.
 
-- [ ] **T4.5: Worker Home Route Card (small)**
+- [x] **T4.5: Worker Home Route Card (small)**
   - Worker `Home` tab per AC-4.3: tickets where `assignedTo.workerId` = active worker and status `IN_PROGRESS`; mini Leaflet map (reuse `LeafletMap` via `next/dynamic`, `ssr: false`), landmark, coordinates, "Open in Google Maps" link, and the Before/After verify flow. No distance calc, no turn-by-turn.
   - Golden-path e2e should now go through this tab after claiming.
   - **Files:** `components/worker/WorkerHome.tsx`, `components/worker/WorkerPortalView.tsx`, `e2e/*`.
