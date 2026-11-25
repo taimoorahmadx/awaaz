@@ -123,6 +123,36 @@ test("app icon / favicon: loading / produces no console errors and no 404 respon
   expect(consoleErrors, `Unexpected console errors: ${consoleErrors.join(", ")}`).toEqual([]);
 });
 
+test("PWA manifest: /manifest.webmanifest returns 200 with standalone display and icons", async ({ page }) => {
+  await page.route(/tile\.openstreetmap\.org/, (route) => route.abort());
+  await page.goto("/");
+
+  const manifestLink = page.locator('link[rel="manifest"]');
+  await expect(manifestLink).toHaveAttribute("href", "/manifest.webmanifest");
+
+  const res = await page.request.get("/manifest.webmanifest");
+  expect(res.status()).toBe(200);
+  const manifest = (await res.json()) as {
+    name: string;
+    short_name: string;
+    display: string;
+    background_color: string;
+    theme_color: string;
+    icons: { src: string; sizes: string; type?: string }[];
+  };
+  expect(manifest.name).toBe("Awaaz");
+  expect(manifest.short_name).toBe("Awaaz");
+  expect(manifest.display).toBe("standalone");
+  expect(manifest.background_color).toBe("#070b12");
+  expect(manifest.theme_color).toBe("#070b12");
+  expect(manifest.icons.map((i) => i.sizes)).toEqual(expect.arrayContaining(["192x192", "512x512"]));
+
+  for (const icon of manifest.icons) {
+    const iconRes = await page.request.get(icon.src);
+    expect(iconRes.status(), `Icon ${icon.src} should load`).toBe(200);
+  }
+});
+
 // Leaflet panes/controls reach z-index ~1000, so every shadcn overlay surface must sit at ≥ 1100.
 // Checked statically: no screen renders these primitives yet (first runtime check comes with T3.3).
 test("overlays stack above Leaflet (z-index ≥ 1100)", () => {

@@ -153,7 +153,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
 
 - [ ] **T5.1: Evaluation Suite — PARKED (D4).** Later, with the user. Do not build. Description in `docs/progress.md` → Parking Lot.
 
-- [ ] **T5.2: PWA Manifest**
+- [x] **T5.2: PWA Manifest**
   - `app/manifest.ts` (Next metadata route) per AC-14.1 using icons derived from `public/logo.jpg` (192, 512). No service worker.
   - e2e: `GET /manifest.webmanifest` returns 200 with `display: "standalone"`.
   - **Files:** `app/manifest.ts`, `public/icons/*`, `e2e/*`.
