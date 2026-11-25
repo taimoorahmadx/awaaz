@@ -136,7 +136,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: Mayor → Contractors → freeze → reload → still frozen; Mayor → Alerts → broadcast → switch to Tariq → Groups → Municipal Alerts shows it and another channel shows the banner.
   - **Files:** `components/mayor/MayorPortalView.tsx` (split into sub-components if it gets large), `lib/data/*`, `lib/types.ts`, `e2e/*`.
 
-- [ ] **T4.4: Dynamic Civic Health Scorecard**
+- [x] **T4.4: Dynamic Civic Health Scorecard**
   - `computeSectorHealth(complaints)` and `computeCityHealth(...)` in `lib/utils.ts` per AC-12.1/12.2. Add a quick self-check: a tiny script or e2e assertion that seed data yields the AC-12.3 values (F-10 66 C, F-6 84 B, G-9 86 B, I-9 100 A, city 84 B).
   - Show in Mayor `Home` (with live KPIs, AC-10.2) and on Explore sector chips (AC-3.3). Recompute on every complaint change.
   - e2e: Mayor Home shows city 84 / B on seed data; resolve `cmp-001` via the worker + confirm flow (or storage helper in test setup) → F-10 shows 86 / B.

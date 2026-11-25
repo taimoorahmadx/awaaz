@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Newspaper } from "lucide-react";
 import type { Complaint, Urgency } from "@/lib/types";
 import { useComplaints } from "@/lib/data/storage";
+import { computeSectorHealth } from "@/lib/utils";
 import ComplaintCard from "./ComplaintCard";
 import ComplaintDetailModal from "./ComplaintDetailModal";
 import FeedFilters, { type SectorFilter, type SortMode, type UrgencyFilter } from "./FeedFilters";
@@ -53,6 +54,11 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpda
     [complaints, sector, urgency, sort],
   );
 
+  const sectorHealth = useMemo(
+    () => (hydrated ? computeSectorHealth(complaints) : []),
+    [complaints, hydrated],
+  );
+
   const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
 
   return (
@@ -62,6 +68,7 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpda
         urgency={urgency}
         sort={sort}
         homeSector={homeSector}
+        sectorHealth={sectorHealth}
         onSectorChange={setSector}
         onUrgencyChange={setUrgency}
         onSortChange={setSort}

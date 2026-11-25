@@ -1,7 +1,8 @@
 "use client";
 
-import type { Urgency } from "@/lib/types";
+import type { SectorHealth, Urgency } from "@/lib/types";
 import { RESOLVED_HEX, URGENCY_HEX } from "@/lib/labels";
+import { gradeColorClasses } from "@/lib/utils";
 
 export const SECTOR_OPTIONS = ["All", "F-10", "F-6", "G-9", "I-9"] as const;
 export type SectorFilter = (typeof SECTOR_OPTIONS)[number];
@@ -30,6 +31,7 @@ interface FeedFiltersProps {
   sort: SortMode;
   /** Viewer's home sector, starred in the pill row */
   homeSector: string;
+  sectorHealth?: SectorHealth[];
   onSectorChange: (sector: SectorFilter) => void;
   onUrgencyChange: (urgency: UrgencyFilter) => void;
   onSortChange: (sort: SortMode) => void;
@@ -48,29 +50,44 @@ export default function FeedFilters({
   urgency,
   sort,
   homeSector,
+  sectorHealth = [],
   onSectorChange,
   onUrgencyChange,
   onSortChange,
 }: FeedFiltersProps) {
+  const healthBySector = new Map(sectorHealth.map((h) => [h.sector, h]));
+
   return (
     <div className="sticky top-14 z-30 flex flex-col gap-2 border-b border-civic-border bg-civic-bg/95 px-3 py-2 backdrop-blur">
       <div role="group" aria-label="Filter by sector" className="no-scrollbar flex gap-1.5 overflow-x-auto">
-        {SECTOR_OPTIONS.map((s) => (
-          <button
-            key={s}
-            type="button"
-            aria-pressed={sector === s}
-            onClick={() => onSectorChange(s)}
-            className={pillClass(sector === s)}
-          >
-            {s === homeSector && (
-              <span aria-label="Your sector" className="text-[10px]">
-                ★
-              </span>
-            )}
-            {s}
-          </button>
-        ))}
+        {SECTOR_OPTIONS.map((s) => {
+          const health = s === "All" ? undefined : healthBySector.get(s);
+          return (
+            <button
+              key={s}
+              type="button"
+              aria-pressed={sector === s}
+              aria-label={health ? `${s} (Civic Health Grade ${health.grade}, ${health.score}/100)` : s}
+              onClick={() => onSectorChange(s)}
+              className={pillClass(sector === s)}
+            >
+              {s === homeSector && (
+                <span aria-label="Your sector" className="text-[10px]">
+                  ★
+                </span>
+              )}
+              <span>{s}</span>
+              {health && (
+                <span
+                  data-testid={`sector-chip-grade-${s}`}
+                  className={`rounded-full border px-1.5 text-[10px] font-bold leading-4 ${gradeColorClasses(health.grade).badge}`}
+                >
+                  {health.grade}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       <div role="group" aria-label="Filter by urgency" className="no-scrollbar flex gap-1.5 overflow-x-auto">

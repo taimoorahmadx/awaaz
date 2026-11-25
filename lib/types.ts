@@ -190,3 +190,15 @@ export interface Contractor {
   flaggedIncidents: number;
   payoutStatus: "ACTIVE" | "FROZEN";
 }
+
+// T4.4: Dynamic Civic Health Scorecard
+export type CivicGrade = "A" | "B" | "C" | "D" | "F";
+
+export interface SectorHealth {
+  sector: string;
+  score: number; // 0–100
+  grade: CivicGrade;
+  totalComplaints: number;
+  openCritical: number;
+  resolvedComplaints: number;
+}

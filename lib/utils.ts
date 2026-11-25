@@ -1,7 +1,15 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import landmarksData from "@/lib/data/landmarks.json";
-import type { Complaint, Department, GeoLocation, IssueCategory, Landmark } from "@/lib/types";
+import type {
+  CivicGrade,
+  Complaint,
+  Department,
+  GeoLocation,
+  IssueCategory,
+  Landmark,
+  SectorHealth,
+} from "@/lib/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -211,4 +219,109 @@ export function findDuplicateComplaint(
     }
   }
   return best;
+}
+
+// ---------------------------------------------------------------------------
+// Dynamic Civic Health Scorecard (T4.4, AC-12.1 / AC-12.2)
+// ---------------------------------------------------------------------------
+
+export const HEALTH_SECTORS = ["F-10", "F-6", "G-9", "I-9"] as const;
+
+export function scoreToGrade(score: number): CivicGrade {
+  if (score >= 90) return "A";
+  if (score >= 75) return "B";
+  if (score >= 60) return "C";
+  if (score >= 45) return "D";
+  return "F";
+}
+
+/**
+ * Computes per-sector Civic Health score & grade (AC-12.1):
+ * score = clamp(0, 100, round(100 - (openCritical*15 + openHigh*8 + openMedium*3) + resolvedRatio*20))
+ */
+export function computeSectorHealth(complaints: Complaint[]): SectorHealth[] {
+  return HEALTH_SECTORS.map((sector) => {
+    const sectorComplaints = complaints.filter((c) => c.location.sector === sector);
+    const totalComplaints = sectorComplaints.length;
+    const resolvedComplaints = sectorComplaints.filter((c) => c.status === "RESOLVED").length;
+    const open = sectorComplaints.filter((c) => c.status !== "RESOLVED");
+
+    const openCritical = open.filter((c) => c.urgency === "CRITICAL").length;
+    const openHigh = open.filter((c) => c.urgency === "HIGH").length;
+    const openMedium = open.filter((c) => c.urgency === "MEDIUM").length;
+    const resolvedRatio = totalComplaints > 0 ? resolvedComplaints / totalComplaints : 0;
+
+    const raw =
+      100 - (openCritical * 15 + openHigh * 8 + openMedium * 3) + resolvedRatio * 20;
+    const score = Math.max(0, Math.min(100, Math.round(raw)));
+
+    return {
+      sector,
+      score,
+      grade: scoreToGrade(score),
+      totalComplaints,
+      openCritical,
+      resolvedComplaints,
+    };
+  });
+}
+
+/** Citywide Civic Health score = rounded mean of the 4 sector scores (AC-12.2). */
+export function computeCityHealth(
+  input: Complaint[] | SectorHealth[],
+): { score: number; grade: CivicGrade; sectors: SectorHealth[] } {
+  const sectors =
+    input.length > 0 && "grade" in input[0]
+      ? (input as SectorHealth[])
+      : computeSectorHealth(input as Complaint[]);
+  const score =
+    sectors.length > 0
+      ? Math.round(sectors.reduce((sum, s) => sum + s.score, 0) / sectors.length)
+      : 100;
+  return { score, grade: scoreToGrade(score), sectors };
+}
+
+export function gradeColorClasses(grade: CivicGrade): {
+  badge: string;
+  text: string;
+  bar: string;
+  border: string;
+} {
+  switch (grade) {
+    case "A":
+      return {
+        badge: "border-emerald-500/40 bg-emerald-500/15 text-emerald-300",
+        text: "text-emerald-400",
+        bar: "bg-emerald-500",
+        border: "border-emerald-500/40",
+      };
+    case "B":
+      return {
+        badge: "border-green-500/40 bg-green-500/15 text-green-300",
+        text: "text-green-400",
+        bar: "bg-green-500",
+        border: "border-green-500/40",
+      };
+    case "C":
+      return {
+        badge: "border-amber-500/40 bg-amber-500/15 text-amber-300",
+        text: "text-amber-400",
+        bar: "bg-amber-400",
+        border: "border-amber-500/40",
+      };
+    case "D":
+      return {
+        badge: "border-orange-500/40 bg-orange-500/15 text-orange-300",
+        text: "text-orange-400",
+        bar: "bg-orange-500",
+        border: "border-orange-500/40",
+      };
+    case "F":
+      return {
+        badge: "border-red-500/40 bg-red-500/15 text-red-300",
+        text: "text-red-400",
+        bar: "bg-red-500",
+        border: "border-red-500/40",
+      };
+  }
 }
