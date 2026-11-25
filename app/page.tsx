@@ -103,7 +103,7 @@ export default function Page() {
           {role.kind === "worker" ? (
             <WorkerPortalView complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
           ) : (
-            <MayorPortalView complaints={complaints} />
+            <MayorPortalView complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
           )}
         </main>
       )}

@@ -179,3 +179,14 @@ export interface GroupMessage {
   isOfficialAlert?: boolean;
   createdAt: string;
 }
+
+// T4.3: Contractor audit & payout freeze
+export interface Contractor {
+  id: string;
+  name: string;
+  department: Department;
+  /** 0–100 display percentage (not an AI confidence) */
+  verifiedResolutionPct: number;
+  flaggedIncidents: number;
+  payoutStatus: "ACTIVE" | "FROZEN";
+}

@@ -130,7 +130,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
     - GPS denied, no landmark match → chip "Sector estimate" → no DuplicateCard.
   - **Files:** `lib/data/landmarks.json`, `lib/utils.ts`, `lib/types.ts`, `lib/data/seedComplaints.json`, `lib/data/storage.ts`, `components/home/HomeChatIntake.tsx`, `components/home/DuplicateCard.tsx`, `e2e/*`.
 
-- [ ] **T4.3: Interactive Mayor Desk – Payout Freeze & Emergency Broadcast**
+- [x] **T4.3: Interactive Mayor Desk – Payout Freeze & Emergency Broadcast**
   - Move the contractor list currently hard-coded in `MayorPortalView.tsx` into seed data (`Contractor` type, spec §3) persisted at `awaaz.contractors.v1`; "Freeze Payout"/"Unfreeze Payout" toggle using the shadcn `Switch` (with a visible text label and status pill) (AC-10.3); included in Reset. Mayor tabs may move to shadcn `Tabs` while this file is being edited.
   - "Broadcast Emergency Notice" form (editable, pre-filled) posting an official alert to `📢 Municipal Alerts` (AC-10.4). Depends on T4.1 storage; if T4.1 is blocked, do the freeze toggle only and log the rest.
   - e2e: Mayor → Contractors → freeze → reload → still frozen; Mayor → Alerts → broadcast → switch to Tariq → Groups → Municipal Alerts shows it and another channel shows the banner.

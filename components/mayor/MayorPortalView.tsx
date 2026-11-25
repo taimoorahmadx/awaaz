@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import type { Complaint } from "@/lib/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MapView from "@/components/map/MapView";
+import MayorAlertsTab from "./MayorAlertsTab";
+import MayorContractorsTab from "./MayorContractorsTab";
 
 type MayorTab = "map" | "alerts" | "home" | "depts" | "contractors";
 
@@ -15,42 +18,68 @@ const TABS: { id: MayorTab; icon: string; label: string }[] = [
 ];
 
 interface MayorPortalViewProps {
-  /** Optional: used only to derive headline counts. Falls back to static demo numbers. */
   complaints?: Complaint[];
+  onUpdateComplaint?: (c: Complaint) => void;
 }
 
 const card = "rounded-xl border border-civic-border bg-civic-surface p-3";
 const sectionTitle = "mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400";
 
-/** Mayor / Commissioner portal: static executive shell with 5 internal tabs (MAYOR_PORTAL_ASCII.md). */
-export default function MayorPortalView({ complaints = [] }: MayorPortalViewProps) {
+/** Mayor / Commissioner portal with 5 executive tabs (MAYOR_PORTAL_ASCII.md). */
+export default function MayorPortalView({
+  complaints = [],
+  onUpdateComplaint,
+}: MayorPortalViewProps) {
   const [tab, setTab] = useState<MayorTab>("home");
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <Tabs
+      value={tab}
+      onValueChange={(v) => setTab(v as MayorTab)}
+      className="flex min-h-0 flex-1 flex-col"
+    >
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-        {tab === "map" && <MapView />}
-        {tab === "alerts" && <AlertsTab />}
-        {tab === "home" && <HomeTab complaints={complaints} onNav={setTab} />}
-        {tab === "depts" && <DeptsTab />}
-        {tab === "contractors" && <ContractorsTab />}
+        <TabsContent value="map" className="mt-0 flex min-h-0 flex-1 flex-col">
+          <MapView
+            viewerId="admin-nasir"
+            viewerName="Comm. Nasir"
+            onUpdateComplaint={onUpdateComplaint}
+          />
+        </TabsContent>
+        <TabsContent value="alerts" className="mt-0">
+          <MayorAlertsTab complaints={complaints} />
+        </TabsContent>
+        <TabsContent value="home" className="mt-0">
+          <HomeTab complaints={complaints} onNav={setTab} />
+        </TabsContent>
+        <TabsContent value="depts" className="mt-0">
+          <DeptsTab />
+        </TabsContent>
+        <TabsContent value="contractors" className="mt-0">
+          <MayorContractorsTab complaints={complaints} />
+        </TabsContent>
       </div>
 
-      <nav aria-label="Mayor portal sections" className="sticky bottom-0 z-20 grid grid-cols-5 border-t border-civic-border bg-civic-surface">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setTab(t.id)}
-            aria-current={tab === t.id ? "page" : undefined}
-            className={`flex flex-col items-center py-2 text-[10px] font-medium ${tab === t.id ? "text-amber-400" : "text-slate-400"}`}
-          >
-            <span className="text-lg" aria-hidden="true">{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+      <nav
+        aria-label="Mayor portal sections"
+        className="sticky bottom-0 z-20 border-t border-civic-border bg-civic-surface"
+      >
+        <TabsList className="grid h-auto w-full grid-cols-5 rounded-none bg-transparent p-0">
+          {TABS.map((t) => (
+            <TabsTrigger
+              key={t.id}
+              value={t.id}
+              className="flex flex-col items-center rounded-none py-2 text-[10px] font-medium text-slate-400 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-amber-400 data-[state=active]:shadow-none"
+            >
+              <span className="text-lg" aria-hidden="true">
+                {t.icon}
+              </span>
+              {t.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
       </nav>
-    </div>
+    </Tabs>
   );
 }
 
@@ -118,31 +147,6 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
   );
 }
 
-function AlertsTab() {
-  const alerts = [
-    { id: "ISB-1042", dept: "CDA Sewerage (F-10/2)", title: "🕳️ Open Manhole on Main Double Road", meta: "Reported 45m ago • Assigned: Sajid Khan • In Progress", action: "🚀 Priority Escalate" },
-    { id: "ISB-1033", dept: "IESCO Power (I-9 Industrial)", title: "⚡ High-Tension Wire Dangling Near School Gate", meta: "Overdue by: 1h 20m • Risk: Extreme Danger", action: "🚨 Dispatch Rapid Emergency Crew" },
-  ];
-  return (
-    <div className="flex flex-col gap-3 p-3">
-      <h2 className={sectionTitle}>Critical Escalations (4 Overdue Hazards)</h2>
-      {alerts.map((a) => (
-        <div key={a.id} className={`${card} border-red-500/50`}>
-          <p className="text-[11px] font-bold text-red-400">🔴 OVERDUE: #{a.id} • {a.dept}</p>
-          <p className="mt-1 text-sm font-semibold text-slate-100">{a.title}</p>
-          <p className="text-[11px] text-slate-400">{a.meta}</p>
-          <button type="button" className="mt-2 w-full rounded-lg bg-red-600 py-1.5 text-xs font-bold text-white">{a.action}</button>
-        </div>
-      ))}
-      <h2 className={sectionTitle}>Public Emergency Broadcast</h2>
-      <button type="button" className={`${card} border-amber-400/50 text-left`}>
-        <p className="text-sm font-bold text-amber-400">📢 Broadcast Emergency Civic Notice</p>
-        <p className="text-[11px] text-slate-400">Sends push alert to Citizen Portal & Group Channels</p>
-      </button>
-    </div>
-  );
-}
-
 function DeptsTab() {
   const depts = [
     { rank: "🥇", name: "⚡ IESCO (Power & Streetlights)", total: 42, resolved: 40, pct: "95.2", time: "42 mins", sla: "97%", status: "🟢 Exceptional Performance" },
@@ -168,49 +172,6 @@ function DeptsTab() {
           <p className="mt-1 text-[11px] text-slate-400">{d.status}</p>
         </div>
       ))}
-    </div>
-  );
-}
-
-function ContractorsTab() {
-  // Single static payout toggle (visual only, no persistence).
-  const [frozen, setFrozen] = useState(false);
-  const kpis = [
-    { v: "🛡️ 95.8%", l: "Fix Integrity", s: "Confirmed by AI + Citizens" },
-    { v: "🚫 6", l: "Fake Claims Blocked", s: "Saved from Payouts" },
-    { v: "💰 ₨ 240,000", l: "Protected", s: "Taxpayer Funds Preserved" },
-    { v: "⚠️ 1", l: "Contractor Under Audit", s: "Apex Road Infrastructure" },
-  ];
-  return (
-    <div className="flex flex-col gap-3 p-3">
-      <h2 className={sectionTitle}>Contractor Integrity & Anti-Ghosting Audit</h2>
-      <div className="grid grid-cols-2 gap-2">
-        {kpis.map((k) => (
-          <div key={k.l} className={card}>
-            <p className="text-base font-bold text-slate-100">{k.v}</p>
-            <p className="text-xs font-semibold text-slate-200">{k.l}</p>
-            <p className="text-[10px] text-slate-400">{k.s}</p>
-          </div>
-        ))}
-      </div>
-
-      <h2 className={sectionTitle}>Flagged Audit Incidents</h2>
-      <div className={`${card} border-red-500/50`}>
-        <p className="text-[11px] font-bold text-red-400">🚨 CONTRACTOR FRAUD FLAGGED • #ISB-1028</p>
-        <p className="text-xs text-slate-300">Contractor: Apex Infra Ltd • Pothole Patching (Zone-1)</p>
-        <p className="mt-2 text-xs text-slate-200">🤖 AI Vision Verdict: <span className="font-bold text-red-400">❌ REJECTED (34%)</span></p>
-        <p className="text-[11px] italic text-slate-400">&quot;Pothole still visible. Photo taken from angle without new asphalt cover. Landmark curb does not match.&quot;</p>
-        <p className="mt-2 text-xs text-slate-200">👤 Citizen Sign-Off: <span className="font-bold text-red-400">❌ Disapproved by Tariq</span></p>
-        <p className="text-[11px] italic text-slate-400">&quot;Pothole is still there, worker only took photo&quot;</p>
-        <button
-          type="button"
-          aria-pressed={frozen}
-          onClick={() => setFrozen((f) => !f)}
-          className={`mt-3 w-full rounded-lg py-2 text-xs font-bold text-white ${frozen ? "bg-slate-600" : "bg-red-600"}`}
-        >
-          {frozen ? "🔒 Payout Frozen (tap to release)" : "🛑 Freeze Contractor Payout"}
-        </button>
-      </div>
     </div>
   );
 }

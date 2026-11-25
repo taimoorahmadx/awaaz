@@ -9,12 +9,14 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import seedData from "./seedComplaints.json";
+import seedContractorsData from "./seedContractors.json";
 import seedGroupsData from "./seedGroups.json";
 import type {
   CivicGroup,
   Complaint,
   ComplaintComment,
   ComplaintEvent,
+  Contractor,
   GroupMessage,
   Urgency,
   VoteDirection,
@@ -28,6 +30,7 @@ export const CONTRACTORS_STORAGE_KEY = "awaaz.contractors.v1";
 const CHANGE_EVENT = "awaaz:complaints-changed";
 const GROUPS_CHANGE_EVENT = "awaaz:groups-changed";
 const MESSAGES_CHANGE_EVENT = "awaaz:messages-changed";
+const CONTRACTORS_CHANGE_EVENT = "awaaz:contractors-changed";
 
 const isBrowser = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 
@@ -144,6 +147,14 @@ const messageSlot: StoreSlot<GroupMessage> = {
   label: "group messages",
   memoryFallback: null,
   getSeed: () => JSON.parse(JSON.stringify(seedGroupsData.messages)) as GroupMessage[],
+};
+
+const contractorSlot: StoreSlot<Contractor> = {
+  key: CONTRACTORS_STORAGE_KEY,
+  event: CONTRACTORS_CHANGE_EVENT,
+  label: "contractors",
+  memoryFallback: null,
+  getSeed: () => JSON.parse(JSON.stringify(seedContractorsData)) as Contractor[],
 };
 
 const nowIso = () => new Date().toISOString();
@@ -411,18 +422,38 @@ export function addGroupMessage(
   return message;
 }
 
-/** Restores seed complaints, seed groups/messages, and clears stored contractor overrides (AC-6.4). */
+/** Restores seed complaints, seed groups/messages, and seed contractor statuses (AC-6.4). */
 export function resetSystemData(): void {
   resetSlot(complaintSlot);
   resetSlot(groupSlot);
   resetSlot(messageSlot);
-  if (isBrowser()) {
-    try {
-      window.localStorage.removeItem(CONTRACTORS_STORAGE_KEY);
-    } catch {
-      // ignore
-    }
-  }
+  resetSlot(contractorSlot);
+}
+
+// ---------------------------------------------------------------------------
+// Contractors CRUD helpers (T4.3)
+// ---------------------------------------------------------------------------
+
+/** All contractors. Returns `[]` on the server. Seeds localStorage on first call. */
+export function getContractors(): Contractor[] {
+  if (!isBrowser()) return [];
+  return readOrSeedSlot(contractorSlot);
+}
+
+/** Toggles a contractor's payout status between ACTIVE and FROZEN (AC-10.3). */
+export function toggleContractorPayout(id: string): Contractor | null {
+  if (!isBrowser()) return null;
+  const list = readOrSeedSlot(contractorSlot);
+  const index = list.findIndex((c) => c.id === id);
+  if (index === -1) return null;
+
+  const current = list[index];
+  const nextStatus: Contractor["payoutStatus"] =
+    current.payoutStatus === "FROZEN" ? "ACTIVE" : "FROZEN";
+  const updated: Contractor = { ...current, payoutStatus: nextStatus };
+  list[index] = updated;
+  writeToSlot(contractorSlot, list);
+  return updated;
 }
 
 // ---------------------------------------------------------------------------
@@ -481,4 +512,14 @@ export function useGroupMessages(): { messages: GroupMessage[]; hydrated: boolea
     getGroupMessages,
   );
   return { messages: items, hydrated };
+}
+
+/** Hydration-safe subscription to contractor audit records (T4.3). */
+export function useContractors(): { contractors: Contractor[]; hydrated: boolean } {
+  const { items, hydrated } = useStoredList(
+    CONTRACTORS_STORAGE_KEY,
+    CONTRACTORS_CHANGE_EVENT,
+    getContractors,
+  );
+  return { contractors: items, hydrated };
 }

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "ctr-apex",
+    "name": "Apex Infra Ltd",
+    "department": "CDA_ROADS",
+    "verifiedResolutionPct": 72,
+    "flaggedIncidents": 3,
+    "payoutStatus": "ACTIVE"
+  },
+  {
+    "id": "ctr-crescent",
+    "name": "Crescent Sanitation Services",
+    "department": "CDA_SANITATION",
+    "verifiedResolutionPct": 91,
+    "flaggedIncidents": 1,
+    "payoutStatus": "ACTIVE"
+  },
+  {
+    "id": "ctr-margalla",
+    "name": "Margalla Grid Contractors",
+    "department": "IESCO",
+    "verifiedResolutionPct": 96,
+    "flaggedIncidents": 0,
+    "payoutStatus": "ACTIVE"
+  },
+  {
+    "id": "ctr-potohar",
+    "name": "Potohar Water & Works",
+    "department": "WASA",
+    "verifiedResolutionPct": 81,
+    "flaggedIncidents": 2,
+    "payoutStatus": "ACTIVE"
+  }
+]
+
