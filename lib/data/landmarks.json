@@ -1,0 +1,187 @@
+{
+  "landmarks": [
+    {
+      "id": "lm-001",
+      "name": "F-10 Markaz, near petrol pump",
+      "sector": "F-10",
+      "lat": 33.695,
+      "lng": 73.013,
+      "aliases": [
+        "f-10 markaz",
+        "f10 markaz",
+        "petrol pump",
+        "markaz f-10",
+        "markaz f10",
+        "ایف ٹین مرکز",
+        "ایف-10 مرکز",
+        "پیٹرول پمپ"
+      ]
+    },
+    {
+      "id": "lm-002",
+      "name": "F-10/2, Street 23 corner",
+      "sector": "F-10",
+      "lat": 33.699,
+      "lng": 73.017,
+      "aliases": [
+        "f-10/2 street 23",
+        "f10/2 street 23",
+        "street 23",
+        "gali 23",
+        "gali number 23",
+        "گلی 23",
+        "گلی نمبر 23",
+        "گلی نمبر تئیس"
+      ]
+    },
+    {
+      "id": "lm-003",
+      "name": "F-10/4, road beside community park",
+      "sector": "F-10",
+      "lat": 33.6905,
+      "lng": 73.008,
+      "aliases": [
+        "f-10/4 park",
+        "f-10/4 community park",
+        "community park",
+        "f-10/4",
+        "f10/4",
+        "ایف ٹین فور",
+        "پارک روڈ"
+      ]
+    },
+    {
+      "id": "lm-004",
+      "name": "Nazimuddin Road, F-10/1 signal",
+      "sector": "F-10",
+      "lat": 33.6975,
+      "lng": 73.01,
+      "aliases": [
+        "nazimuddin road",
+        "f-10/1 signal",
+        "f10/1 signal",
+        "f-10/1",
+        "ناظم الدین روڈ"
+      ]
+    },
+    {
+      "id": "lm-005",
+      "name": "F-6 Super Market, rear service road",
+      "sector": "F-6",
+      "lat": 33.728,
+      "lng": 73.076,
+      "aliases": [
+        "f-6 super market",
+        "f6 super market",
+        "super market",
+        "supermarket",
+        "سپر مارکیٹ"
+      ]
+    },
+    {
+      "id": "lm-006",
+      "name": "F-6/3, children's park gate",
+      "sector": "F-6",
+      "lat": 33.724,
+      "lng": 73.079,
+      "aliases": [
+        "f-6/3 children's park",
+        "f-6/3 park",
+        "children's park",
+        "childrens park",
+        "f-6/3",
+        "بچوں کے پارک"
+      ]
+    },
+    {
+      "id": "lm-007",
+      "name": "Kohsar Market, F-6/1 parking",
+      "sector": "F-6",
+      "lat": 33.73,
+      "lng": 73.07,
+      "aliases": [
+        "kohsar market",
+        "kohsar",
+        "f-6/1 parking",
+        "f-6/1",
+        "کوہسار مارکیٹ"
+      ]
+    },
+    {
+      "id": "lm-008",
+      "name": "G-9 Markaz (Karachi Company)",
+      "sector": "G-9",
+      "lat": 33.688,
+      "lng": 73.031,
+      "aliases": [
+        "g-9 markaz",
+        "g9 markaz",
+        "karachi company",
+        "جی نائن مرکز",
+        "کراچی کمپنی"
+      ]
+    },
+    {
+      "id": "lm-009",
+      "name": "G-9/4, Street 40",
+      "sector": "G-9",
+      "lat": 33.683,
+      "lng": 73.027,
+      "aliases": [
+        "g-9/4 street 40",
+        "street 40",
+        "gali 40",
+        "g-9/4",
+        "جی نائن فور"
+      ]
+    },
+    {
+      "id": "lm-010",
+      "name": "G-9/2 main double road",
+      "sector": "G-9",
+      "lat": 33.692,
+      "lng": 73.036,
+      "aliases": [
+        "g-9/2 double road",
+        "g-9/2 main road",
+        "double road",
+        "g-9/2",
+        "جی نائن ٹو"
+      ]
+    },
+    {
+      "id": "lm-011",
+      "name": "I-9 Industrial Area, Street 7",
+      "sector": "I-9",
+      "lat": 33.665,
+      "lng": 73.06,
+      "aliases": [
+        "i-9 industrial area",
+        "industrial area",
+        "street 7",
+        "آئی نائن انڈسٹریل ایریا"
+      ]
+    },
+    {
+      "id": "lm-012",
+      "name": "I-9/4, Street 12",
+      "sector": "I-9",
+      "lat": 33.66,
+      "lng": 73.052,
+      "aliases": [
+        "i-9/4 street 12",
+        "street 12",
+        "gali 12",
+        "i-9/4",
+        "آئی نائن فور"
+      ]
+    }
+  ],
+  "sectorCentres": {
+    "F-10": { "lat": 33.695, "lng": 73.013 },
+    "F-6": { "lat": 33.727, "lng": 73.075 },
+    "G-9": { "lat": 33.687, "lng": 73.03 },
+    "I-9": { "lat": 33.655, "lng": 73.06 }
+  }
+}
+

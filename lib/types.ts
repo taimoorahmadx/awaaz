@@ -26,12 +26,24 @@ export type IssueCategory =
 
 export type Sector = "F-10" | "F-6" | "G-9" | "I-9" | (string & {});
 
+export type LocationSource = "GPS" | "LANDMARK" | "SECTOR_CENTRE";
+
 export interface GeoLocation {
   lat: number;
   lng: number;
   city: City | (string & {});
   sector: Sector;
   landmark: string;
+  source?: LocationSource;
+}
+
+export interface Landmark {
+  id: string;
+  name: string;
+  sector: string;
+  lat: number;
+  lng: number;
+  aliases: string[];
 }
 
 export interface AIVerificationResult {

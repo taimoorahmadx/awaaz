@@ -3,8 +3,8 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** Work normally on the current branch (`master`); do not create task branches; nothing is pushed.
-- **Last Completed:** `T4.1` — built Groups Tab (5 channels grouped by type, seeded messages, text composer, live complaint embeds opening Detail Modal, read-only Municipal Alerts + top banner, Convert to Ticket draft flow, and header Reset System Data).
-- **Next Task:** `T4.2` — Location Resolution (GPS → Landmark → Sector) + Proximity Duplicate Detection.
+- **Last Completed:** `T4.2` — implemented Location Resolution (GPS → Landmark → Sector Centre) and Proximity Duplicate Detection (`landmarks.json`, Haversine + duplicate detection in `lib/utils.ts`, `addImpactConfirmation` with urgency boost in `storage.ts`, `DuplicateCard.tsx`, `HomeChatIntake.tsx`, `Anonymous Citizen` role in `AppHeader.tsx`, and `e2e/location-duplicates.spec.ts`).
+- **Next Task:** `T4.3` — Interactive Mayor Desk – Payout Freeze & Emergency Broadcast.
 
 ---
 
@@ -12,7 +12,7 @@
 - Sprint 1 (Scaffold, Map, Seed Data, Feed): `[x]` Completed
 - Sprint 2 (Core AI Endpoints & Basic Portals): `[x]` Completed
 - Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[x]` Completed (T3.0, T3.0b, T3.1, T3.2, T3.3, T3.4 done)
-- Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[ ]` In progress (next `T4.1`)
+- Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[ ]` In progress (next `T4.3`)
 - Sprint 5 (PWA, final verification): `[ ]` Planned — T5.1 evals parked (see Parking Lot)
 
 ---
@@ -86,7 +86,7 @@
 8. **No detail modal; no history data; no `assignedTo`.** → T3.3 ✅ resolved (`ComplaintDetailModal.tsx`, `ComplaintEvent[]` in `seedComplaints.json` & `storage.ts` v3, `assignedTo` + `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history events)
 9. **Favicon 404.** → T3.4 ✅ resolved (`app/icon.jpg` added; verified 200 response and zero 404s/console errors on `/`)
 10. **Groups tab is a "Coming soon" shell; Mayor freeze/broadcast inert.** → Groups tab implemented in T4.1 ✅; Mayor freeze/broadcast still pending (T4.3). → T4.1, T4.3
-11. **Intake coordinates** = sector centre (`SECTOR_COORDS`) + random jitter in `HomeChatIntake.tsx`. → T4.2 (GPS → landmark → sector)
+11. **Intake coordinates** = sector centre (`SECTOR_COORDS`) + random jitter in `HomeChatIntake.tsx`. → T4.2 ✅ resolved (GPS → landmark → sector centre in `lib/utils.ts` + `landmarks.json`, location chip, and 50m `DuplicateCard`)
 12. **No automated tests.** → T3.0 ✅ resolved (`e2e/golden-path.spec.ts`)
 13. **Favicon 404 re-confirmed** via Playwright MCP (only console error on Home). → T3.4 ✅ resolved (`app/icon.jpg`)
 14. **shadcn init leftovers** (tailwind-merge v3, `^` versions, light theme variables, no `dark` class). → T3.0b ✅ resolved
@@ -128,3 +128,4 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T3.3:** Lifecycle `history` and `assignedTo` on `Complaint`, all 12 seeds updated (`awaaz.complaints.v3`), `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history tracking, `ComplaintDetailModal` (shadcn `Dialog` at `z-[1100]`) wired from Explore cards, Map drawer, and My Reports, plus "+1 Confirm Fix" on Explore cards and modal.
 - **T3.4:** Added `app/icon.jpg` (copied from `public/logo.jpg`) so Next.js serves `/icon.jpg`; added E2E check in `e2e/ui-smoke.spec.ts` verifying `/` loads with no 404 responses and no console errors.
 - **T4.1:** Implemented Groups Tab (`CivicGroup`, `GroupMessage` in `lib/types.ts`; 5 seeded channels + 34 messages in `lib/data/seedGroups.json`; `awaaz.groups.v1` / `awaaz.messages.v1` + `resetSystemData()` in `lib/data/storage.ts`; `GroupsShell`, `GroupChatView`, `ChatMessageBubble`, `ComplaintCardEmbed`; header "Reset System Data" menu item; "Convert to Ticket" draft pre-fill in `app/page.tsx` + `HomeChatIntake.tsx`; `e2e/groups.spec.ts`). Verified via `npm run build && npm run lint && npm run test:e2e` (19 passed).
+- **T4.2:** Implemented Location Resolution (GPS → `landmarks.json` → Sector Centre) and 50m Haversine proximity duplicate detection (`LocationSource` + `Landmark` in `lib/types.ts`; `source: "LANDMARK"` on seeds in `lib/data/seedComplaints.json`; 12 landmarks + 4 sector centres in `lib/data/landmarks.json`; `haversineMeters`, `resolveComplaintLocation`, `findDuplicateComplaint` in `lib/utils.ts`; `addImpactConfirmation` with 2/4 confirmation urgency boost + `IMPACT_ADDED`/`URGENCY_RAISED` events in `lib/data/storage.ts`; `Anonymous Citizen` profile in `components/common/AppHeader.tsx`; `DuplicateCard.tsx` and parallel GPS + duplicate check in `HomeChatIntake.tsx`; `e2e/location-duplicates.spec.ts`). Verified via `npm run build && npm run lint && npm run test:e2e` (24 passed).

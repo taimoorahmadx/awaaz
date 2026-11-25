@@ -38,6 +38,12 @@ async function fileTicket(page: Page, text: string = COMPLAINT_TEXT): Promise<st
   await page.getByRole("button", { name: "Send complaint" }).click();
   const card = page.getByTestId("triage-card");
   await expect(card).toBeVisible({ timeout: 10_000 });
+  // T4.2: if a landmark duplicate is detected (e.g. F-10 Markaz open manhole matches cmp-001),
+  // confirm submitting as a separate ticket for the golden path.
+  const separateBtn = page.getByTestId("submit-separate-ticket-btn");
+  if (await separateBtn.isVisible()) {
+    await separateBtn.click();
+  }
   await expect(card).toHaveAttribute("data-complaint-id", /^cmp-\d+$/);
   return (await card.getAttribute("data-complaint-id")) as string;
 }

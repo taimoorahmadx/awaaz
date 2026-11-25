@@ -1,11 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Bot, Loader2, MapPin, Mic, Plus, Send, X } from "lucide-react";
-import type { Complaint, Department, Urgency } from "@/lib/types";
+import type { Complaint, Department, GeoLocation, Urgency } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
 import WaveformVisualizer from "@/components/audio/WaveformVisualizer";
+import DuplicateCard from "@/components/home/DuplicateCard";
 import { categoryInfo } from "@/lib/categories";
 import { base64ToBlob, compressImage, type CompressedImage } from "@/lib/image";
+import { addImpactConfirmation, getComplaints, useComplaints } from "@/lib/data/storage";
+import {
+  findDuplicateComplaint,
+  getCurrentGpsPosition,
+  resolveComplaintLocation,
+  type DuplicateMatch,
+} from "@/lib/utils";
 
 // INTEGRATOR NOTE: local mirror of AudioAnalysisResponse (lib/ai/schemas.ts) + route flags,
 // kept local so this client component doesn't import zod schemas.
@@ -35,14 +43,6 @@ interface HomeChatIntakeProps {
   /** Called with `true` when the API returned a DEMO-FALLBACK mock. */
   onFallbackChange?: (fallback: boolean) => void;
 }
-
-// Approximate sector centres (Islamabad) — matches seed conventions.
-const SECTOR_COORDS: Record<string, { lat: number; lng: number }> = {
-  "F-10": { lat: 33.695, lng: 73.013 },
-  "F-6": { lat: 33.727, lng: 73.075 },
-  "G-9": { lat: 33.687, lng: 73.03 },
-  "I-9": { lat: 33.655, lng: 73.06 },
-};
 
 const SLA_HOURS: Record<Urgency, number> = { CRITICAL: 4, HIGH: 24, MEDIUM: 72, LOW: 168 };
 
@@ -74,13 +74,9 @@ function toComplaint(
   r: AnalyzeAudioResult,
   citizenId: string,
   citizenName: string,
-  homeSector: string,
-  city: string,
+  location: GeoLocation,
   photoDataUrl?: string,
 ): Complaint {
-  const sector = r.sector && SECTOR_COORDS[r.sector] ? r.sector : homeSector;
-  const base = SECTOR_COORDS[sector] ?? SECTOR_COORDS["F-10"];
-  const jitter = () => (Math.random() - 0.5) * 0.006;
   const now = new Date().toISOString();
   // Fixed category table (lib/categories.ts): unknown → "Other"; stock photo per category.
   const info = categoryInfo(r.category);
@@ -95,18 +91,21 @@ function toComplaint(
     category: info.category,
     urgency: r.urgency,
     status: "REPORTED",
-    location: {
-      lat: base.lat + jitter(),
-      lng: base.lng + jitter(),
-      city,
-      sector,
-      landmark: r.landmark || `${sector} sector`,
-    },
+    location,
     reporter: { citizenId, citizenName },
     votes: { score: 1, upvotedBy: [citizenId], downvotedBy: [] },
-    communityImpact: { affectedCount: 1, verifiedCount: 0, verifiedBy: [] },
+    communityImpact: { affectedCount: 1, verifiedCount: 0, verifiedBy: [], impactConfirmedBy: [] },
     comments: [],
     sla: { hoursRemaining: SLA_HOURS[r.urgency], isBreached: false, escalationLevel: "STANDARD" },
+    history: [
+      {
+        type: "REPORTED",
+        status: "REPORTED",
+        at: now,
+        actorId: citizenId,
+        actorName: citizenName,
+      },
+    ],
     createdAt: now,
     updatedAt: now,
   };
@@ -121,7 +120,13 @@ export default function HomeChatIntake({
   onComplaintCreated,
   onFallbackChange,
 }: HomeChatIntakeProps) {
-  const urduName = citizenName === "Ayesha" ? "عائشہ بہن" : "طارق بھائی";
+  const urduName =
+    citizenName === "Ayesha"
+      ? "عائشہ بہن"
+      : citizenName === "Tariq"
+        ? "طارق بھائی"
+        : "شہری";
+  const { complaints } = useComplaints();
   const [text, setText] = useState("");
   const [attachedPhoto, setAttachedPhoto] = useState<CompressedImage | null>(null);
   const [recording, setRecording] = useState(false);
@@ -130,6 +135,10 @@ export default function HomeChatIntake({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeAudioResult | null>(null);
   const [created, setCreated] = useState<Complaint | null>(null);
+  const [pendingComplaint, setPendingComplaint] = useState<Complaint | null>(null);
+  const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
+  const [impactSubmitted, setImpactSubmitted] = useState(false);
+  const [locationChip, setLocationChip] = useState<string>("");
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
@@ -147,6 +156,10 @@ export default function HomeChatIntake({
       setText(initialDraft.text);
       setResult(null);
       setCreated(null);
+      setPendingComplaint(null);
+      setDuplicateMatch(null);
+      setImpactSubmitted(false);
+      setLocationChip("");
       setError(null);
     }
   }, [initialDraft]);
@@ -187,6 +200,11 @@ export default function HomeChatIntake({
     if (!audio && !note.trim() && !photo) return;
     setLoading(true);
     setError(null);
+    setCreated(null);
+    setPendingComplaint(null);
+    setDuplicateMatch(null);
+    setImpactSubmitted(false);
+    setLocationChip("");
     try {
       const fd = new FormData();
       if (audio) {
@@ -199,14 +217,41 @@ export default function HomeChatIntake({
       if (note.trim()) fd.append("text", note.trim());
       if (sector) fd.append("sectorHint", sector);
 
-      const res = await fetch("/api/analyze-audio", { method: "POST", body: fd });
+      // AC-11.3: request GPS in parallel with the AI triage call.
+      const gpsPromise = getCurrentGpsPosition();
+      const [res, gps] = await Promise.all([
+        fetch("/api/analyze-audio", { method: "POST", body: fd }),
+        gpsPromise,
+      ]);
       const data = (await res.json()) as AnalyzeAudioResult;
       const isFallback = Boolean(data.isOfflineFallback);
       setResult(data);
       onFallbackChange?.(isFallback);
-      const complaint = toComplaint(data, citizenId, citizenName, sector, city, photo?.dataUrl);
-      setCreated(complaint);
-      onComplaintCreated?.(complaint);
+
+      const { location, chipLabel } = resolveComplaintLocation({
+        gps,
+        aiLandmark: data.landmark,
+        typedText: note,
+        aiSector: data.sector,
+        homeSector: sector,
+        city,
+      });
+      setLocationChip(chipLabel);
+
+      const complaint = toComplaint(data, citizenId, citizenName, location, photo?.dataUrl);
+      const dup = findDuplicateComplaint(getComplaints(), {
+        department: complaint.department,
+        category: complaint.category,
+        location: complaint.location,
+      });
+
+      if (dup) {
+        setPendingComplaint(complaint);
+        setDuplicateMatch(dup);
+      } else {
+        setCreated(complaint);
+        onComplaintCreated?.(complaint);
+      }
       setText("");
       setAttachedPhoto(null);
     } catch {
@@ -214,6 +259,25 @@ export default function HomeChatIntake({
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleImpactMeToo() {
+    if (!liveDuplicateComplaint) return;
+    const updated = addImpactConfirmation(liveDuplicateComplaint.id, citizenId, citizenName);
+    if (updated) {
+      setDuplicateMatch((prev) => (prev ? { ...prev, complaint: updated } : null));
+    }
+    setImpactSubmitted(true);
+    setPendingComplaint(null);
+  }
+
+  function handleSubmitSeparate() {
+    if (!pendingComplaint) return;
+    setCreated(pendingComplaint);
+    onComplaintCreated?.(pendingComplaint);
+    setPendingComplaint(null);
+    setDuplicateMatch(null);
+    setImpactSubmitted(false);
   }
 
   function stopRecording() {
@@ -253,10 +317,14 @@ export default function HomeChatIntake({
 
   const isFallback = Boolean(result?.isOfflineFallback);
   const canSubmit = Boolean((text.trim() || attachedPhoto) && !recording);
+  const activeComplaint = created ?? pendingComplaint;
+  const liveDuplicateComplaint = duplicateMatch
+    ? (complaints.find((c) => c.id === duplicateMatch.complaint.id) ?? duplicateMatch.complaint)
+    : null;
 
   return (
     <section className="flex flex-1 flex-col">
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-4 text-center">
         {!result && !loading && (
           <>
             <span className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-civic-raised text-civic-accent ring-1 ring-civic-border">
@@ -312,6 +380,14 @@ export default function HomeChatIntake({
               >
                 {result.urgency}
               </span>
+              {locationChip && (
+                <span
+                  data-testid="triage-location-chip"
+                  className="rounded-full border border-civic-border bg-civic-surface px-2.5 py-0.5 text-[11px] font-medium text-slate-200"
+                >
+                  {locationChip}
+                </span>
+              )}
               <OfflineBadge visible={isFallback} />
             </div>
             <h3 className="text-base font-semibold text-slate-50">{result.title}</h3>
@@ -319,10 +395,10 @@ export default function HomeChatIntake({
               {result.urduTranscript}
             </p>
             <p className="mt-2 text-sm text-civic-muted">{result.englishSummary}</p>
-            {created?.beforePhotoUrl.startsWith("data:") && (
+            {activeComplaint?.beforePhotoUrl.startsWith("data:") && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={created.beforePhotoUrl}
+                src={activeComplaint.beforePhotoUrl}
                 alt={`Attached photo: ${result.title}`}
                 data-testid="triage-photo"
                 className="mt-3 aspect-video w-full rounded-xl border border-civic-border object-cover"
@@ -330,11 +406,28 @@ export default function HomeChatIntake({
             )}
             <p className="mt-3 flex items-center gap-1 text-xs text-slate-300">
               <MapPin className="h-3.5 w-3.5 text-red-400" aria-hidden="true" />
-              {created?.location.landmark ?? result.landmark}
-              {created ? ` · ${created.location.sector}` : ""}
+              {activeComplaint?.location.landmark ?? result.landmark}
+              {activeComplaint?.location.sector ? ` · ${activeComplaint.location.sector}` : ""}
             </p>
-            <p className="mt-2 text-xs text-emerald-300">✓ Filed — pin added to the map.</p>
+            {created ? (
+              <p className="mt-2 text-xs text-emerald-300">✓ Filed — pin added to the map.</p>
+            ) : impactSubmitted ? (
+              <p className="mt-2 text-xs text-emerald-300">✓ Impact added to existing ticket.</p>
+            ) : (
+              <p className="mt-2 text-xs text-amber-300">⚠ Possible duplicate nearby — review below.</p>
+            )}
           </article>
+        )}
+
+        {liveDuplicateComplaint && duplicateMatch && !loading && (
+          <DuplicateCard
+            complaint={liveDuplicateComplaint}
+            distanceMeters={duplicateMatch.distanceMeters}
+            citizenId={citizenId}
+            impactSubmitted={impactSubmitted}
+            onImpactMeToo={handleImpactMeToo}
+            onSubmitSeparate={handleSubmitSeparate}
+          />
         )}
       </div>
 

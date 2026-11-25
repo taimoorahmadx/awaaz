@@ -120,7 +120,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: Groups → `# F-10/2 Residents` → post a message → it persists after reload → "Convert to Ticket" → Home composer contains the text.
   - **Files:** `lib/data/seedGroups.json`, `lib/types.ts`, `lib/data/storage.ts`, `components/groups/*`, `app/page.tsx`, `components/home/HomeChatIntake.tsx`, `e2e/*`.
 
-- [ ] **T4.2: Location Resolution (GPS → Landmark → Sector) + Proximity Duplicate Detection**
+- [x] **T4.2: Location Resolution (GPS → Landmark → Sector) + Proximity Duplicate Detection**
   - Decision D1: GPS if allowed, otherwise landmark, otherwise sector centre. Implement AC-11.3 exactly: `location.source`, `Landmark` type, `lib/data/landmarks.json` (12 seed landmarks with seed coordinates + 4 sector centres, aliases in English / Roman Urdu / Urdu; no invented coordinates), GPS requested in parallel with the AI call, accuracy ≤ 100m and Islamabad-box checks, location chip on the triage card. Seeds get `source: "LANDMARK"`.
   - Current coordinates come from `SECTOR_COORDS` + `jitter()` in `HomeChatIntake.tsx` — this becomes step 3 only.
   - Haversine in `lib/utils.ts`; match rule AC-11.1 (same department + same category, non-resolved, ≤ 50m, only when source is GPS or LANDMARK); `DuplicateCard.tsx` in the Home chat stream with "+1 Impacts Me Too" / "Submit as Separate Ticket" (AC-11.2); `impactConfirmedBy` field (default `[]`, normalize on load); urgency boost at 2 and 4 confirmations (AC-11.4); history events.

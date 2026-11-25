@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { resetSystemData } from "@/lib/data/storage";
 import OfflineBadge from "./OfflineBadge";
 
-export type RoleId = "tariq" | "ayesha" | "worker" | "mayor";
+export type RoleId = "tariq" | "ayesha" | "anonymous" | "worker" | "mayor";
 
 export interface RoleProfile {
   id: RoleId;
@@ -23,6 +23,7 @@ export interface RoleProfile {
 export const ROLES: RoleProfile[] = [
   { id: "tariq", name: "Tariq", label: "Citizen · F-10", kind: "citizen", sector: "F-10", emoji: "👤", profileId: "citizen-tariq" },
   { id: "ayesha", name: "Ayesha", label: "Citizen · F-6", kind: "citizen", sector: "F-6", emoji: "👤", profileId: "citizen-ayesha" },
+  { id: "anonymous", name: "Anonymous Citizen", label: "Citizen · No sector", kind: "citizen", sector: "", emoji: "🕶️", profileId: "citizen-anonymous" },
   { id: "worker", name: "Sajid", label: "CDA Worker", kind: "worker", sector: "F-10", emoji: "👷", profileId: "worker-sajid" },
   { id: "mayor", name: "Comm. Nasir", label: "Mayor", kind: "mayor", sector: "All Sectors", emoji: "🏛️", profileId: "admin-nasir" },
 ];
@@ -76,7 +77,7 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
       {/* Subtle sector badge */}
       <span className="flex shrink-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted">
         <MapPin className="h-3 w-3 text-civic-accent" aria-hidden="true" />
-        Islamabad ({role.sector})
+        {role.sector ? `Islamabad (${role.sector})` : "Islamabad"}
       </span>
 
       {/* Role switcher */}

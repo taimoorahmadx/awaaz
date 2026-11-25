@@ -16,6 +16,7 @@ import type {
   ComplaintComment,
   ComplaintEvent,
   GroupMessage,
+  Urgency,
   VoteDirection,
 } from "@/lib/types";
 
@@ -299,6 +300,69 @@ export function claimComplaint(
     status: "IN_PROGRESS",
     assignedTo: { workerId, workerName },
     history: [...(c.history ?? []), event],
+  }));
+}
+
+const NEXT_URGENCY: Record<Urgency, Urgency> = {
+  LOW: "MEDIUM",
+  MEDIUM: "HIGH",
+  HIGH: "CRITICAL",
+  CRITICAL: "CRITICAL",
+};
+
+/**
+ * Citizen "+1 Impacts Me Too" on a non-RESOLVED duplicate complaint (AC-11.2, AC-11.4).
+ * Guards against the original reporter or citizens already in `impactConfirmedBy`.
+ * Raises urgency by 1 level (capped at CRITICAL) when confirmations reach 2 and 4.
+ */
+export function addImpactConfirmation(
+  id: string,
+  citizenId: string,
+  citizenName: string = "Citizen",
+): Complaint | null {
+  if (!isBrowser()) return null;
+  const current = readOrSeedSlot(complaintSlot).find((c) => c.id === id);
+  if (!current || current.status === "RESOLVED") return current ?? null;
+  const confirmed = current.communityImpact.impactConfirmedBy ?? [];
+  if (current.reporter.citizenId === citizenId || confirmed.includes(citizenId)) {
+    return current;
+  }
+
+  const now = nowIso();
+  const nextConfirmedBy = [...confirmed, citizenId];
+  const count = nextConfirmedBy.length;
+  const events: ComplaintEvent[] = [
+    {
+      type: "IMPACT_ADDED",
+      status: current.status,
+      at: now,
+      actorId: citizenId,
+      actorName: citizenName,
+    },
+  ];
+
+  let nextUrgency = current.urgency;
+  if ((count === 2 || count === 4) && NEXT_URGENCY[current.urgency] !== current.urgency) {
+    nextUrgency = NEXT_URGENCY[current.urgency];
+    events.push({
+      type: "URGENCY_RAISED",
+      status: current.status,
+      at: now,
+      actorId: citizenId,
+      actorName: citizenName,
+      note: `Urgency ${current.urgency} → ${nextUrgency} (${count} confirmations)`,
+    });
+  }
+
+  return updateComplaint(id, (c) => ({
+    ...c,
+    urgency: nextUrgency,
+    communityImpact: {
+      ...c.communityImpact,
+      affectedCount: c.communityImpact.affectedCount + 1,
+      impactConfirmedBy: nextConfirmedBy,
+    },
+    history: [...(c.history ?? []), ...events],
   }));
 }
 
