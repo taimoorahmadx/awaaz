@@ -158,7 +158,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: `GET /manifest.webmanifest` returns 200 with `display: "standalone"`.
   - **Files:** `app/manifest.ts`, `public/icons/*`, `e2e/*`.
 
-- [ ] **T5.3: Final Verification Pass**
+- [x] **T5.3: Final Verification Pass**
   - Full gate: `npm run build && npm run lint && npm run test:e2e`.
   - Check mobile layout at 375px and 430px with Playwright screenshots of every tab and portal; save to `test-results/screens/` (gitignored) and fix any overflow/clipping found.
   - Write a short "Morning checklist" section in `docs/progress.md`: what was built, what's blocked, what the user should click through manually (including a real mic test, which automation can't do with real speech).

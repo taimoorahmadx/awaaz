@@ -60,13 +60,13 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-civic-border bg-civic-surface/90 px-3 backdrop-blur">
       {/* Branding */}
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-civic-accent/15 text-civic-accent ring-1 ring-civic-accent/40">
           <Landmark className="h-4 w-4" aria-hidden="true" />
         </span>
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-sm font-semibold text-slate-50">Awaaz</p>
-          <p className="urdu -mt-1 truncate text-[11px] text-civic-muted" lang="ur">
+        <div className="leading-tight">
+          <p className="text-sm font-semibold text-slate-50">Awaaz</p>
+          <p className="urdu -mt-1 text-[11px] text-civic-muted" lang="ur">
             آواز
           </p>
         </div>
@@ -75,9 +75,9 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
       <OfflineBadge visible={offline} className="shrink-0" />
 
       {/* Subtle sector badge */}
-      <span className="flex shrink-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted">
-        <MapPin className="h-3 w-3 text-civic-accent" aria-hidden="true" />
-        {role.sector ? `Islamabad (${role.sector})` : "Islamabad"}
+      <span className="flex min-w-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted">
+        <MapPin className="h-3 w-3 shrink-0 text-civic-accent" aria-hidden="true" />
+        <span className="truncate">{role.sector ? `Islamabad (${role.sector})` : "Islamabad"}</span>
       </span>
 
       {/* Role switcher */}

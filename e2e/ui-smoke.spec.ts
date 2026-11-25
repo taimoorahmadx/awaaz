@@ -153,6 +153,84 @@ test("PWA manifest: /manifest.webmanifest returns 200 with standalone display an
   }
 });
 
+for (const width of [375, 430] as const) {
+  test(`mobile layout at ${width}px: zero horizontal overflow and screenshots saved`, async ({ page }) => {
+    const height = width === 375 ? 844 : 932;
+    await page.setViewportSize({ width, height });
+    await page.route(/tile\.openstreetmap\.org/, (route) => route.abort());
+    await page.goto("/");
+
+    const assertNoOverflow = async (label: string) => {
+      const dims = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+      }));
+      expect(dims.scrollWidth, `${label} at ${width}px overflowed horizontally`).toBeLessThanOrEqual(
+        dims.innerWidth,
+      );
+    };
+
+    const tabs: [CitizenTab, string][] = [
+      ["Explore", "explore"],
+      ["Map", "map"],
+      ["Home", "home"],
+      ["My Reports", "my-reports"],
+      ["Groups", "groups"],
+    ];
+    for (const [label, slug] of tabs) {
+      await gotoTab(page, label);
+      if (label === "Map") {
+        await expect(page.locator(".leaflet-marker-pane .awaaz-pin")).toHaveCount(SEED_COUNT);
+      } else {
+        await page.waitForLoadState("networkidle");
+      }
+      await assertNoOverflow(`citizen-${slug}`);
+      await shot(page, `${width}-citizen-${slug}`);
+    }
+
+    // Open a group channel too
+    await page.getByRole("button", { name: /# F-10\/2 Residents/ }).click();
+    await expect(page.getByRole("textbox")).toBeVisible();
+    await assertNoOverflow("citizen-group-chat");
+    await shot(page, `${width}-citizen-group-chat`);
+
+    // Worker portal: Queue, Home, Profile
+    await switchRole(page, "Sajid");
+    const workerNav = page.getByRole("navigation", { name: "Worker navigation" });
+    await expect(workerNav).toBeVisible();
+    for (const [label, slug] of [
+      ["Queue", "queue"],
+      ["Home", "home"],
+      ["Profile", "profile"],
+    ] as const) {
+      await workerNav.getByRole("button", { name: new RegExp(`^${label}`) }).click();
+      if (slug === "home") {
+        await expect(
+          page.locator('[data-testid="worker-route-card"] .leaflet-marker-pane .awaaz-pin').first(),
+        ).toBeVisible();
+      }
+      await assertNoOverflow(`worker-${slug}`);
+      await shot(page, `${width}-worker-${slug}`);
+    }
+
+    // Mayor portal: Map, Alerts, Home, Depts, Contrs
+    await switchRole(page, "Nasir");
+    const mayorNav = page.getByRole("navigation", { name: "Mayor portal sections" });
+    await expect(mayorNav).toBeVisible();
+    for (const [label, slug] of [
+      ["Map", "map"],
+      ["Alerts", "alerts"],
+      ["Home", "home"],
+      ["Depts", "depts"],
+      ["Contrs", "contractors"],
+    ] as const) {
+      await mayorNav.getByRole("tab", { name: new RegExp(label) }).click();
+      await assertNoOverflow(`mayor-${slug}`);
+      await shot(page, `${width}-mayor-${slug}`);
+    }
+  });
+}
+
 // Leaflet panes/controls reach z-index ~1000, so every shadcn overlay surface must sit at ≥ 1100.
 // Checked statically: no screen renders these primitives yet (first runtime check comes with T3.3).
 test("overlays stack above Leaflet (z-index ≥ 1100)", () => {

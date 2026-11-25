@@ -3,8 +3,8 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** Work normally on the current branch (`master`); do not create task branches; nothing is pushed.
-- **Last Completed:** `T5.2` — implemented PWA Manifest (`app/manifest.ts` serving `/manifest.webmanifest` with `display: "standalone"`, `#070b12` theme/background colors, and 192×192 + 512×512 PNG icons in `public/icons/` generated from `public/logo.jpg`; verified via `e2e/ui-smoke.spec.ts`).
-- **Next Task:** `T5.3` — Final Verification Pass.
+- **Last Completed:** `T5.3` — completed Final Verification Pass (`npm run build`, `npm run lint`, 31/31 Playwright E2E tests including 375px and 430px mobile layout checks across all tabs/portals, fixed 375px header brand truncation in `components/common/AppHeader.tsx`, and added Morning Checklist below).
+- **Next Task:** None in Phase 2 Sprints 3–5 (`T5.1` Evaluation Suite remains parked under Parking Lot / OPEN D4).
 
 ---
 
@@ -13,7 +13,7 @@
 - Sprint 2 (Core AI Endpoints & Basic Portals): `[x]` Completed
 - Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[x]` Completed (T3.0, T3.0b, T3.1, T3.2, T3.3, T3.4 done)
 - Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[x]` Completed (T4.1–T4.5 done)
-- Sprint 5 (PWA, final verification): `[ ]` Planned — T5.1 evals parked (see Parking Lot)
+- Sprint 5 (PWA, final verification): `[x]` Completed (T5.2, T5.3 done; T5.1 parked)
 
 ---
 
@@ -133,3 +133,22 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T4.4:** Implemented Dynamic Civic Health Scorecard (`CivicGrade` and `SectorHealth` in `lib/types.ts`; `computeSectorHealth`, `computeCityHealth`, `scoreToGrade`, and `gradeColorClasses` in `lib/utils.ts`; live KPIs + citywide/sector scorecard in `components/mayor/MayorPortalView.tsx`; live sector grade chips in `components/feed/ComplaintFeed.tsx` + `components/feed/FeedFilters.tsx`; `e2e/civic-health.spec.ts` verifying AC-12.3 seed math and live 66 C → 86 B transition on `cmp-001` resolution). Verified via `npm run build && npm run lint && npm run test:e2e` (27 passed).
 - **T4.5:** Implemented Worker Home Route Card (`components/worker/WorkerHome.tsx` filtering `assignedTo.workerId` with mini `LeafletMap`, landmark, coordinates, Google Maps link, and `BeforeAfterViewer`; optional `center`/`zoom`/`showZoomControl` on `components/map/LeafletMap.tsx`; offline fallback badge persistence in `components/worker/BeforeAfterViewer.tsx`; `workerId` prop wired through `app/page.tsx` and `components/worker/WorkerPortalView.tsx`; `e2e/golden-path.spec.ts` verifying route card, Google Maps link, and worker assignment filter). Verified via `npm run build && npm run lint && npm run test:e2e` (28 passed).
 - **T5.2:** Implemented PWA Manifest (`app/manifest.ts` serving `/manifest.webmanifest` with `name`/`short_name` "Awaaz", `display: "standalone"`, `#070b12` civic theme/background colors, and `public/icons/icon-192.png` + `public/icons/icon-512.png` generated from `public/logo.jpg`; E2E test in `e2e/ui-smoke.spec.ts` verifying 200 response, manifest fields, `<link rel="manifest">`, and icon assets). Verified via `npm run build && npm run lint && npm run test:e2e` (29 passed).
+- **T5.3:** Final Verification Pass — verified mobile layouts at 375px and 430px across every citizen tab, group chat, worker tab, and mayor tab in `e2e/ui-smoke.spec.ts` (zero horizontal overflow; screenshots saved to `test-results/screens/`), fixed 375px header brand text squeezing for `Comm. Nasir` in `components/common/AppHeader.tsx`, and added the Morning Checklist below. Verified via `npm run build && npm run lint && npm run test:e2e` (31 passed).
+
+---
+
+## Morning Checklist
+- **What was built (Sprints 3–5):**
+  - **Test & UI Foundation (T3.0–T3.4):** Playwright E2E harness (`AI_FORCE_FALLBACK=1`, port 3100), shadcn/ui dark civic theme (`z-[1100]` overlays), harmonized `0.0–1.0` fail-closed verify-fix contract + `lib/categories.ts`, compressed photo upload + live `WaveformVisualizer` (`m:ss / 0:30`), `QuotaExceededError` Sonner toast fallback, lifecycle `history` + `ComplaintDetailModal`, and `/icon.jpg`.
+  - **Phase 2 Capabilities (T4.1–T4.5):** Groups neighborhood chat hub (`5` channels, complaint embeds, "Convert to Ticket", read-only `📢 Municipal Alerts`), GPS → landmark → sector centre location resolution + 50m `DuplicateCard` ("+1 Impacts Me Too" with 2/4 urgency boost), Interactive Mayor Desk (persisted contractor payout freeze + emergency broadcast), live Sector & Citywide Civic Health scorecard (`A–F` grades), and Worker Home route card (mini Leaflet map centered on pin, coordinates, Google Maps directions link, Before/After verification).
+  - **PWA & Verification (T5.2–T5.3):** `app/manifest.ts` (`/manifest.webmanifest` with 192px & 512px icons in `public/icons/`) and 375px/430px layout overflow verification across all screens.
+- **What is parked / awaits your decisions:**
+  - **T5.1 Evaluation Suite (`D4`)** — parked in Parking Lot; no `evals/` created.
+  - **Live Gemini testing (`D2`) & `AI_TIMEOUT_MS` (`D7`)** — all automated tests ran with `AI_FORCE_FALLBACK=1`; live Gemini calls and latency tuning await your manual test.
+  - **Shared backend (`D3`) & Demo script (`D5`)** — parked/open; app runs on `localStorage` + seed JSON.
+- **Manual click-through checklist (with `npm run dev` on `http://localhost:3000`):**
+  1. **Real Urdu mic & live AI triage:** In Citizen Home (`Tariq`), tap `🎙️`, speak an Urdu hazard report while watching the live waveform and timer, stop, and verify live Gemini returns transcript, department, urgency, and creates a Map pin (measure latency for `D7`).
+  2. **Photo attachment + live Vision verification:** Attach a real photo (`➕`) on Home, switch to `Sajid` → `Queue` → `Claim Ticket` → `Home` route card (verify mini map + `"Open in Google Maps"` link) → upload an After photo → `Verify Fix` with live Gemini Vision → switch back to `Tariq` → `My Reports` → `"+1 Confirm Fix"`.
+  3. **GPS + Duplicate check:** On Home with location permission granted near a known landmark, submit a matching hazard to confirm `📍 GPS` chip and `DuplicateCard` `"+1 Impacts Me Too"`.
+  4. **Mayor & Groups:** As `Comm. Nasir`, toggle a contractor payout freeze, send an emergency broadcast, switch to `Tariq` → `Groups`, verify the banner and read-only `📢 Municipal Alerts`, and test `"Convert to Ticket"`.
+  5. **PWA install check:** Inspect `/manifest.webmanifest` and Application → Manifest in Chrome DevTools.
