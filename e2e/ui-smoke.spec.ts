@@ -98,6 +98,31 @@ test.describe("ui smoke (page)", () => {
   });
 });
 
+test("app icon / favicon: loading / produces no console errors and no 404 responses", async ({ page }) => {
+  const consoleErrors: string[] = [];
+  const notFoundUrls: string[] = [];
+
+  page.on("console", (msg) => {
+    if (msg.type() === "error") consoleErrors.push(msg.text());
+  });
+  page.on("response", (res) => {
+    if (res.status() === 404) notFoundUrls.push(res.url());
+  });
+
+  await page.route(/tile\.openstreetmap\.org/, (route) => route.abort());
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+
+  // Verify Next emitted the icon link and it loads without 404.
+  const iconHref = await page.locator('link[rel="icon"]').getAttribute("href");
+  expect(iconHref).toBeTruthy();
+  const iconRes = await page.request.get(iconHref!);
+  expect(iconRes.status()).toBe(200);
+
+  expect(notFoundUrls, `Unexpected 404 responses: ${notFoundUrls.join(", ")}`).toEqual([]);
+  expect(consoleErrors, `Unexpected console errors: ${consoleErrors.join(", ")}`).toEqual([]);
+});
+
 // Leaflet panes/controls reach z-index ~1000, so every shadcn overlay surface must sit at ≥ 1100.
 // Checked statically: no screen renders these primitives yet (first runtime check comes with T3.3).
 test("overlays stack above Leaflet (z-index ≥ 1100)", () => {

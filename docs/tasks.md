@@ -101,7 +101,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: tap a seed card → modal opens with timeline entries → Escape closes; golden-path test asserts the timeline shows Reported → Claimed → AI Verified → Resolved at the end.
   - **Files:** `lib/types.ts`, `lib/data/seedComplaints.json`, `lib/data/storage.ts`, `components/feed/ComplaintDetailModal.tsx`, `components/feed/ComplaintCard.tsx`, `components/map/MapDrawer.tsx`, `components/reports/MyReportsView.tsx`, worker components that claim/verify, `e2e/*`.
 
-- [ ] **T3.4: App Icon / Favicon**
+- [x] **T3.4: App Icon / Favicon**
   - Add `app/icon.jpg` (copy of `public/logo.jpg`) so Next emits the icon link (AC-14.2). If `sharp` is already present in `node_modules` (Next ships it), a one-off script may produce `app/icon.png` instead; don't add dependencies.
   - e2e: load `/` → no console errors and no 404 responses.
   - **Files:** `app/icon.*`, `e2e/*`.
