@@ -45,9 +45,9 @@ export default function Page() {
           {/* pb-16 keeps content clear of the fixed bottom nav */}
           <main className="flex flex-1 flex-col pb-16">
             {tab === "explore" && (
-              <ComplaintFeed viewerId={role.profileId} viewerName={role.name} homeSector={role.sector} />
+              <ComplaintFeed viewerId={role.profileId} viewerName={role.name} homeSector={role.sector} onUpdateComplaint={onUpdateComplaint} />
             )}
-            {tab === "map" && <MapView />}
+            {tab === "map" && <MapView viewerId={role.profileId} viewerName={role.name} onUpdateComplaint={onUpdateComplaint} />}
             {tab === "home" && (
               <HomeChatIntake
                 key={role.id}
@@ -64,6 +64,7 @@ export default function Page() {
                 complaints={myComplaints}
                 onUpdateComplaint={onUpdateComplaint}
                 citizenId={role.profileId}
+                citizenName={role.name}
               />
             )}
             {tab === "groups" && <GroupsShell />}

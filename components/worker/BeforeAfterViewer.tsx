@@ -105,10 +105,37 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
           afterPhotoUrl: afterDataUrl,
           aiVerification,
           updatedAt: now,
+          history: [
+            ...(complaint.history ?? []),
+            {
+              type: "AI_VERIFIED" as const,
+              status: "PENDING_COMMUNITY_VERIFICATION" as const,
+              at: now,
+              actorId: "worker-sajid",
+              actorName: "Sajid",
+              note: data.reasoning,
+            },
+          ],
         });
       } else {
         // AC-4.6: rejection is stored, status stays IN_PROGRESS so the worker can retry.
-        onUpdateComplaint({ ...complaint, status: "IN_PROGRESS", aiVerification, updatedAt: now });
+        onUpdateComplaint({
+          ...complaint,
+          status: "IN_PROGRESS",
+          aiVerification,
+          updatedAt: now,
+          history: [
+            ...(complaint.history ?? []),
+            {
+              type: "AI_REJECTED" as const,
+              status: "IN_PROGRESS" as const,
+              at: now,
+              actorId: "worker-sajid",
+              actorName: "Sajid",
+              note: data.reasoning,
+            },
+          ],
+        });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");

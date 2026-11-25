@@ -9,9 +9,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import seedData from "./seedComplaints.json";
-import type { Complaint, ComplaintComment, VoteDirection } from "@/lib/types";
+import type { Complaint, ComplaintComment, ComplaintEvent, VoteDirection } from "@/lib/types";
 
-export const STORAGE_KEY = "awaaz.complaints.v2";
+export const STORAGE_KEY = "awaaz.complaints.v3";
 const CHANGE_EVENT = "awaaz:complaints-changed";
 
 const isBrowser = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
@@ -52,11 +52,34 @@ function write(list: Complaint[]): void {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-/** Old local data (pre-T3.1) stored AI confidence on a 0–100 scale; confidence is always 0.0–1.0 now. */
+/** Old local data (pre-T3.1) stored AI confidence on a 0–100 scale; confidence is always 0.0–1.0 now.
+ *  T3.3: also normalises missing `history` and `communityImpact.impactConfirmedBy`. */
 function normalizeStored(c: Complaint): Complaint {
+  // Fix confidence scale
+  let out = c;
   const v = c.aiVerification;
-  if (!v || typeof v.confidence !== "number" || v.confidence <= 1) return c;
-  return { ...c, aiVerification: { ...v, confidence: v.confidence / 100 } };
+  if (v && typeof v.confidence === "number" && v.confidence > 1) {
+    out = { ...out, aiVerification: { ...v, confidence: v.confidence / 100 } };
+  }
+  // Normalize history: missing → synthesize REPORTED event
+  if (!Array.isArray(out.history) || out.history.length === 0) {
+    const reported: ComplaintEvent = {
+      type: "REPORTED",
+      status: "REPORTED",
+      at: out.createdAt,
+      actorId: out.reporter.citizenId,
+      actorName: out.reporter.citizenName,
+    };
+    out = { ...out, history: [reported] };
+  }
+  // Normalize impactConfirmedBy (T4.2 prep)
+  if (!Array.isArray(out.communityImpact.impactConfirmedBy)) {
+    out = {
+      ...out,
+      communityImpact: { ...out.communityImpact, impactConfirmedBy: [] },
+    };
+  }
+  return out;
 }
 
 /** Seeds localStorage on first run (or if the stored value is corrupt). Browser only. */
@@ -174,7 +197,7 @@ export function addComment(
  * A single confirmation moves the ticket to RESOLVED.
  * Returns the (possibly unchanged) complaint, or `null` if not found.
  */
-export function confirmFix(id: string, profileId: string): Complaint | null {
+export function confirmFix(id: string, profileId: string, profileName: string = "Citizen"): Complaint | null {
   if (!isBrowser()) return null;
   const current = readOrSeed().find((c) => c.id === id);
   if (!current) return null;
@@ -184,6 +207,21 @@ export function confirmFix(id: string, profileId: string): Complaint | null {
   ) {
     return current;
   }
+  const now = nowIso();
+  const confirmedEvent: ComplaintEvent = {
+    type: "COMMUNITY_CONFIRMED",
+    status: "PENDING_COMMUNITY_VERIFICATION",
+    at: now,
+    actorId: profileId,
+    actorName: profileName,
+  };
+  const resolvedEvent: ComplaintEvent = {
+    type: "RESOLVED",
+    status: "RESOLVED",
+    at: now,
+    actorId: profileId,
+    actorName: profileName,
+  };
   return updateComplaint(id, (c) => ({
     ...c,
     status: "RESOLVED",
@@ -192,6 +230,32 @@ export function confirmFix(id: string, profileId: string): Complaint | null {
       verifiedCount: c.communityImpact.verifiedCount + 1,
       verifiedBy: [...c.communityImpact.verifiedBy, profileId],
     },
+    history: [...(c.history ?? []), confirmedEvent, resolvedEvent],
+  }));
+}
+
+/**
+ * Worker claims a ticket: sets status to IN_PROGRESS, records assignedTo, appends CLAIMED history.
+ */
+export function claimComplaint(
+  id: string,
+  workerId: string,
+  workerName: string,
+): Complaint | null {
+  if (!isBrowser()) return null;
+  const now = nowIso();
+  const event: ComplaintEvent = {
+    type: "CLAIMED",
+    status: "IN_PROGRESS",
+    at: now,
+    actorId: workerId,
+    actorName: workerName,
+  };
+  return updateComplaint(id, (c) => ({
+    ...c,
+    status: "IN_PROGRESS",
+    assignedTo: { workerId, workerName },
+    history: [...(c.history ?? []), event],
   }));
 }
 

@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { CheckCircle2, ClipboardList } from "lucide-react";
 import type { Complaint } from "@/lib/types";
+import { confirmFix } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS, STATUS_BADGE, STATUS_LABELS, timeAgo } from "@/lib/labels";
+import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import LifecycleStepper from "./LifecycleStepper";
 
 interface MyReportsViewProps {
@@ -12,20 +15,19 @@ interface MyReportsViewProps {
   onUpdateComplaint: (complaint: Complaint) => void;
   /** Current citizen id, recorded in communityImpact.verifiedBy on confirm. */
   citizenId?: string;
+  /** Current citizen display name, for history events. */
+  citizenName?: string;
 }
 
 /** My Reports tab: the citizen's own tickets with lifecycle + "+1 Confirm Fix". */
-export default function MyReportsView({ complaints, onUpdateComplaint, citizenId }: MyReportsViewProps) {
-  const confirmFix = (c: Complaint) => {
-    const verifiedBy = citizenId && !c.communityImpact.verifiedBy.includes(citizenId)
-      ? [...c.communityImpact.verifiedBy, citizenId]
-      : c.communityImpact.verifiedBy;
-    onUpdateComplaint({
-      ...c,
-      status: "RESOLVED",
-      communityImpact: { ...c.communityImpact, verifiedBy, verifiedCount: verifiedBy.length },
-      updatedAt: new Date().toISOString(),
-    });
+export default function MyReportsView({ complaints, onUpdateComplaint, citizenId, citizenName = "Citizen" }: MyReportsViewProps) {
+  const [modalId, setModalId] = useState<string | null>(null);
+  const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
+
+  const handleConfirmFix = (c: Complaint) => {
+    if (!citizenId) return;
+    const updated = confirmFix(c.id, citizenId, citizenName);
+    if (updated) onUpdateComplaint(updated);
   };
 
   if (complaints.length === 0) {
@@ -50,7 +52,16 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
             data-testid="report-card"
             data-complaint-id={c.id}
             data-status={c.status}
-            className={`rounded-xl border bg-civic-surface p-3 ${resolved ? "border-green-500/60" : "border-civic-border"}`}
+            onClick={() => setModalId(c.id)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setModalId(c.id);
+              }
+            }}
+            className={`cursor-pointer rounded-xl border bg-civic-surface p-3 ${resolved ? "border-green-500/60" : "border-civic-border"}`}
           >
             <header className="mb-2 flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -84,7 +95,10 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
             {c.status === "PENDING_COMMUNITY_VERIFICATION" && (
               <button
                 type="button"
-                onClick={() => confirmFix(c)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleConfirmFix(c);
+                }}
                 data-testid="confirm-fix-button"
                 className="mt-3 w-full rounded-lg bg-green-500 py-2 text-sm font-bold text-white shadow-lg shadow-green-500/30 transition hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
               >
@@ -94,6 +108,14 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
           </article>
         );
       })}
+
+      <ComplaintDetailModal
+        complaint={modalComplaint}
+        viewerId={citizenId ?? "citizen-tariq"}
+        viewerName={citizenName}
+        onClose={() => setModalId(null)}
+        onUpdateComplaint={onUpdateComplaint}
+      />
     </section>
   );
 }

@@ -92,7 +92,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: attach `public/images/hazards/pothole.jpg` with typed text → created complaint image `src` starts with `data:image/jpeg`; mic test with fake media stream → waveform canvas visible, timer advances, stop works.
   - **Files:** `lib/image.ts`, `components/home/HomeChatIntake.tsx`, `components/audio/WaveformVisualizer.tsx`, `app/api/analyze-audio/route.ts`, `components/worker/BeforeAfterViewer.tsx`, `lib/data/storage.ts`, `e2e/*`.
 
-- [ ] **T3.3: Lifecycle History, Assignment & Complaint Detail Modal**
+- [x] **T3.3: Lifecycle History, Assignment & Complaint Detail Modal**
   - Add `ComplaintEvent`, `history`, `assignedTo` to `lib/types.ts` (spec §3).
   - Add realistic `history` to all 12 seeds in `lib/data/seedComplaints.json`, consistent with each status and `createdAt` (AC-8.1). Bump `STORAGE_KEY` to `awaaz.complaints.v3`. On load, missing `history` → synthesize one `REPORTED` event from `createdAt`.
   - Every status change appends an event: create (`REPORTED`), claim (`CLAIMED` + set `assignedTo`), AI pass/reject (`AI_VERIFIED`/`AI_REJECTED`), "+1 Confirm Fix" (`COMMUNITY_CONFIRMED` + `RESOLVED`). Prefer doing this in `storage.ts` helpers so components can't forget.

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Building2, ChevronDown, MapPin, MessageCircle } from "lucide-react";
 import type { Complaint } from "@/lib/types";
-import { castVote } from "@/lib/data/storage";
+import { castVote, confirmFix } from "@/lib/data/storage";
 import {
   DEPARTMENT_LABELS,
   STATUS_BADGE,
@@ -19,10 +19,11 @@ interface ComplaintCardProps {
   complaint: Complaint;
   viewerId: string;
   viewerName: string;
+  onOpenModal: (id: string) => void;
 }
 
 /** One Explore feed card: badges, Urdu + English text, photo, vote bar and expandable flat comments. */
-export default function ComplaintCard({ complaint, viewerId, viewerName }: ComplaintCardProps) {
+export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenModal }: ComplaintCardProps) {
   const [showComments, setShowComments] = useState(false);
   const { votes } = complaint;
   const upvoted = votes.upvotedBy.includes(viewerId);
@@ -37,10 +38,17 @@ export default function ComplaintCard({ complaint, viewerId, viewerName }: Compl
       active ? activeClass : "text-civic-muted hover:bg-civic-surface hover:text-slate-100"
     }`;
 
+  const isPendingVerification = complaint.status === "PENDING_COMMUNITY_VERIFICATION";
+  const alreadyConfirmed = complaint.communityImpact.verifiedBy.includes(viewerId);
+
   return (
     <article
       aria-labelledby={`title-${complaint.id}`}
-      className="rounded-2xl border border-civic-border bg-civic-raised p-3 shadow-lg shadow-black/30"
+      className="rounded-2xl border border-civic-border bg-civic-raised p-3 shadow-lg shadow-black/30 cursor-pointer"
+      onClick={() => onOpenModal(complaint.id)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenModal(complaint.id); } }}
     >
       {/* Badge row */}
       <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
@@ -100,7 +108,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName }: Compl
             type="button"
             aria-label="Upvote"
             aria-pressed={upvoted}
-            onClick={() => castVote(complaint.id, viewerId, "up")}
+            onClick={(e) => { e.stopPropagation(); castVote(complaint.id, viewerId, "up"); }}
             className={voteBtn(upvoted, "bg-civic-accent/20 text-civic-accent")}
           >
             <span aria-hidden="true">▲</span>
@@ -116,7 +124,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName }: Compl
             type="button"
             aria-label="Downvote"
             aria-pressed={downvoted}
-            onClick={() => castVote(complaint.id, viewerId, "down")}
+            onClick={(e) => { e.stopPropagation(); castVote(complaint.id, viewerId, "down"); }}
             className={voteBtn(downvoted, "bg-red-500/20 text-red-300")}
           >
             <span aria-hidden="true">▼</span>
@@ -127,7 +135,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName }: Compl
           type="button"
           aria-expanded={showComments}
           aria-controls={commentsId}
-          onClick={() => setShowComments((v) => !v)}
+          onClick={(e) => { e.stopPropagation(); setShowComments((v) => !v); }}
           className="inline-flex items-center gap-1.5 rounded-full bg-civic-surface px-3 py-1.5 text-xs font-medium text-slate-200 ring-1 ring-civic-border transition hover:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
         >
           <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
@@ -135,6 +143,22 @@ export default function ComplaintCard({ complaint, viewerId, viewerName }: Compl
           <ChevronDown className={`h-3.5 w-3.5 transition ${showComments ? "rotate-180" : ""}`} aria-hidden="true" />
         </button>
       </div>
+
+      {/* +1 Confirm Fix on explore cards */}
+      {isPendingVerification && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); if (!alreadyConfirmed) confirmFix(complaint.id, viewerId, viewerName); }}
+          disabled={alreadyConfirmed}
+          className={`mt-2 w-full rounded-lg py-1.5 text-xs font-bold transition ${
+            alreadyConfirmed
+              ? "bg-civic-surface text-civic-muted cursor-default"
+              : "bg-green-500 text-white hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+          }`}
+        >
+          {alreadyConfirmed ? "✓ You confirmed this fix" : "+1 Confirm Fix"}
+        </button>
+      )}
 
       <div id={commentsId} hidden={!showComments}>
         {showComments && (

@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 const HAZARDS = path.join(__dirname, "../public/images/hazards");
 const POTHOLE_PHOTO = path.join(HAZARDS, "pothole.jpg");
-const STORAGE_KEY = "awaaz.complaints.v2";
+const STORAGE_KEY = "awaaz.complaints.v3";
 
 function gotoTab(page: Page, label: "Explore" | "Map" | "Home" | "My Reports" | "Groups") {
   return page.getByRole("navigation", { name: "Primary" }).getByRole("button", { name: label, exact: true }).click();

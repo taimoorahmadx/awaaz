@@ -3,15 +3,15 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** `phase2-overnight` (all work happens here; `master` untouched; nothing is pushed).
-- **Last Completed:** `T3.2` — citizen photo attachment, client-side JPEG compression, live waveform visualizer, `sectorHint`/`photo` forwarding, `QuotaExceededError` toast handling.
-- **Next Task:** `T3.3` — lifecycle history, assignment, and Complaint Detail Modal.
+- **Last Completed:** `T3.3` — lifecycle history (`ComplaintEvent[]`), worker assignment (`assignedTo`), storage v3 + normalization, `ComplaintDetailModal` (shadcn `Dialog`, `z-[1100]`) wired from Explore, Map drawer, and My Reports.
+- **Next Task:** `T3.4` — app icon / favicon.
 
 ---
 
 ## Sprint Status
 - Sprint 1 (Scaffold, Map, Seed Data, Feed): `[x]` Completed
 - Sprint 2 (Core AI Endpoints & Basic Portals): `[x]` Completed
-- Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[~]` In progress (T3.0, T3.0b, T3.1, T3.2 done; next `T3.3`)
+- Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[~]` In progress (T3.0, T3.0b, T3.1, T3.2, T3.3 done; next `T3.4`)
 - Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[ ]` Planned
 - Sprint 5 (PWA, final verification): `[ ]` Planned — T5.1 evals parked (see Parking Lot)
 
@@ -83,7 +83,7 @@
 5. **`➕` inactive; analyze-audio ignores `photo`/`sectorHint`.** → T3.2 ✅ resolved (`HomeChatIntake.tsx` compressed JPEG attachment + preview/remove + `photo`/`sectorHint` forwarded by `app/api/analyze-audio/route.ts`)
 6. **Raw photos stored in localStorage** (worker After photo stored uncompressed) → quota risk. → T3.2 ✅ resolved (`lib/image.ts` compression on both intake & worker After photo + `QuotaExceededError` Sonner toast & in-memory fallback in `lib/data/storage.ts`)
 7. **No waveform / timer.** → T3.2 ✅ resolved (`components/audio/WaveformVisualizer.tsx` live `AnalyserNode` canvas, `m:ss / 0:30` timer, 30s auto-stop, track/AudioContext cleanup)
-8. **No detail modal; no history data; no `assignedTo`.** → T3.3
+8. **No detail modal; no history data; no `assignedTo`.** → T3.3 ✅ resolved (`ComplaintDetailModal.tsx`, `ComplaintEvent[]` in `seedComplaints.json` & `storage.ts` v3, `assignedTo` + `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history events)
 9. **Favicon 404.** → T3.4
 10. **Groups tab is a "Coming soon" shell; Mayor freeze/broadcast inert.** → T4.1, T4.3
 11. **Intake coordinates** = sector centre (`SECTOR_COORDS`) + random jitter in `HomeChatIntake.tsx`. → T4.2 (GPS → landmark → sector)
@@ -125,3 +125,4 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T3.0b:** shadcn/ui foundation with civic dark theme, pinned dependencies, and overlay stacking.
 - **T3.1:** verify-fix contract harmonized (0-1 confidence, fail closed), input-aware fallbacks, fixed category table (`lib/categories.ts`).
 - **T3.2:** Client-side photo compression (`lib/image.ts`), citizen photo attachment + `photo`/`sectorHint` forwarding, live `WaveformVisualizer` (`m:ss / 0:30`, auto-stop, cleanup), worker After photo compression, and `QuotaExceededError` Sonner toast + in-memory fallback.
+- **T3.3:** Lifecycle `history` and `assignedTo` on `Complaint`, all 12 seeds updated (`awaaz.complaints.v3`), `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history tracking, `ComplaintDetailModal` (shadcn `Dialog` at `z-[1100]`) wired from Explore cards, Map drawer, and My Reports, plus "+1 Confirm Fix" on Explore cards and modal.

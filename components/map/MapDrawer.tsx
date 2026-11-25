@@ -15,10 +15,11 @@ import {
 interface MapDrawerProps {
   complaint: Complaint | null;
   onClose: () => void;
+  onOpenModal: (id: string) => void;
 }
 
 /** Slide-up bottom sheet for the tapped map pin. */
-export default function MapDrawer({ complaint, onClose }: MapDrawerProps) {
+export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const openId = complaint?.id;
 
@@ -113,6 +114,14 @@ export default function MapDrawer({ complaint, onClose }: MapDrawerProps) {
       </div>
 
       <p className="mt-2 text-[11px] text-civic-muted">Reported by {complaint.reporter.citizenName}</p>
+
+      <button
+        type="button"
+        onClick={() => onOpenModal(complaint.id)}
+        className="mt-3 w-full rounded-lg bg-civic-surface py-2 text-xs font-semibold text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+      >
+        View Full Details
+      </button>
     </section>
   );
 }

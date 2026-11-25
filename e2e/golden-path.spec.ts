@@ -13,7 +13,7 @@ const HAZARDS = path.join(__dirname, "../public/images/hazards");
 const AFTER_PHOTO = path.join(HAZARDS, "open-manhole-after.jpg");
 // The Open Manhole stock photo — the new ticket's own Before photo.
 const BEFORE_PHOTO = path.join(HAZARDS, "open-manhole.jpg");
-const STORAGE_KEY = "awaaz.complaints.v2";
+const STORAGE_KEY = "awaaz.complaints.v3";
 
 async function switchRole(page: Page, name: "Tariq" | "Sajid") {
   await page.getByRole("button", { name: /Switch role/ }).click();
@@ -128,6 +128,19 @@ test("golden path: report → map pin → worker AI verify → citizen sign-off"
 
   // Persisted to localStorage.
   expect((await storedComplaint(page, id))?.status).toBe("RESOLVED");
+
+  // Open detail modal from My Reports and assert full lifecycle timeline.
+  await report.click();
+  const modal = page.getByRole("dialog");
+  await expect(modal).toBeVisible();
+  const timeline = modal.getByRole("list", { name: "Lifecycle timeline" });
+  await expect(timeline).toBeVisible();
+  await expect(timeline.getByText("Reported", { exact: true })).toBeVisible();
+  await expect(timeline.getByText("Claimed by worker", { exact: true })).toBeVisible();
+  await expect(timeline.getByText("AI Verified", { exact: true })).toBeVisible();
+  await expect(timeline.getByText("Resolved", { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(modal).not.toBeVisible();
 });
 
 test("verify badge shows spec'd confidence (≤ 100%) and reasoning", async ({ page }) => {
@@ -186,4 +199,27 @@ test("triage fallback maps typed keywords to the fixed category table", async ({
   const stored = await storedComplaint(page, id);
   expect(stored?.category).toBe("Broken Streetlight");
   expect(stored?.department).toBe("IESCO");
+});
+
+test("modal opens from explore card and shows lifecycle timeline", async ({ page }) => {
+  // Navigate to Explore tab and open the first card.
+  await gotoTab(page, "Explore");
+  const cards = page.locator("ul li article");
+  await expect(cards.first()).toBeVisible({ timeout: 5_000 });
+
+  // Click the first card body — the article is a button that opens the modal.
+  await cards.first().click();
+
+  // Modal must be open.
+  const modal = page.getByRole("dialog");
+  await expect(modal).toBeVisible({ timeout: 5_000 });
+
+  // Timeline section must have at least one "Reported" entry (synthesized from seed).
+  await expect(
+    modal.getByRole("list", { name: "Lifecycle timeline" }).getByText("Reported", { exact: true }),
+  ).toBeVisible();
+
+  // Escape closes the modal.
+  await page.keyboard.press("Escape");
+  await expect(modal).not.toBeVisible();
 });

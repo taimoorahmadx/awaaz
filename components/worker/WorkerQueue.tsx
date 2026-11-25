@@ -2,6 +2,7 @@
 
 import { MapPin } from "lucide-react";
 import type { Complaint, Urgency } from "@/lib/types";
+import { claimComplaint } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS, STATUS_BADGE, STATUS_LABELS, URGENCY_BADGE, URGENCY_LABELS } from "@/lib/labels";
 
 const URGENCY_RANK: Record<Urgency, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
@@ -52,7 +53,10 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
           </div>
           <button
             type="button"
-            onClick={() => onUpdateComplaint({ ...c, status: "IN_PROGRESS", updatedAt: new Date().toISOString() })}
+            onClick={() => {
+              const updated = claimComplaint(c.id, "worker-sajid", "Sajid");
+              if (updated) onUpdateComplaint(updated);
+            }}
             className="rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950"
           >
             Claim Ticket

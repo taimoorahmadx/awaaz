@@ -3,9 +3,11 @@
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { MapIcon } from "lucide-react";
+import type { Complaint } from "@/lib/types";
 import { useComplaints } from "@/lib/data/storage";
 import { RESOLVED_HEX, URGENCY_HEX } from "@/lib/labels";
 import MapDrawer from "./MapDrawer";
+import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 
 // Leaflet touches `window` at import time: client-only, never SSR.
 const LeafletMap = dynamic(() => import("./LeafletMap"), {
@@ -25,12 +27,24 @@ const LEGEND = [
   { label: "Resolved", color: RESOLVED_HEX },
 ];
 
+interface MapViewProps {
+  viewerId?: string;
+  viewerName?: string;
+  onUpdateComplaint?: (c: Complaint) => void;
+}
+
 /** Map tab: full-height Leaflet map + legend + bottom drawer for the tapped pin. */
-export default function MapView() {
+export default function MapView({ viewerId = "citizen-tariq", viewerName = "Tariq", onUpdateComplaint }: MapViewProps) {
   const { complaints } = useComplaints();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [modalId, setModalId] = useState<string | null>(null);
   const selected = complaints.find((c) => c.id === selectedId) ?? null;
+  const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
   const close = useCallback(() => setSelectedId(null), []);
+
+  const handleUpdateComplaint = useCallback((c: Complaint) => {
+    onUpdateComplaint?.(c);
+  }, [onUpdateComplaint]);
 
   return (
     <div className="relative min-h-[420px] flex-1 overflow-hidden">
@@ -51,7 +65,15 @@ export default function MapView() {
         ))}
       </ul>
 
-      <MapDrawer complaint={selected} onClose={close} />
+      <MapDrawer complaint={selected} onClose={close} onOpenModal={(id) => { setSelectedId(null); setModalId(id); }} />
+
+      <ComplaintDetailModal
+        complaint={modalComplaint}
+        viewerId={viewerId}
+        viewerName={viewerName}
+        onClose={() => setModalId(null)}
+        onUpdateComplaint={handleUpdateComplaint}
+      />
     </div>
   );
 }

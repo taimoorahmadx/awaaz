@@ -5,6 +5,7 @@ import { Newspaper } from "lucide-react";
 import type { Complaint, Urgency } from "@/lib/types";
 import { useComplaints } from "@/lib/data/storage";
 import ComplaintCard from "./ComplaintCard";
+import ComplaintDetailModal from "./ComplaintDetailModal";
 import FeedFilters, { type SectorFilter, type SortMode, type UrgencyFilter } from "./FeedFilters";
 
 const URGENCY_RANK: Record<Urgency, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
@@ -33,14 +34,16 @@ interface ComplaintFeedProps {
   viewerName: string;
   /** Viewer's home sector, starred in the filter row */
   homeSector: string;
+  onUpdateComplaint: (c: Complaint) => void;
 }
 
 /** Explore tab: filterable, sorted list of complaint cards read from localStorage. */
-export default function ComplaintFeed({ viewerId, viewerName, homeSector }: ComplaintFeedProps) {
+export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpdateComplaint }: ComplaintFeedProps) {
   const { complaints, hydrated } = useComplaints();
   const [sector, setSector] = useState<SectorFilter>("All");
   const [urgency, setUrgency] = useState<UrgencyFilter>("ALL");
   const [sort, setSort] = useState<SortMode>("recent");
+  const [modalId, setModalId] = useState<string | null>(null);
 
   const visible = useMemo(
     () =>
@@ -49,6 +52,8 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector }: Comp
         .sort(SORTERS[sort]),
     [complaints, sector, urgency, sort],
   );
+
+  const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
 
   return (
     <section aria-label="Explore complaints" className="flex flex-1 flex-col">
@@ -75,11 +80,24 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector }: Comp
         <ul className="flex flex-col gap-3 px-3 py-2">
           {visible.map((c) => (
             <li key={c.id}>
-              <ComplaintCard complaint={c} viewerId={viewerId} viewerName={viewerName} />
+              <ComplaintCard
+                complaint={c}
+                viewerId={viewerId}
+                viewerName={viewerName}
+                onOpenModal={setModalId}
+              />
             </li>
           ))}
         </ul>
       )}
+
+      <ComplaintDetailModal
+        complaint={modalComplaint}
+        viewerId={viewerId}
+        viewerName={viewerName}
+        onClose={() => setModalId(null)}
+        onUpdateComplaint={onUpdateComplaint}
+      />
     </section>
   );
 }
