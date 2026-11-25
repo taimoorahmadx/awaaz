@@ -3,8 +3,8 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** `phase2-overnight` (all work happens here; `master` untouched; nothing is pushed).
-- **Last Completed:** `T3.4` — added `app/icon.jpg` from `public/logo.jpg` and verified `/` loads with zero 404s and zero console errors.
-- **Next Task:** `T4.1` — Groups Tab (Neighborhood Chat Hub, text only).
+- **Last Completed:** `T4.1` — built Groups Tab (5 channels grouped by type, seeded messages, text composer, live complaint embeds opening Detail Modal, read-only Municipal Alerts + top banner, Convert to Ticket draft flow, and header Reset System Data).
+- **Next Task:** `T4.2` — Location Resolution (GPS → Landmark → Sector) + Proximity Duplicate Detection.
 
 ---
 
@@ -85,7 +85,7 @@
 7. **No waveform / timer.** → T3.2 ✅ resolved (`components/audio/WaveformVisualizer.tsx` live `AnalyserNode` canvas, `m:ss / 0:30` timer, 30s auto-stop, track/AudioContext cleanup)
 8. **No detail modal; no history data; no `assignedTo`.** → T3.3 ✅ resolved (`ComplaintDetailModal.tsx`, `ComplaintEvent[]` in `seedComplaints.json` & `storage.ts` v3, `assignedTo` + `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history events)
 9. **Favicon 404.** → T3.4 ✅ resolved (`app/icon.jpg` added; verified 200 response and zero 404s/console errors on `/`)
-10. **Groups tab is a "Coming soon" shell; Mayor freeze/broadcast inert.** → T4.1, T4.3
+10. **Groups tab is a "Coming soon" shell; Mayor freeze/broadcast inert.** → Groups tab implemented in T4.1 ✅; Mayor freeze/broadcast still pending (T4.3). → T4.1, T4.3
 11. **Intake coordinates** = sector centre (`SECTOR_COORDS`) + random jitter in `HomeChatIntake.tsx`. → T4.2 (GPS → landmark → sector)
 12. **No automated tests.** → T3.0 ✅ resolved (`e2e/golden-path.spec.ts`)
 13. **Favicon 404 re-confirmed** via Playwright MCP (only console error on Home). → T3.4 ✅ resolved (`app/icon.jpg`)
@@ -127,3 +127,4 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T3.2:** Client-side photo compression (`lib/image.ts`), citizen photo attachment + `photo`/`sectorHint` forwarding, live `WaveformVisualizer` (`m:ss / 0:30`, auto-stop, cleanup), worker After photo compression, and `QuotaExceededError` Sonner toast + in-memory fallback.
 - **T3.3:** Lifecycle `history` and `assignedTo` on `Complaint`, all 12 seeds updated (`awaaz.complaints.v3`), `claimComplaint` / `confirmFix` / `BeforeAfterViewer` history tracking, `ComplaintDetailModal` (shadcn `Dialog` at `z-[1100]`) wired from Explore cards, Map drawer, and My Reports, plus "+1 Confirm Fix" on Explore cards and modal.
 - **T3.4:** Added `app/icon.jpg` (copied from `public/logo.jpg`) so Next.js serves `/icon.jpg`; added E2E check in `e2e/ui-smoke.spec.ts` verifying `/` loads with no 404 responses and no console errors.
+- **T4.1:** Implemented Groups Tab (`CivicGroup`, `GroupMessage` in `lib/types.ts`; 5 seeded channels + 34 messages in `lib/data/seedGroups.json`; `awaaz.groups.v1` / `awaaz.messages.v1` + `resetSystemData()` in `lib/data/storage.ts`; `GroupsShell`, `GroupChatView`, `ChatMessageBubble`, `ComplaintCardEmbed`; header "Reset System Data" menu item; "Convert to Ticket" draft pre-fill in `app/page.tsx` + `HomeChatIntake.tsx`; `e2e/groups.spec.ts`). Verified via `npm run build && npm run lint && npm run test:e2e` (19 passed).

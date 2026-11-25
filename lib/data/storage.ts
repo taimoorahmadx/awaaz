@@ -1,23 +1,34 @@
-// Hydration-safe localStorage persistence for complaints.
+// Hydration-safe localStorage persistence for complaints, groups, and messages.
 //
 // Rules:
 // - Never touch `window`/`localStorage` at module scope or during render.
-//   Components read data through `useComplaints()`, which only reads inside useEffect,
-//   so the server render and the first client render both see `[]` (no hydration mismatch).
-// - Every write dispatches a window event so all mounted `useComplaints()` hooks re-sync.
+//   Components read data through hooks (`useComplaints`, `useGroups`, `useGroupMessages`),
+//   which only read inside useEffect so SSR and first client paint match (no hydration mismatch).
+// - Every write dispatches a window event so all mounted hooks re-sync.
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import seedData from "./seedComplaints.json";
-import type { Complaint, ComplaintComment, ComplaintEvent, VoteDirection } from "@/lib/types";
+import seedGroupsData from "./seedGroups.json";
+import type {
+  CivicGroup,
+  Complaint,
+  ComplaintComment,
+  ComplaintEvent,
+  GroupMessage,
+  VoteDirection,
+} from "@/lib/types";
 
 export const STORAGE_KEY = "awaaz.complaints.v3";
+export const GROUPS_STORAGE_KEY = "awaaz.groups.v1";
+export const MESSAGES_STORAGE_KEY = "awaaz.messages.v1";
+export const CONTRACTORS_STORAGE_KEY = "awaaz.contractors.v1";
+
 const CHANGE_EVENT = "awaaz:complaints-changed";
+const GROUPS_CHANGE_EVENT = "awaaz:groups-changed";
+const MESSAGES_CHANGE_EVENT = "awaaz:messages-changed";
 
 const isBrowser = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
-
-// Keeps in-memory state if localStorage hits QuotaExceededError (AC-7.4).
-let inMemoryFallback: Complaint[] | null = null;
 
 function isQuotaExceeded(err: unknown): boolean {
   if (err instanceof DOMException) {
@@ -26,42 +37,70 @@ function isQuotaExceeded(err: unknown): boolean {
   return err instanceof Error && /quota/i.test(`${err.name} ${err.message}`);
 }
 
-/** Fresh deep copy of the seed so callers can never mutate the imported JSON. */
-function seedCopy(): Complaint[] {
-  return JSON.parse(JSON.stringify(seedData)) as Complaint[];
+interface StoreSlot<T> {
+  key: string;
+  event: string;
+  label: string;
+  memoryFallback: T[] | null;
+  getSeed: () => T[];
+  normalize?: (item: T) => T;
 }
 
-function writeRaw(list: Complaint[]): void {
+function writeRawToSlot<T>(slot: StoreSlot<T>, list: T[]): void {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-    inMemoryFallback = null;
+    window.localStorage.setItem(slot.key, JSON.stringify(list));
+    slot.memoryFallback = null;
   } catch (err) {
     // Quota exceeded / private mode: keep the app running in memory and warn the user (AC-7.4).
-    inMemoryFallback = list;
+    slot.memoryFallback = list;
     if (isQuotaExceeded(err)) {
       toast.error("Storage is full — use Reset System Data in the header", {
         id: "storage-quota-full",
       });
     }
-    console.warn("[storage] Failed to write complaints to localStorage", err);
+    console.warn(`[storage] Failed to write ${slot.label} to localStorage`, err);
   }
 }
 
-function write(list: Complaint[]): void {
-  writeRaw(list);
-  window.dispatchEvent(new Event(CHANGE_EVENT));
+function writeToSlot<T>(slot: StoreSlot<T>, list: T[]): void {
+  writeRawToSlot(slot, list);
+  window.dispatchEvent(new Event(slot.event));
+}
+
+function readOrSeedSlot<T>(slot: StoreSlot<T>): T[] {
+  if (slot.memoryFallback !== null) return slot.memoryFallback;
+  try {
+    const raw = window.localStorage.getItem(slot.key);
+    if (raw) {
+      const parsed: unknown = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        const items = parsed as T[];
+        return slot.normalize ? items.map(slot.normalize) : items;
+      }
+    }
+  } catch {
+    // fall through to reseed
+  }
+  const seeded = slot.getSeed();
+  writeRawToSlot(slot, seeded);
+  return seeded;
+}
+
+function resetSlot<T>(slot: StoreSlot<T>): T[] {
+  slot.memoryFallback = null;
+  const seeded = slot.getSeed();
+  if (isBrowser()) writeToSlot(slot, seeded);
+  return seeded;
 }
 
 /** Old local data (pre-T3.1) stored AI confidence on a 0–100 scale; confidence is always 0.0–1.0 now.
  *  T3.3: also normalises missing `history` and `communityImpact.impactConfirmedBy`. */
-function normalizeStored(c: Complaint): Complaint {
-  // Fix confidence scale
+function normalizeStoredComplaint(c: Complaint): Complaint {
   let out = c;
   const v = c.aiVerification;
   if (v && typeof v.confidence === "number" && v.confidence > 1) {
     out = { ...out, aiVerification: { ...v, confidence: v.confidence / 100 } };
   }
-  // Normalize history: missing → synthesize REPORTED event
   if (!Array.isArray(out.history) || out.history.length === 0) {
     const reported: ComplaintEvent = {
       type: "REPORTED",
@@ -72,7 +111,6 @@ function normalizeStored(c: Complaint): Complaint {
     };
     out = { ...out, history: [reported] };
   }
-  // Normalize impactConfirmedBy (T4.2 prep)
   if (!Array.isArray(out.communityImpact.impactConfirmedBy)) {
     out = {
       ...out,
@@ -82,22 +120,30 @@ function normalizeStored(c: Complaint): Complaint {
   return out;
 }
 
-/** Seeds localStorage on first run (or if the stored value is corrupt). Browser only. */
-function readOrSeed(): Complaint[] {
-  if (inMemoryFallback !== null) return inMemoryFallback;
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed: unknown = JSON.parse(raw);
-      if (Array.isArray(parsed)) return (parsed as Complaint[]).map(normalizeStored);
-    }
-  } catch {
-    // fall through to reseed
-  }
-  const seeded = seedCopy();
-  writeRaw(seeded);
-  return seeded;
-}
+const complaintSlot: StoreSlot<Complaint> = {
+  key: STORAGE_KEY,
+  event: CHANGE_EVENT,
+  label: "complaints",
+  memoryFallback: null,
+  getSeed: () => JSON.parse(JSON.stringify(seedData)) as Complaint[],
+  normalize: normalizeStoredComplaint,
+};
+
+const groupSlot: StoreSlot<CivicGroup> = {
+  key: GROUPS_STORAGE_KEY,
+  event: GROUPS_CHANGE_EVENT,
+  label: "groups",
+  memoryFallback: null,
+  getSeed: () => JSON.parse(JSON.stringify(seedGroupsData.groups)) as CivicGroup[],
+};
+
+const messageSlot: StoreSlot<GroupMessage> = {
+  key: MESSAGES_STORAGE_KEY,
+  event: MESSAGES_CHANGE_EVENT,
+  label: "group messages",
+  memoryFallback: null,
+  getSeed: () => JSON.parse(JSON.stringify(seedGroupsData.messages)) as GroupMessage[],
+};
 
 const nowIso = () => new Date().toISOString();
 
@@ -105,20 +151,20 @@ const makeId = (prefix: string) =>
   `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
 // ---------------------------------------------------------------------------
-// CRUD helpers (call from event handlers or effects only, never during render)
+// Complaint CRUD helpers (call from event handlers or effects only, never during render)
 // ---------------------------------------------------------------------------
 
 /** All complaints. Returns `[]` on the server. Seeds localStorage on first call. */
 export function getComplaints(): Complaint[] {
   if (!isBrowser()) return [];
-  return readOrSeed();
+  return readOrSeedSlot(complaintSlot);
 }
 
 /** Adds a new complaint to the top of the list. */
 export function saveComplaint(complaint: Complaint): Complaint {
   if (!isBrowser()) return complaint;
-  const list = readOrSeed().filter((c) => c.id !== complaint.id);
-  write([complaint, ...list]);
+  const list = readOrSeedSlot(complaintSlot).filter((c) => c.id !== complaint.id);
+  writeToSlot(complaintSlot, [complaint, ...list]);
   return complaint;
 }
 
@@ -131,7 +177,7 @@ export function updateComplaint(
   patch: Partial<Complaint> | ((current: Complaint) => Complaint),
 ): Complaint | null {
   if (!isBrowser()) return null;
-  const list = readOrSeed();
+  const list = readOrSeedSlot(complaintSlot);
   const index = list.findIndex((c) => c.id === id);
   if (index === -1) return null;
 
@@ -139,16 +185,13 @@ export function updateComplaint(
   const next = typeof patch === "function" ? patch(current) : { ...current, ...patch };
   const updated: Complaint = { ...next, id: current.id, updatedAt: nowIso() };
   list[index] = updated;
-  write(list);
+  writeToSlot(complaintSlot, list);
   return updated;
 }
 
 /** Restores the original 12 seed complaints. */
 export function resetToSeed(): Complaint[] {
-  inMemoryFallback = null;
-  const seeded = seedCopy();
-  if (isBrowser()) write(seeded);
-  return seeded;
+  return resetSlot(complaintSlot);
 }
 
 /**
@@ -199,7 +242,7 @@ export function addComment(
  */
 export function confirmFix(id: string, profileId: string, profileName: string = "Citizen"): Complaint | null {
   if (!isBrowser()) return null;
-  const current = readOrSeed().find((c) => c.id === id);
+  const current = readOrSeedSlot(complaintSlot).find((c) => c.id === id);
   if (!current) return null;
   if (
     current.status !== "PENDING_COMMUNITY_VERIFICATION" ||
@@ -260,8 +303,95 @@ export function claimComplaint(
 }
 
 // ---------------------------------------------------------------------------
-// React hook
+// Groups & Messages CRUD helpers (T4.1)
 // ---------------------------------------------------------------------------
+
+/** All civic group channels. Returns `[]` on the server. */
+export function getGroups(): CivicGroup[] {
+  if (!isBrowser()) return [];
+  return readOrSeedSlot(groupSlot);
+}
+
+/** All group messages (optionally filtered by groupId), oldest first. */
+export function getGroupMessages(groupId?: string): GroupMessage[] {
+  if (!isBrowser()) return [];
+  const list = readOrSeedSlot(messageSlot);
+  const filtered = groupId ? list.filter((m) => m.groupId === groupId) : list;
+  return [...filtered].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/**
+ * Appends a text message to a group channel.
+ * Official broadcast channels only accept messages marked `isOfficialAlert: true` (AC-9.3).
+ */
+export function addGroupMessage(
+  input: Omit<GroupMessage, "id" | "createdAt">,
+): GroupMessage | null {
+  if (!isBrowser()) return null;
+  const text = input.text.trim();
+  if (!text) return null;
+
+  const groups = readOrSeedSlot(groupSlot);
+  const group = groups.find((g) => g.id === input.groupId);
+  if (!group) return null;
+  if (group.isOfficial && !input.isOfficialAlert) return null;
+
+  const message: GroupMessage = {
+    ...input,
+    id: makeId("msg"),
+    text,
+    createdAt: nowIso(),
+  };
+  const list = readOrSeedSlot(messageSlot);
+  writeToSlot(messageSlot, [...list, message]);
+  return message;
+}
+
+/** Restores seed complaints, seed groups/messages, and clears stored contractor overrides (AC-6.4). */
+export function resetSystemData(): void {
+  resetSlot(complaintSlot);
+  resetSlot(groupSlot);
+  resetSlot(messageSlot);
+  if (isBrowser()) {
+    try {
+      window.localStorage.removeItem(CONTRACTORS_STORAGE_KEY);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// React hooks
+// ---------------------------------------------------------------------------
+
+function useStoredList<T>(
+  slotKey: string,
+  changeEvent: string,
+  read: () => T[],
+): { items: T[]; hydrated: boolean } {
+  const [items, setItems] = useState<T[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setItems(read());
+    const onStorage = (e: StorageEvent) => {
+      // Other browser tabs; `key === null` means localStorage.clear()
+      if (e.key === slotKey || e.key === null) sync();
+    };
+
+    sync();
+    setHydrated(true);
+    window.addEventListener(changeEvent, sync);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(changeEvent, sync);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [slotKey, changeEvent, read]);
+
+  return { items, hydrated };
+}
 
 /**
  * Hydration-safe subscription to stored complaints.
@@ -269,25 +399,22 @@ export function claimComplaint(
  * then loads (and seeds, on first run) from localStorage inside useEffect.
  */
 export function useComplaints(): { complaints: Complaint[]; hydrated: boolean } {
-  const [complaints, setComplaints] = useState<Complaint[]>([]);
-  const [hydrated, setHydrated] = useState(false);
+  const { items, hydrated } = useStoredList(STORAGE_KEY, CHANGE_EVENT, getComplaints);
+  return { complaints: items, hydrated };
+}
 
-  useEffect(() => {
-    const sync = () => setComplaints(getComplaints());
-    const onStorage = (e: StorageEvent) => {
-      // Other browser tabs; `key === null` means localStorage.clear()
-      if (e.key === STORAGE_KEY || e.key === null) sync();
-    };
+/** Hydration-safe subscription to civic group channels. */
+export function useGroups(): { groups: CivicGroup[]; hydrated: boolean } {
+  const { items, hydrated } = useStoredList(GROUPS_STORAGE_KEY, GROUPS_CHANGE_EVENT, getGroups);
+  return { groups: items, hydrated };
+}
 
-    sync();
-    setHydrated(true);
-    window.addEventListener(CHANGE_EVENT, sync);
-    window.addEventListener("storage", onStorage);
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, sync);
-      window.removeEventListener("storage", onStorage);
-    };
-  }, []);
-
-  return { complaints, hydrated };
+/** Hydration-safe subscription to group messages (sorted oldest-first). */
+export function useGroupMessages(): { messages: GroupMessage[]; hydrated: boolean } {
+  const { items, hydrated } = useStoredList(
+    MESSAGES_STORAGE_KEY,
+    MESSAGES_CHANGE_EVENT,
+    getGroupMessages,
+  );
+  return { messages: items, hydrated };
 }

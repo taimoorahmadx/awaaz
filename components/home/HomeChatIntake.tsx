@@ -29,6 +29,8 @@ interface HomeChatIntakeProps {
   /** Citizen's home sector, e.g. "F-10". New pin is placed near it. */
   sector?: string;
   city?: string;
+  /** Pre-filled text from Groups "Convert to Ticket" (never auto-submitted). */
+  initialDraft?: { text: string; nonce: number } | null;
   onComplaintCreated?: (complaint: Complaint) => void;
   /** Called with `true` when the API returned a DEMO-FALLBACK mock. */
   onFallbackChange?: (fallback: boolean) => void;
@@ -115,6 +117,7 @@ export default function HomeChatIntake({
   citizenId = "citizen-tariq",
   sector = "F-10",
   city = "Islamabad",
+  initialDraft,
   onComplaintCreated,
   onFallbackChange,
 }: HomeChatIntakeProps) {
@@ -130,11 +133,23 @@ export default function HomeChatIntake({
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
+  const lastDraftNonceRef = useRef<number | null>(null);
   // Keep latest text/photo in refs so async rec.onstop always sees current values.
   const textRef = useRef(text);
   textRef.current = text;
   const photoRef = useRef(attachedPhoto);
   photoRef.current = attachedPhoto;
+
+  // Apply pre-filled draft from Groups "Convert to Ticket" without auto-submitting (AC-9.5).
+  useEffect(() => {
+    if (initialDraft && initialDraft.nonce !== lastDraftNonceRef.current) {
+      lastDraftNonceRef.current = initialDraft.nonce;
+      setText(initialDraft.text);
+      setResult(null);
+      setCreated(null);
+      setError(null);
+    }
+  }, [initialDraft]);
 
   // Stop recorder and mic tracks on unmount.
   useEffect(() => {

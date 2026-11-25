@@ -21,14 +21,27 @@ export default function Page() {
   const [tab, setTab] = useState<CitizenTab>("home");
   // True when the last AI API call returned a DEMO-FALLBACK mock.
   const [offline, setOffline] = useState(false);
+  // Draft passed from Groups "Convert to Ticket" into Home intake (never auto-submitted).
+  const [intakeDraft, setIntakeDraft] = useState<{ text: string; nonce: number } | null>(null);
   const role = ROLES.find((r) => r.id === roleId) ?? ROLES[0];
 
   const onComplaintCreated = useCallback((c: Complaint) => {
     saveComplaint(c);
+    setIntakeDraft(null);
   }, []);
 
   const onUpdateComplaint = useCallback((c: Complaint) => {
     updateComplaint(c.id, c);
+  }, []);
+
+  const handleConvertToTicket = useCallback((text: string) => {
+    setIntakeDraft({ text, nonce: Date.now() });
+    setTab("home");
+  }, []);
+
+  const handleTabChange = useCallback((nextTab: CitizenTab) => {
+    if (nextTab !== "home") setIntakeDraft(null);
+    setTab(nextTab);
   }, []);
 
   const myComplaints = useMemo(
@@ -38,7 +51,12 @@ export default function Page() {
 
   return (
     <>
-      <AppHeader role={role} onRoleChange={setRoleId} offline={offline} />
+      <AppHeader
+        role={role}
+        onRoleChange={setRoleId}
+        offline={offline}
+        onResetData={() => setOffline(false)}
+      />
 
       {role.kind === "citizen" ? (
         <>
@@ -55,6 +73,7 @@ export default function Page() {
                 citizenId={role.profileId}
                 sector={role.sector}
                 city="Islamabad"
+                initialDraft={intakeDraft}
                 onComplaintCreated={onComplaintCreated}
                 onFallbackChange={setOffline}
               />
@@ -67,9 +86,17 @@ export default function Page() {
                 citizenName={role.name}
               />
             )}
-            {tab === "groups" && <GroupsShell />}
+            {tab === "groups" && (
+              <GroupsShell
+                viewerId={role.profileId}
+                viewerName={role.name}
+                viewerLabel={role.label}
+                onConvertToTicket={handleConvertToTicket}
+                onUpdateComplaint={onUpdateComplaint}
+              />
+            )}
           </main>
-          <BottomNav active={tab} onChange={setTab} />
+          <BottomNav active={tab} onChange={handleTabChange} />
         </>
       ) : (
         <main className="flex flex-1 flex-col">

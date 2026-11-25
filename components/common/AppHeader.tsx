@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Landmark, MapPin } from "lucide-react";
+import { Check, ChevronDown, Landmark, MapPin, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
+import { resetSystemData } from "@/lib/data/storage";
 import OfflineBadge from "./OfflineBadge";
 
 export type RoleId = "tariq" | "ayesha" | "worker" | "mayor";
@@ -30,9 +32,10 @@ interface AppHeaderProps {
   onRoleChange: (id: RoleId) => void;
   /** True when the last AI API call returned a DEMO-FALLBACK mock (`isOfflineFallback: true`). */
   offline?: boolean;
+  onResetData?: () => void;
 }
 
-export default function AppHeader({ role, onRoleChange, offline = false }: AppHeaderProps) {
+export default function AppHeader({ role, onRoleChange, offline = false, onResetData }: AppHeaderProps) {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -124,6 +127,22 @@ export default function AppHeader({ role, onRoleChange, offline = false }: AppHe
                 </button>
               );
             })}
+            <div className="my-1 border-t border-civic-border" />
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="reset-system-data"
+              onClick={() => {
+                resetSystemData();
+                onResetData?.();
+                setOpen(false);
+                toast.success("System data reset to defaults");
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-amber-300 transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none"
+            >
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Reset System Data</span>
+            </button>
           </div>
         )}
       </div>

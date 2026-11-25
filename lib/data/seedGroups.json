@@ -1,0 +1,371 @@
+{
+  "groups": [
+    {
+      "id": "grp-f10-residents",
+      "name": "# F-10/2 Residents",
+      "type": "LOCALITY",
+      "sector": "F-10",
+      "description": "Street-level updates, sanitation & neighbour coordination for F-10/2",
+      "memberCount": 214
+    },
+    {
+      "id": "grp-f10-traders",
+      "name": "# F-10 Markaz Traders",
+      "type": "MARKET",
+      "sector": "F-10",
+      "description": "Shopkeepers & market association civic alerts in F-10 Markaz",
+      "memberCount": 168
+    },
+    {
+      "id": "grp-water-watch",
+      "name": "💧 Water Watch",
+      "type": "CIVIC_TOPIC",
+      "description": "WASA supply schedules, tanker requests & sewage line leaks",
+      "memberCount": 392
+    },
+    {
+      "id": "grp-iesco-alerts",
+      "name": "⚡ IESCO Alerts",
+      "type": "CIVIC_TOPIC",
+      "description": "Feeder outages, loose wires & broken streetlights across Islamabad",
+      "memberCount": 547
+    },
+    {
+      "id": "grp-municipal-alerts",
+      "name": "📢 Municipal Alerts",
+      "type": "OFFICIAL_BROADCAST",
+      "description": "Official advisories & emergency notices from the Commissioner Office",
+      "memberCount": 1420,
+      "isOfficial": true
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-f10r-1",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-usman",
+      "senderName": "Usman",
+      "senderRole": "F-10/2 Resident",
+      "text": "Assalam-o-Alaikum neighbours, Street 23 ke corner pe garbage truck aaj bhi nahi aaya.",
+      "createdAt": "2026-11-24T08:15:00.000Z"
+    },
+    {
+      "id": "msg-f10r-2",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-tariq",
+      "senderName": "Tariq",
+      "senderRole": "Citizen · F-10",
+      "text": "Maine ticket file kar diya hai — Sajid bhai ne claim kar liya hai cleanup ke liye.",
+      "attachedComplaintId": "cmp-002",
+      "createdAt": "2026-11-24T08:40:00.000Z"
+    },
+    {
+      "id": "msg-f10r-3",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-sana",
+      "senderName": "Sana",
+      "senderRole": "F-10/2 Resident",
+      "text": "Shukriya Tariq! Also, Park Road ki streetlights ab theek ho gayi hain kya? Raat ko andhera tha.",
+      "createdAt": "2026-11-24T11:20:00.000Z"
+    },
+    {
+      "id": "msg-f10r-4",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-hamza",
+      "senderName": "Hamza",
+      "senderRole": "F-10/4 Resident",
+      "text": "Haan, 4 sodium lamps badle hain IESCO team ne. Abhi community sign-off pending hai.",
+      "attachedComplaintId": "cmp-003",
+      "createdAt": "2026-11-24T12:05:00.000Z"
+    },
+    {
+      "id": "msg-f10r-5",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-zainab",
+      "senderName": "Zainab",
+      "senderRole": "F-10/2 Resident",
+      "text": "Gali 19 mein shaam ko street sweeper aaye thay, kaafi safai ho gayi hai.",
+      "createdAt": "2026-11-24T15:30:00.000Z"
+    },
+    {
+      "id": "msg-f10r-6",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-bilal",
+      "senderName": "Bilal",
+      "senderRole": "F-10/2 Resident",
+      "text": "Street 14 ke end pe speed breaker ka paint bilkul mit gaya hai, raat ko nazar nahi aata.",
+      "createdAt": "2026-11-25T06:10:00.000Z"
+    },
+    {
+      "id": "msg-f10r-7",
+      "groupId": "grp-f10-residents",
+      "senderId": "citizen-usman",
+      "senderName": "Usman",
+      "senderRole": "F-10/2 Resident",
+      "text": "Bilal bhai isko ticket bana dein taake CDA Roads reflector laga de.",
+      "createdAt": "2026-11-25T07:05:00.000Z"
+    },
+
+    {
+      "id": "msg-f10t-1",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-farhan",
+      "senderName": "Farhan",
+      "senderRole": "Markaz Pharmacy",
+      "text": "Petrol pump ke sath wala gutter ka dhakkan kal raat se bilkul ghayab hai. Bohat khatarnak hai.",
+      "attachedComplaintId": "cmp-001",
+      "createdAt": "2026-11-24T06:00:00.000Z"
+    },
+    {
+      "id": "msg-f10t-2",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-bilal",
+      "senderName": "Bilal",
+      "senderRole": "Markaz Traders",
+      "text": "Mere cousin ki bike ka wheel phas gaya tha wahan. Temporary wooden crate rakha hai hum ne.",
+      "createdAt": "2026-11-24T06:55:00.000Z"
+    },
+    {
+      "id": "msg-f10t-3",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-tariq",
+      "senderName": "Tariq",
+      "senderRole": "Citizen · F-10",
+      "text": "Sab traders Explore feed mein cmp-001 ko upvote kar dein taake CDA Sanitation team foran aaye.",
+      "createdAt": "2026-11-24T07:30:00.000Z"
+    },
+    {
+      "id": "msg-f10t-4",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-kamran",
+      "senderName": "Kamran",
+      "senderRole": "Bookshop Owner",
+      "text": "Nazimuddin Road side parking entry pe bara pothole ban gaya hai barish ke baad.",
+      "attachedComplaintId": "cmp-004",
+      "createdAt": "2026-11-24T10:15:00.000Z"
+    },
+    {
+      "id": "msg-f10t-5",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-farhan",
+      "senderName": "Farhan",
+      "senderRole": "Markaz Pharmacy",
+      "text": "Delivery vans roz us gaddhay mein lagti hain, bumper damage ho rahe hain.",
+      "createdAt": "2026-11-24T13:45:00.000Z"
+    },
+    {
+      "id": "msg-f10t-6",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-kamran",
+      "senderName": "Kamran",
+      "senderRole": "Bookshop Owner",
+      "text": "Markaz back lane ke drainage drain ki safai bhi zaroori hai next week se pehle.",
+      "createdAt": "2026-11-25T05:45:00.000Z"
+    },
+    {
+      "id": "msg-f10t-7",
+      "groupId": "grp-f10-traders",
+      "senderId": "citizen-bilal",
+      "senderName": "Bilal",
+      "senderRole": "Markaz Traders",
+      "text": "جی بالکل، اگر آج دوپہر تک ڈھکن نہ لگا تو مارکیٹ یونین کی طرف سے دوبارہ الرٹ بھیجیں گے۔",
+      "createdAt": "2026-11-25T08:10:00.000Z"
+    },
+
+    {
+      "id": "msg-water-1",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-ayesha",
+      "senderName": "Ayesha",
+      "senderRole": "Citizen · F-6",
+      "text": "F-6 Super Market ke peechay main sewer line phir se overflow ho rahi hai.",
+      "attachedComplaintId": "cmp-005",
+      "createdAt": "2026-11-24T09:00:00.000Z"
+    },
+    {
+      "id": "msg-water-2",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-nadeem",
+      "senderName": "Nadeem",
+      "senderRole": "G-9 Resident",
+      "text": "G-9 Markaz ke qareeb do din se pani bilkul nahi aa raha. Tanker helpline busy ja rahi hai.",
+      "attachedComplaintId": "cmp-008",
+      "createdAt": "2026-11-24T10:20:00.000Z"
+    },
+    {
+      "id": "msg-water-3",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-sana",
+      "senderName": "Sana",
+      "senderRole": "F-10/2 Resident",
+      "text": "F-10 mein aaj subah 6 se 8 baje supply aayi thi, pressure normal tha.",
+      "createdAt": "2026-11-24T11:45:00.000Z"
+    },
+    {
+      "id": "msg-water-4",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-rashid",
+      "senderName": "Rashid",
+      "senderRole": "I-9 Workshop",
+      "text": "I-9 Industrial Area mein factory road pe sewer ka ganda pani jama hai, WASA ko report kiya hai.",
+      "attachedComplaintId": "cmp-011",
+      "createdAt": "2026-11-24T14:10:00.000Z"
+    },
+    {
+      "id": "msg-water-5",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-ayesha",
+      "senderName": "Ayesha",
+      "senderRole": "Citizen · F-6",
+      "text": "Kohsar Market ki safai to resolve ho gayi, umeed hai WASA F-6 sewer bhi jaldi clear karega.",
+      "createdAt": "2026-11-24T17:00:00.000Z"
+    },
+    {
+      "id": "msg-water-6",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-nadeem",
+      "senderName": "Nadeem",
+      "senderRole": "G-9 Resident",
+      "text": "جی نائن ٹو میں ٹینکر پہنچ گیا ہے لیکن پریشر ابھی تک بحال نہیں ہوا۔",
+      "createdAt": "2026-11-25T06:30:00.000Z"
+    },
+    {
+      "id": "msg-water-7",
+      "groupId": "grp-water-watch",
+      "senderId": "citizen-zainab",
+      "senderName": "Zainab",
+      "senderRole": "F-10/2 Resident",
+      "text": "F-10/2 Street 11 ke bahar main valve se pani leak ho raha hai subah se.",
+      "createdAt": "2026-11-25T08:40:00.000Z"
+    },
+
+    {
+      "id": "msg-iesco-1",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-ayesha",
+      "senderName": "Ayesha",
+      "senderRole": "Citizen · F-6",
+      "text": "Urgent: F-6/3 children's park ke qareeb live electric wire latak rahi hai! Bacchon ko door rakhein.",
+      "attachedComplaintId": "cmp-006",
+      "createdAt": "2026-11-24T07:10:00.000Z"
+    },
+    {
+      "id": "msg-iesco-2",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-salman",
+      "senderName": "Salman",
+      "senderRole": "F-6/3 Resident",
+      "text": "IESCO lineman aa gaya hai site pe, feeder temporarily isolate kiya gaya hai.",
+      "createdAt": "2026-11-24T08:05:00.000Z"
+    },
+    {
+      "id": "msg-iesco-3",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-imran",
+      "senderName": "Imran",
+      "senderRole": "I-9/4 Resident",
+      "text": "I-9/4 lane ki streetlight fix ho gayi aur verify bhi ho chuki hai! Good work.",
+      "attachedComplaintId": "cmp-012",
+      "createdAt": "2026-11-24T13:20:00.000Z"
+    },
+    {
+      "id": "msg-iesco-4",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-hamza",
+      "senderName": "Hamza",
+      "senderRole": "F-10/4 Resident",
+      "text": "F-10/4 park road ki lights ab on hain — jo log paas rehte hain please confirm fix kar dein.",
+      "attachedComplaintId": "cmp-003",
+      "createdAt": "2026-11-24T18:00:00.000Z"
+    },
+    {
+      "id": "msg-iesco-5",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-salman",
+      "senderName": "Salman",
+      "senderRole": "F-6/3 Resident",
+      "text": "F-6 feeder pe voltage fluctuation aa rahi hai shaam 7 baje ke baad.",
+      "createdAt": "2026-11-24T19:30:00.000Z"
+    },
+    {
+      "id": "msg-iesco-6",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-imran",
+      "senderName": "Imran",
+      "senderRole": "I-9/4 Resident",
+      "text": "G-9/1 transformer se sparking ki awaaz aa rahi hai jab load barhta hai.",
+      "createdAt": "2026-11-25T07:15:00.000Z"
+    },
+    {
+      "id": "msg-iesco-7",
+      "groupId": "grp-iesco-alerts",
+      "senderId": "citizen-tariq",
+      "senderName": "Tariq",
+      "senderRole": "Citizen · F-10",
+      "text": "ایف ٹین ون میں آج صبح فیڈر ٹرپ ہوا تھا، 20 منٹ بعد بجلی بحال ہو گئی۔",
+      "createdAt": "2026-11-25T08:50:00.000Z"
+    },
+
+    {
+      "id": "msg-muni-1",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "CDA Sanitation Monsoon Prep: All uncovered manholes in commercial markazes are marked Priority-1 for 4-hour SLA resolution.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-23T09:00:00.000Z"
+    },
+    {
+      "id": "msg-muni-2",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "WASA Tanker Dispatch: Emergency water tankers are stationed at G-9 Markaz and F-10/2 Sector Office from 8 AM to 6 PM.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-23T16:00:00.000Z"
+    },
+    {
+      "id": "msg-muni-3",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "IESCO Safety Advisory: Citizens are advised to stay clear of pole-mounted transformers during rain and report hanging wires immediately on Awaaz.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-24T08:00:00.000Z"
+    },
+    {
+      "id": "msg-muni-4",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "Citizen Verification Reminder: Please confirm repaired street lights and waste clearances via '+1 Confirm Fix' so contractor payouts can be audited accurately.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-24T14:00:00.000Z"
+    },
+    {
+      "id": "msg-muni-5",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "Night Road Patching Schedule: CDA Roads crews will repair potholes along Nazimuddin Road (F-10) and Margalla Road between 11 PM and 4 AM.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-25T05:00:00.000Z"
+    },
+    {
+      "id": "msg-muni-6",
+      "groupId": "grp-municipal-alerts",
+      "senderId": "admin-nasir",
+      "senderName": "Comm. Nasir",
+      "senderRole": "Mayor / Commissioner",
+      "text": "Emergency Notice: F-10 Markaz & F-6/3 safety inspections underway today — field teams dispatched for open manholes and loose power lines.",
+      "isOfficialAlert": true,
+      "createdAt": "2026-11-25T09:00:00.000Z"
+    }
+  ]
+}
+

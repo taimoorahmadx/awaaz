@@ -141,3 +141,29 @@ export interface CitizenProfile {
 }
 
 export type VoteDirection = "up" | "down";
+
+// T4.1: Groups & Neighborhood Chat (text only — voice notes cut per spec)
+export type CivicGroupType = "LOCALITY" | "MARKET" | "CIVIC_TOPIC" | "OFFICIAL_BROADCAST";
+
+export interface CivicGroup {
+  id: string;
+  name: string;
+  type: CivicGroupType;
+  sector?: string;
+  description: string;
+  memberCount: number;
+  /** true only for 📢 Municipal Alerts (read-only for citizens) */
+  isOfficial?: boolean;
+}
+
+export interface GroupMessage {
+  id: string;
+  groupId: string;
+  senderId: string;
+  senderName: string;
+  senderRole?: string;
+  text: string;
+  attachedComplaintId?: string;
+  isOfficialAlert?: boolean;
+  createdAt: string;
+}

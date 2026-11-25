@@ -110,7 +110,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
 
 ## Sprint 4: Phase 2 Capabilities
 
-- [ ] **T4.1: Groups Tab – Neighborhood Chat Hub (text only)**
+- [x] **T4.1: Groups Tab – Neighborhood Chat Hub (text only)**
   - `lib/data/seedGroups.json`: 5 channels + 6–10 seeded messages each (AC-8.2). Use real seed complaint ids for embeds.
   - Types `CivicGroup`, `GroupMessage` (spec §3, no audio fields). Storage helpers in `lib/data/storage.ts` (keys `awaaz.groups.v1`, `awaaz.messages.v1`), hydration-safe, included in "Reset System Data" (AC-6.4 — verify the reset action exists in the header; add it if missing).
   - `GroupsShell.tsx` (channel list by type, remove "Coming soon"), `GroupChatView.tsx` (stream + composer), `ChatMessageBubble.tsx` ("Convert to Ticket"), `ComplaintCardEmbed.tsx` (live status, opens Detail Modal).
