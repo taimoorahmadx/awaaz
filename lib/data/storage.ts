@@ -7,6 +7,7 @@
 // - Every write dispatches a window event so all mounted `useComplaints()` hooks re-sync.
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import seedData from "./seedComplaints.json";
 import type { Complaint, ComplaintComment, VoteDirection } from "@/lib/types";
 
@@ -14,6 +15,16 @@ export const STORAGE_KEY = "awaaz.complaints.v2";
 const CHANGE_EVENT = "awaaz:complaints-changed";
 
 const isBrowser = () => typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+
+// Keeps in-memory state if localStorage hits QuotaExceededError (AC-7.4).
+let inMemoryFallback: Complaint[] | null = null;
+
+function isQuotaExceeded(err: unknown): boolean {
+  if (err instanceof DOMException) {
+    return err.name === "QuotaExceededError" || err.name === "NS_ERROR_DOM_QUOTA_REACHED";
+  }
+  return err instanceof Error && /quota/i.test(`${err.name} ${err.message}`);
+}
 
 /** Fresh deep copy of the seed so callers can never mutate the imported JSON. */
 function seedCopy(): Complaint[] {
@@ -23,8 +34,15 @@ function seedCopy(): Complaint[] {
 function writeRaw(list: Complaint[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    inMemoryFallback = null;
   } catch (err) {
-    // Quota exceeded / private mode: keep the app running on whatever is already stored.
+    // Quota exceeded / private mode: keep the app running in memory and warn the user (AC-7.4).
+    inMemoryFallback = list;
+    if (isQuotaExceeded(err)) {
+      toast.error("Storage is full — use Reset System Data in the header", {
+        id: "storage-quota-full",
+      });
+    }
     console.warn("[storage] Failed to write complaints to localStorage", err);
   }
 }
@@ -43,6 +61,7 @@ function normalizeStored(c: Complaint): Complaint {
 
 /** Seeds localStorage on first run (or if the stored value is corrupt). Browser only. */
 function readOrSeed(): Complaint[] {
+  if (inMemoryFallback !== null) return inMemoryFallback;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -103,6 +122,7 @@ export function updateComplaint(
 
 /** Restores the original 12 seed complaints. */
 export function resetToSeed(): Complaint[] {
+  inMemoryFallback = null;
   const seeded = seedCopy();
   if (isBrowser()) write(seeded);
   return seeded;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Loader2, Upload, XCircle } from "lucide-react";
 import type { AIVerificationResult, Complaint } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
+import { compressImage } from "@/lib/image";
 
 interface BeforeAfterViewerProps {
   complaint: Complaint;
@@ -33,20 +34,12 @@ function splitDataUrl(dataUrl: string): { mime: string; base64: string } {
   return match ? { mime: match[1], base64: match[2] } : { mime: "application/octet-stream", base64: dataUrl };
 }
 
-function blobToDataUrl(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
-}
-
 async function urlToDataUrl(url: string): Promise<string> {
   if (url.startsWith("data:")) return url;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Could not load Before photo (${res.status})`);
-  return blobToDataUrl(await res.blob());
+  const compressed = await compressImage(await res.blob());
+  return compressed.dataUrl;
 }
 
 export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: BeforeAfterViewerProps) {
@@ -59,10 +52,16 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setResult(null);
     setError(null);
-    setAfterDataUrl(await blobToDataUrl(file));
+    try {
+      const compressed = await compressImage(file);
+      setAfterDataUrl(compressed.dataUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not process image.");
+    }
   }
 
   async function handleVerify() {

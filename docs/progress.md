@@ -3,15 +3,15 @@
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
 - **Branch:** `phase2-overnight` (all work happens here; `master` untouched; nothing is pushed).
-- **Last Completed:** `T3.1` — verify-fix contract (spec §4.2), 0–1 confidence, input-aware fallbacks, fixed categories.
-- **Next Task:** `T3.2` — citizen photo attachment, photo compression, waveform visualizer.
+- **Last Completed:** `T3.2` — citizen photo attachment, client-side JPEG compression, live waveform visualizer, `sectorHint`/`photo` forwarding, `QuotaExceededError` toast handling.
+- **Next Task:** `T3.3` — lifecycle history, assignment, and Complaint Detail Modal.
 
 ---
 
 ## Sprint Status
 - Sprint 1 (Scaffold, Map, Seed Data, Feed): `[x]` Completed
 - Sprint 2 (Core AI Endpoints & Basic Portals): `[x]` Completed
-- Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[~]` In progress (T3.0, T3.0b, T3.1 done; next `T3.2`)
+- Sprint 3 (Test harness, shadcn foundation, fixes, golden path hardening): `[~]` In progress (T3.0, T3.0b, T3.1, T3.2 done; next `T3.3`)
 - Sprint 4 (Groups, Location + Duplicates, Mayor desk, Civic Health, Worker route): `[ ]` Planned
 - Sprint 5 (PWA, final verification): `[ ]` Planned — T5.1 evals parked (see Parking Lot)
 
@@ -67,6 +67,8 @@
 - **T3.1 (review fix):** Fail-closed vs spec §5.2/§5.3 reconciled: the byte-compare demo fallback (identical/missing After → reject 5%, else pass 90%) runs only when the AI is *not reachable* (no key, `AI_FORCE_FALLBACK=1`, timeout, network error). When Gemini *answered* but the reply is malformed (unparseable JSON, schema mismatch, confidence outside 0–100), or the live path cannot read the Before photo / an image MIME, the route returns a rejecting fallback instead: `passed:false`, `REJECTED_UNRESOLVED`, 0.05, `isOfflineFallback:true`, reasoning "AI verification reply was invalid — please retry." / "The Before/After photos could not be read — please retry.". Reply interpretation moved to `lib/ai/verification.ts` (pure, testable).
 - **T3.1 (review fix):** No unit-test framework (no new deps), so pure Node tests run under Playwright: `e2e/ai-contract.spec.ts` covers `normalizeConfidence`, `FixVerificationModelSchema` rejections, malformed-reply → rejection, 94 → 0.94, low-confidence downgrade, demo fallback, keyword whole-word matching. Gap still open: the route's Gemini call itself (no stub) and storage's legacy-confidence normalisation have no automated test.
 - **T3.1:** Worker card shows the offline chip under the verify result when `isOfflineFallback` is true (AC-4.7), and a stored rejection re-renders the red "AI Rejected" badge after a remount.
+- **T3.2:** `BeforeAfterViewer.tsx` compresses fetched non-data-URL `beforePhotoUrl` stock photos through `lib/image.ts` too, so uploading the exact same stock file as After still yields identical bytes in `buildVerifyFallback` while keeping verify payloads small.
+- **T3.2:** `storage.ts` keeps an `inMemoryFallback` list when `localStorage.setItem` throws `QuotaExceededError` and deduplicates the Sonner error toast (`id: "storage-quota-full"`).
 
 ## Blocked
 - **T5.1** — parked by user (see Parking Lot).
@@ -78,9 +80,9 @@
 2. **Verify fallback can't reject:** `MOCK_FIX_VERIFICATION` always `verified: true, 94`. → T3.1 ✅ resolved (identical/missing After photo → rejected 5%, else passed 90%, always `isOfflineFallback: true`)
 3. **Audio fallback ignores input:** always "Garbage heap near Jinnah Super Market, F-10, HIGH". → T3.1 ✅ resolved (keyword match via `lib/categories.ts`; audio-only keeps the old mock)
 4. **verify-fix ignores image MIME types** (route assumed JPEG). → T3.1 ✅ resolved (uses `beforeMimeType`/`afterMimeType` or the data-URL MIME)
-5. **`➕` inactive; analyze-audio ignores `photo`/`sectorHint`.** → T3.2
-6. **Raw photos stored in localStorage** (worker After photo stored uncompressed) → quota risk. → T3.2
-7. **No waveform / timer.** → T3.2
+5. **`➕` inactive; analyze-audio ignores `photo`/`sectorHint`.** → T3.2 ✅ resolved (`HomeChatIntake.tsx` compressed JPEG attachment + preview/remove + `photo`/`sectorHint` forwarded by `app/api/analyze-audio/route.ts`)
+6. **Raw photos stored in localStorage** (worker After photo stored uncompressed) → quota risk. → T3.2 ✅ resolved (`lib/image.ts` compression on both intake & worker After photo + `QuotaExceededError` Sonner toast & in-memory fallback in `lib/data/storage.ts`)
+7. **No waveform / timer.** → T3.2 ✅ resolved (`components/audio/WaveformVisualizer.tsx` live `AnalyserNode` canvas, `m:ss / 0:30` timer, 30s auto-stop, track/AudioContext cleanup)
 8. **No detail modal; no history data; no `assignedTo`.** → T3.3
 9. **Favicon 404.** → T3.4
 10. **Groups tab is a "Coming soon" shell; Mayor freeze/broadcast inert.** → T4.1, T4.3
@@ -122,3 +124,4 @@ npm run test:e2e   # Playwright golden path (after T3.0); uses port 3100 + AI_FO
 - **T3.0:** Playwright golden-path smoke test and `AI_FORCE_FALLBACK` flag implemented.
 - **T3.0b:** shadcn/ui foundation with civic dark theme, pinned dependencies, and overlay stacking.
 - **T3.1:** verify-fix contract harmonized (0-1 confidence, fail closed), input-aware fallbacks, fixed category table (`lib/categories.ts`).
+- **T3.2:** Client-side photo compression (`lib/image.ts`), citizen photo attachment + `photo`/`sectorHint` forwarding, live `WaveformVisualizer` (`m:ss / 0:30`, auto-stop, cleanup), worker After photo compression, and `QuotaExceededError` Sonner toast + in-memory fallback.

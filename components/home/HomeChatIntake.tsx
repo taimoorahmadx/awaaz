@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Bot, Loader2, MapPin, Mic, Plus, Send, Square } from "lucide-react";
+import { Bot, Loader2, MapPin, Mic, Plus, Send, X } from "lucide-react";
 import type { Complaint, Department, Urgency } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
+import WaveformVisualizer from "@/components/audio/WaveformVisualizer";
 import { categoryInfo } from "@/lib/categories";
+import { base64ToBlob, compressImage, type CompressedImage } from "@/lib/image";
 
 // INTEGRATOR NOTE: local mirror of AudioAnalysisResponse (lib/ai/schemas.ts) + route flags,
 // kept local so this client component doesn't import zod schemas.
@@ -72,6 +74,7 @@ function toComplaint(
   citizenName: string,
   homeSector: string,
   city: string,
+  photoDataUrl?: string,
 ): Complaint {
   const sector = r.sector && SECTOR_COORDS[r.sector] ? r.sector : homeSector;
   const base = SECTOR_COORDS[sector] ?? SECTOR_COORDS["F-10"];
@@ -85,7 +88,7 @@ function toComplaint(
     titleUrdu: r.titleUrdu,
     urduTranscript: r.urduTranscript,
     englishSummary: r.englishSummary,
-    beforePhotoUrl: info.photo,
+    beforePhotoUrl: photoDataUrl || info.photo,
     department: r.department,
     category: info.category,
     urgency: r.urgency,
@@ -117,21 +120,56 @@ export default function HomeChatIntake({
 }: HomeChatIntakeProps) {
   const urduName = citizenName === "Ayesha" ? "عائشہ بہن" : "طارق بھائی";
   const [text, setText] = useState("");
+  const [attachedPhoto, setAttachedPhoto] = useState<CompressedImage | null>(null);
   const [recording, setRecording] = useState(false);
+  const [recordingStream, setRecordingStream] = useState<MediaStream | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalyzeAudioResult | null>(null);
   const [created, setCreated] = useState<Complaint | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const photoInputRef = useRef<HTMLInputElement | null>(null);
+  // Keep latest text/photo in refs so async rec.onstop always sees current values.
+  const textRef = useRef(text);
+  textRef.current = text;
+  const photoRef = useRef(attachedPhoto);
+  photoRef.current = attachedPhoto;
 
-  // Stop mic tracks on unmount.
+  // Stop recorder and mic tracks on unmount.
   useEffect(() => {
-    return () => recorderRef.current?.stream.getTracks().forEach((t) => t.stop());
+    return () => {
+      const rec = recorderRef.current;
+      if (rec) {
+        rec.onstop = null;
+        if (rec.state !== "inactive") {
+          try {
+            rec.stop();
+          } catch {
+            // ignore
+          }
+        }
+        rec.stream.getTracks().forEach((t) => t.stop());
+        recorderRef.current = null;
+      }
+    };
   }, []);
 
-  async function submit(audio: Blob | null, note: string) {
-    if (!audio && !note.trim()) return;
+  async function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError(null);
+    try {
+      const compressed = await compressImage(file);
+      setAttachedPhoto(compressed);
+    } catch {
+      setError("Could not process attached photo. Please choose a JPEG, PNG, or WebP image.");
+    }
+  }
+
+  async function submit(audio: Blob | null, note: string, photo: CompressedImage | null = attachedPhoto) {
+    if (!audio && !note.trim() && !photo) return;
     setLoading(true);
     setError(null);
     try {
@@ -140,16 +178,22 @@ export default function HomeChatIntake({
         const ext = audio.type.includes("mp4") ? "mp4" : "webm";
         fd.append("audio", audio, `note.${ext}`);
       }
+      if (photo) {
+        fd.append("photo", base64ToBlob(photo.base64, photo.mimeType), "photo.jpg");
+      }
       if (note.trim()) fd.append("text", note.trim());
+      if (sector) fd.append("sectorHint", sector);
+
       const res = await fetch("/api/analyze-audio", { method: "POST", body: fd });
       const data = (await res.json()) as AnalyzeAudioResult;
       const isFallback = Boolean(data.isOfflineFallback);
       setResult(data);
       onFallbackChange?.(isFallback);
-      const complaint = toComplaint(data, citizenId, citizenName, sector, city);
+      const complaint = toComplaint(data, citizenId, citizenName, sector, city, photo?.dataUrl);
       setCreated(complaint);
       onComplaintCreated?.(complaint);
       setText("");
+      setAttachedPhoto(null);
     } catch {
       setError("Could not reach Awaaz AI. Please try again.");
     } finally {
@@ -157,11 +201,16 @@ export default function HomeChatIntake({
     }
   }
 
-  async function toggleRecording() {
-    if (recording) {
-      recorderRef.current?.stop();
-      return;
+  function stopRecording() {
+    const rec = recorderRef.current;
+    if (rec && rec.state !== "inactive") {
+      rec.stop();
     }
+  }
+
+  async function startRecording() {
+    if (recording) return;
+    setError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mimeType = pickMimeType();
@@ -172,12 +221,15 @@ export default function HomeChatIntake({
       };
       rec.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+        recorderRef.current = null;
+        setRecordingStream(null);
         setRecording(false);
         const blob = new Blob(chunksRef.current, { type: rec.mimeType || mimeType || "audio/webm" });
-        void submit(blob, text);
+        void submit(blob, textRef.current, photoRef.current);
       };
       recorderRef.current = rec;
       rec.start();
+      setRecordingStream(stream);
       setRecording(true);
     } catch {
       setError("Microphone unavailable — type your complaint instead.");
@@ -185,6 +237,7 @@ export default function HomeChatIntake({
   }
 
   const isFallback = Boolean(result?.isOfflineFallback);
+  const canSubmit = Boolean((text.trim() || attachedPhoto) && !recording);
 
   return (
     <section className="flex flex-1 flex-col">
@@ -251,6 +304,15 @@ export default function HomeChatIntake({
               {result.urduTranscript}
             </p>
             <p className="mt-2 text-sm text-civic-muted">{result.englishSummary}</p>
+            {created?.beforePhotoUrl.startsWith("data:") && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={created.beforePhotoUrl}
+                alt={`Attached photo: ${result.title}`}
+                data-testid="triage-photo"
+                className="mt-3 aspect-video w-full rounded-xl border border-civic-border object-cover"
+              />
+            )}
             <p className="mt-3 flex items-center gap-1 text-xs text-slate-300">
               <MapPin className="h-3.5 w-3.5 text-red-400" aria-hidden="true" />
               {created?.location.landmark ?? result.landmark}
@@ -265,57 +327,93 @@ export default function HomeChatIntake({
         className="sticky bottom-16 border-t border-civic-border bg-civic-surface/95 px-3 pb-3 pt-2 backdrop-blur"
         onSubmit={(e) => {
           e.preventDefault();
-          void submit(null, text);
+          void submit(null, text, attachedPhoto);
         }}
       >
-        <div className="flex items-center gap-2 rounded-full border border-civic-border bg-civic-raised px-2 py-1.5">
-          <button
-            type="button"
-            aria-label="Attach photo or GPS pin"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-civic-muted transition hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handlePhotoSelect}
+          className="sr-only"
+          data-testid="intake-photo-input"
+          aria-label="Choose hazard photo"
+        />
+
+        {attachedPhoto && !recording && (
+          <div
+            data-testid="intake-photo-preview"
+            className="mb-2 flex items-center gap-2 rounded-xl border border-civic-border bg-civic-raised p-2"
           >
-            <Plus className="h-5 w-5" aria-hidden="true" />
-          </button>
-          <label htmlFor="intake-text" className="sr-only">
-            Describe issue in Urdu or English
-          </label>
-          <input
-            id="intake-text"
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            disabled={loading}
-            placeholder="Describe issue in Urdu or English..."
-            className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-civic-muted focus:outline-none"
-          />
-          {text.trim() && !recording ? (
-            <button
-              type="submit"
-              aria-label="Send complaint"
-              disabled={loading}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50"
-            >
-              <Send className="h-5 w-5" aria-hidden="true" />
-            </button>
-          ) : (
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={attachedPhoto.dataUrl}
+              alt="Attached hazard preview"
+              className="h-12 w-12 shrink-0 rounded-lg object-cover ring-1 ring-civic-border"
+            />
+            <span className="min-w-0 flex-1 truncate text-xs text-slate-200">Photo attached (compressed JPEG)</span>
             <button
               type="button"
-              onClick={toggleRecording}
-              disabled={loading}
-              aria-label={recording ? "Stop recording" : "Record Urdu voice note"}
-              aria-pressed={recording}
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50 ${
-                recording
-                  ? "animate-pulse bg-red-500 text-white"
-                  : "animate-soft-pulse bg-civic-accent text-civic-bg hover:bg-civic-accent-strong"
-              }`}
+              onClick={() => setAttachedPhoto(null)}
+              aria-label="Remove attached photo"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-civic-muted transition hover:bg-civic-surface hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
             >
-              {recording ? <Square className="h-4 w-4" aria-hidden="true" /> : <Mic className="h-5 w-5" aria-hidden="true" />}
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
-          )}
-        </div>
+          </div>
+        )}
+
+        {recording && recordingStream ? (
+          <WaveformVisualizer stream={recordingStream} onStop={stopRecording} onAutoStop={stopRecording} />
+        ) : (
+          <div className="flex items-center gap-2 rounded-full border border-civic-border bg-civic-raised px-2 py-1.5">
+            <button
+              type="button"
+              onClick={() => photoInputRef.current?.click()}
+              disabled={loading}
+              aria-label="Attach photo"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-civic-muted transition hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent disabled:opacity-50"
+            >
+              <Plus className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <label htmlFor="intake-text" className="sr-only">
+              Describe issue in Urdu or English
+            </label>
+            <input
+              id="intake-text"
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              disabled={loading}
+              placeholder="Describe issue in Urdu or English..."
+              className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-civic-muted focus:outline-none"
+            />
+            {canSubmit ? (
+              <button
+                type="submit"
+                aria-label="Send complaint"
+                disabled={loading}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50"
+              >
+                <Send className="h-5 w-5" aria-hidden="true" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startRecording}
+                disabled={loading}
+                aria-label="Record Urdu voice note"
+                aria-pressed={false}
+                className="flex h-10 w-10 shrink-0 animate-soft-pulse items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50"
+              >
+                <Mic className="h-5 w-5" aria-hidden="true" />
+              </button>
+            )}
+          </div>
+        )}
+
         <p className="mt-1.5 text-center text-[11px] text-civic-muted">
-          Tap ➕ for photo / GPS · Tap 🎙️ for Urdu audio
+          Tap ➕ for photo · Tap 🎙️ for Urdu audio
         </p>
       </form>
     </section>

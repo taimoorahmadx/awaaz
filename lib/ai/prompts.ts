@@ -6,8 +6,8 @@ import { CATEGORIES, CATEGORY_TABLE } from "@/lib/categories";
 const CATEGORY_LINES = CATEGORIES.map((c) => `   - "${c}" → ${CATEGORY_TABLE[c].department}`).join("\n");
 
 export const AUDIO_TRIAGE_PROMPT = `You are the civic complaint triage officer for Islamabad, Pakistan.
-The attached audio is a citizen speaking in Urdu (possibly mixed with English or Punjabi) about a civic problem.
-An optional typed note may also be provided.
+The attached audio (if any) is a citizen speaking in Urdu (possibly mixed with English or Punjabi) about a civic problem.
+An optional typed note and/or hazard photo may also be provided.
 
 Tasks:
 1. Transcribe the speech verbatim in Urdu script (urduTranscript). If there is no audio, use the typed note.

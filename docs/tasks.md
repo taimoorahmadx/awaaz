@@ -82,7 +82,7 @@ Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass,
   - e2e: un-fixme T3.0 assertions; add a rejection test (upload the complaint's own Before photo as After → "AI Rejected" badge, status stays In Progress); add a fallback-category test (type "street light kharab hai F-6" → triage card department IESCO).
   - **Files:** `app/api/verify-fix/route.ts`, `app/api/analyze-audio/route.ts`, `lib/ai/schemas.ts`, `lib/ai/mocks.ts`, `lib/ai/prompts.ts`, `lib/categories.ts`, `lib/types.ts`, `lib/data/storage.ts`, `components/worker/BeforeAfterViewer.tsx`, `components/reports/MyReportsView.tsx`, `components/home/HomeChatIntake.tsx`, `e2e/*`.
 
-- [ ] **T3.2: Citizen Photo Attachment, Photo Compression & Waveform Visualizer**
+- [x] **T3.2: Citizen Photo Attachment, Photo Compression & Waveform Visualizer**
   - `lib/image.ts`: `compressImage(file: File): Promise<{ dataUrl: string; mimeType: "image/jpeg"; base64: string }>` — longest side ≤ 800px, JPEG quality 0.7, via canvas.
   - `HomeChatIntake.tsx`: `➕` opens `<input type="file" accept="image/jpeg,image/png,image/webp">` (no `capture`); compressed thumbnail preview + remove button; send compressed JPEG as `photo` and active profile sector as `sectorHint` (AC-1.3, AC-1.4). New complaint `beforePhotoUrl` = compressed data URL, else category stock photo (AC-1.5).
   - `app/api/analyze-audio/route.ts`: read `photo` and `sectorHint`; forward photo as `inlineData` with its MIME.

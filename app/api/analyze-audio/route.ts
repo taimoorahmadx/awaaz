@@ -6,11 +6,12 @@ import { buildAudioFallback } from "@/lib/ai/mocks";
 
 export const runtime = "nodejs";
 
-// INTEGRATOR NOTE (spec §4.1): request = multipart/form-data { audio?: Blob, text?: string, sectorHint?: string }.
+// INTEGRATOR NOTE (spec §4.1): request = multipart/form-data { audio?: Blob, photo?: Blob, text?: string, sectorHint?: string }.
 // Response = AudioAnalysisResponse & { isOfflineFallback: boolean }.
 
 export async function POST(req: Request) {
   let audio: File | null = null;
+  let photo: File | null = null;
   let text = "";
   let sectorHint = "";
 
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
     const form = await req.formData();
     const a = form.get("audio");
     if (a && typeof a !== "string" && a.size > 0) audio = a as File;
+    const p = form.get("photo");
+    if (p && typeof p !== "string" && p.size > 0) photo = p as File;
     const t = form.get("text");
     if (typeof t === "string") text = t.trim();
     const s = form.get("sectorHint");
@@ -34,7 +37,7 @@ export async function POST(req: Request) {
 
   const ai = getGemini();
   if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
-  if (!audio && !text) return fallback("no audio or text provided");
+  if (!audio && !text && !photo) return fallback("no audio, text, or photo provided");
 
   try {
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
@@ -47,6 +50,13 @@ export async function POST(req: Request) {
       // MIME passed dynamically from the uploaded blob (webm on Chrome, mp4 on Safari).
       const mimeType = (audio.type || "audio/webm").split(";")[0];
       parts.push({ inlineData: { mimeType, data } });
+    }
+    if (photo) {
+      const data = Buffer.from(await photo.arrayBuffer()).toString("base64");
+      const mimeType = (photo.type || "image/jpeg").split(";")[0].trim() || "image/jpeg";
+      if (mimeType.startsWith("image/")) {
+        parts.push({ inlineData: { mimeType, data } });
+      }
     }
 
     const result = await withTimeout(
