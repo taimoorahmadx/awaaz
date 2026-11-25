@@ -115,8 +115,8 @@ When the user is present (attended), stop after each task for review and ask ins
 - Never edit `.env.local` and never print its values.
 
 ### Git rules
-- Work on branch `phase2-overnight`. Never commit to `master`. Never push. Never force anything, never rewrite history.
-- One commit per completed task (more is fine for large tasks). Stage specific files, not `git add -A`.
+- Work normally on the current branch (e.g. `master` / `main`). Do not create or switch to feature/task branches unless explicitly asked. Never push. Never force anything, never rewrite history.
+- Commit on the go: commit after each completed task or whenever there is a clean, verified checkpoint (more commits are fine for large tasks). Stage specific files, not `git add -A`.
 - Commit message format: `type(scope): summary (T3.1)` + a short body listing what changed and how it was verified. Types: `feat`, `fix`, `test`, `docs`, `chore`.
 
 ---
@@ -149,4 +149,4 @@ When the user is present (attended), stop after each task for review and ask ins
 ---
 
 ## Definition of done (per task)
-`npm run build` + `npm run lint` + `npm run test:e2e` pass → golden path still works → `docs/progress.md` updated → committed on `phase2-overnight`.
+`npm run build` + `npm run lint` + `npm run test:e2e` pass → golden path still works → `docs/progress.md` updated → committed on the current branch.

@@ -2,7 +2,7 @@
 
 ## Current State
 - **Mode:** Phase 2 — building the full civic platform capabilities.
-- **Branch:** `phase2-overnight` (all work happens here; `master` untouched; nothing is pushed).
+- **Branch:** Work normally on the current branch (`master`); do not create task branches; nothing is pushed.
 - **Last Completed:** `T4.1` — built Groups Tab (5 channels grouped by type, seeded messages, text composer, live complaint embeds opening Detail Modal, read-only Municipal Alerts + top banner, Convert to Ticket draft flow, and header Reset System Data).
 - **Next Task:** `T4.2` — Location Resolution (GPS → Landmark → Sector) + Proximity Duplicate Detection.
 
@@ -49,7 +49,7 @@
 - **D6 closed: use shadcn/ui.** Initialized shadcn@2.3.0 (New York, Neutral, CSS variables). Keep the current civic dark look by mapping shadcn variables to the `civic-*` palette. `tailwind-merge` pinned to 2.6.1, exact versions, `.npmrc`, dark theme variables.
 - `npm audit`: 11 findings, all in existing Next/Tailwind/ESLint tooling, fixes are major upgrades only. Not acting on them now; never `npm audit fix --force`.
 - The user is currently working alongside (attended mode): stop after each task for review.
-- Overnight: commit per task on `phase2-overnight` with descriptive messages; never push; on block → log here and skip.
+- Overnight: commit on the go (per task or clean checkpoint) on the current branch with descriptive messages; never push; on block → log here and skip.
 
 ## Decisions Made Overnight
 - **T3.0:** The 9400%/empty-reasoning assertions live in a separate `test.fixme` test (an inline `test.fixme()` would skip the real sign-off assertions). Un-fixme in T3.1.

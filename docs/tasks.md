@@ -4,7 +4,7 @@ Legend: `[ ]` todo | `[~]` in progress | `[x]` done | `BLOCKED` = needs an OPEN 
 
 Order: T3.0 → T3.0b → T3.1 → T3.2 → T3.3 → T3.4 → T4.1 → T4.2 → T4.3 → T4.4 → T4.5 → T5.2 → T5.3 (T5.1 parked).
 
-Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass, `docs/progress.md` updated, one commit on `phase2-overnight` (see AGENTS.md → Git rules). Extend `e2e/` whenever a task adds user-visible behavior. All tests run with `AI_FORCE_FALLBACK=1` — no live Gemini calls (OPEN D2).
+Every task's gate: `npm run build && npm run lint && npm run test:e2e` all pass, `docs/progress.md` updated, committed on the current branch (see AGENTS.md → Git rules). Extend `e2e/` whenever a task adds user-visible behavior. All tests run with `AI_FORCE_FALLBACK=1` — no live Gemini calls (OPEN D2).
 
 ---
 
