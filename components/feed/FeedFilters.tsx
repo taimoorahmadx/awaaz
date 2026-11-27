@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpDown, Check, ChevronDown, SlidersHorizontal, X } from "lucide-react";
 import type { SectorHealth, Urgency } from "@/lib/types";
 import { RESOLVED_HEX, URGENCY_HEX } from "@/lib/labels";
@@ -10,14 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 export const SECTOR_OPTIONS = ["All", "F-10", "F-6", "G-9", "I-9"] as const;
 export type SectorFilter = (typeof SECTOR_OPTIONS)[number];
@@ -62,7 +55,7 @@ const chipClass = (active: boolean) =>
       : "bg-civic-raised text-slate-300 ring-civic-border hover:text-slate-100",
   );
 
-/** Compact Explore toolbar with Sort dropdown + bottom-sheet Filter drawer. */
+/** Compact Explore toolbar with Sort dropdown + anchored top-down Filter card. */
 export default function FeedFilters({
   sector,
   urgency,
@@ -74,6 +67,27 @@ export default function FeedFilters({
   onUrgencyChange,
   onSortChange,
 }: FeedFiltersProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterAnchorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onPointerDown = (e: MouseEvent) => {
+      if (filterAnchorRef.current && !filterAnchorRef.current.contains(e.target as Node)) {
+        setFiltersOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersOpen(false);
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [filtersOpen]);
+
   const healthBySector = new Map(sectorHealth.map((h) => [h.sector, h]));
   const activeCount = Number(sector !== "All") + Number(urgency !== "ALL");
   const currentSortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "Newest";
@@ -85,7 +99,7 @@ export default function FeedFilters({
   };
 
   return (
-    <div className="flex flex-col gap-2 border-b border-civic-border bg-civic-bg px-3 py-2">
+    <div ref={filterAnchorRef} className="relative flex flex-col gap-2 border-b border-civic-border bg-civic-bg px-3 py-2">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[11px] font-medium text-civic-muted" aria-live="polite">
           {countText ?? ""}
@@ -120,116 +134,28 @@ export default function FeedFilters({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Filters bottom sheet */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                data-testid="open-filters-button"
-                className={cn(
-                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent",
-                  activeCount > 0
-                    ? "border-civic-accent/60 bg-civic-accent/15 text-civic-accent"
-                    : "border-civic-border bg-civic-raised text-slate-200 hover:border-civic-accent/60",
-                )}
-              >
-                <SlidersHorizontal className="h-3 w-3" aria-hidden="true" />
-                <span>Filters</span>
-                {activeCount > 0 && (
-                  <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-civic-accent px-1 text-[10px] font-bold text-emerald-950">
-                    {activeCount}
-                  </span>
-                )}
-              </button>
-            </SheetTrigger>
-
-            <SheetContent
-              side="bottom"
-              className="mx-auto max-w-md rounded-t-2xl border-civic-border bg-civic-surface px-4 pb-6 pt-4 text-slate-100"
-            >
-              <SheetHeader className="flex-row items-center justify-between space-y-0 pb-3 text-left">
-                <SheetTitle className="text-sm font-semibold text-slate-100">Filter Complaints</SheetTitle>
-                {activeCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={clearAll}
-                    className="mr-7 text-xs font-medium text-civic-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </SheetHeader>
-
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
-                    Sector
-                  </p>
-                  <div role="group" aria-label="Filter by sector" className="flex flex-wrap gap-2">
-                    {SECTOR_OPTIONS.map((s) => {
-                      const health = s === "All" ? undefined : healthBySector.get(s);
-                      return (
-                        <button
-                          key={s}
-                          type="button"
-                          aria-pressed={sector === s}
-                          aria-label={health ? `${s} (Civic Health Grade ${health.grade}, ${health.score}/100)` : s}
-                          onClick={() => onSectorChange(s)}
-                          className={chipClass(sector === s)}
-                        >
-                          {s === homeSector && (
-                            <span aria-label="Your sector" className="text-[10px]">
-                              ★
-                            </span>
-                          )}
-                          <span>{s}</span>
-                          {health && (
-                            <span
-                              data-testid={`sector-chip-grade-${s}`}
-                              className={`rounded-full border px-1.5 text-[10px] font-bold leading-4 ${gradeColorClasses(health.grade).badge}`}
-                            >
-                              {health.grade}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
-                    Urgency &amp; Status
-                  </p>
-                  <div role="group" aria-label="Filter by urgency" className="flex flex-wrap gap-2">
-                    {URGENCY_OPTIONS.map(({ value, label, color }) => (
-                      <button
-                        key={value}
-                        type="button"
-                        aria-pressed={urgency === value}
-                        onClick={() => onUrgencyChange(value)}
-                        className={chipClass(urgency === value)}
-                      >
-                        {color && (
-                          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />
-                        )}
-                        <span>{label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <SheetClose asChild>
-                  <button
-                    type="button"
-                    className="mt-1 w-full rounded-xl bg-civic-accent py-2.5 text-sm font-bold text-emerald-950 transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
-                  >
-                    Done
-                  </button>
-                </SheetClose>
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* Filters top-down trigger */}
+          <button
+            type="button"
+            aria-expanded={filtersOpen}
+            aria-haspopup="dialog"
+            data-testid="open-filters-button"
+            onClick={() => setFiltersOpen((v) => !v)}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent",
+              activeCount > 0 || filtersOpen
+                ? "border-civic-accent/60 bg-civic-accent/15 text-civic-accent"
+                : "border-civic-border bg-civic-raised text-slate-200 hover:border-civic-accent/60",
+            )}
+          >
+            <SlidersHorizontal className="h-3 w-3" aria-hidden="true" />
+            <span>Filters</span>
+            {activeCount > 0 && (
+              <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-civic-accent px-1 text-[10px] font-bold text-emerald-950">
+                {activeCount}
+              </span>
+            )}
+          </button>
         </div>
       </div>
 
@@ -265,6 +191,106 @@ export default function FeedFilters({
               <span className="sr-only">Remove urgency filter</span>
             </button>
           )}
+        </div>
+      )}
+
+      {/* Anchored top-down dropdown card */}
+      {filtersOpen && (
+        <div
+          role="dialog"
+          aria-label="Filter Complaints"
+          className="absolute left-3 right-3 top-full z-40 mt-1.5 rounded-2xl border border-civic-border bg-civic-surface p-4 text-slate-100 shadow-2xl shadow-black/70"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-100">Filter Complaints</h2>
+            <div className="flex items-center gap-3">
+              {activeCount > 0 && (
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="text-xs font-medium text-civic-accent hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+                >
+                  Clear all
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label="Close filters"
+                onClick={() => setFiltersOpen(false)}
+                className="rounded-md p-1 text-civic-muted hover:bg-civic-raised hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3.5">
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
+                Sector
+              </p>
+              <div role="group" aria-label="Filter by sector" className="flex flex-wrap gap-2">
+                {SECTOR_OPTIONS.map((s) => {
+                  const health = s === "All" ? undefined : healthBySector.get(s);
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      aria-pressed={sector === s}
+                      aria-label={health ? `${s} (Civic Health Grade ${health.grade}, ${health.score}/100)` : s}
+                      onClick={() => onSectorChange(s)}
+                      className={chipClass(sector === s)}
+                    >
+                      {s === homeSector && (
+                        <span aria-label="Your sector" className="text-[10px]">
+                          ★
+                        </span>
+                      )}
+                      <span>{s}</span>
+                      {health && (
+                        <span
+                          data-testid={`sector-chip-grade-${s}`}
+                          className={`rounded-full border px-1.5 text-[10px] font-bold leading-4 ${gradeColorClasses(health.grade).badge}`}
+                        >
+                          {health.grade}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
+                Urgency &amp; Status
+              </p>
+              <div role="group" aria-label="Filter by urgency" className="flex flex-wrap gap-2">
+                {URGENCY_OPTIONS.map(({ value, label, color }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={urgency === value}
+                    onClick={() => onUrgencyChange(value)}
+                    className={chipClass(urgency === value)}
+                  >
+                    {color && (
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" />
+                    )}
+                    <span>{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(false)}
+              className="mt-1 w-full rounded-xl bg-civic-accent py-2 text-xs font-bold text-emerald-950 transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+            >
+              Done
+            </button>
+          </div>
         </div>
       )}
     </div>
