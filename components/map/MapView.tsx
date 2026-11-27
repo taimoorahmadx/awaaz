@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
-import { MapIcon } from "lucide-react";
+import { LocateFixed, MapIcon } from "lucide-react";
 import type { Complaint } from "@/lib/types";
 import { useComplaints } from "@/lib/data/storage";
 import { RESOLVED_HEX, URGENCY_HEX } from "@/lib/labels";
@@ -38,6 +38,7 @@ export default function MapView({ viewerId = "citizen-tariq", viewerName = "Tari
   const { complaints } = useComplaints();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [modalId, setModalId] = useState<string | null>(null);
+  const [recenterSignal, setRecenterSignal] = useState(0);
   const selected = complaints.find((c) => c.id === selectedId) ?? null;
   const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
   const close = useCallback(() => setSelectedId(null), []);
@@ -50,8 +51,23 @@ export default function MapView({ viewerId = "citizen-tariq", viewerName = "Tari
     <div className="relative min-h-[420px] flex-1 overflow-hidden">
       {/* `isolate` keeps Leaflet's z-indexed panes below the sticky header and bottom nav. */}
       <div className="absolute inset-0 isolate z-0">
-        <LeafletMap complaints={complaints} selectedId={selectedId} onSelect={setSelectedId} />
+        <LeafletMap
+          complaints={complaints}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          recenterSignal={recenterSignal}
+        />
       </div>
+
+      <button
+        type="button"
+        onClick={() => setRecenterSignal((n) => n + 1)}
+        aria-label="Recenter map on Islamabad"
+        title="Recenter map"
+        className="absolute right-2.5 top-[78px] z-10 flex h-[30px] w-[30px] items-center justify-center rounded-lg border border-civic-border bg-civic-surface text-slate-200 shadow-lg shadow-black/45 transition hover:bg-civic-raised hover:text-civic-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+      >
+        <LocateFixed className="h-4 w-4" aria-hidden="true" />
+      </button>
 
       <ul
         aria-label="Pin colour legend"

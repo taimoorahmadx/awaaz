@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Globe, MapPin, RotateCcw } from "lucide-react";
+import { Check, ChevronDown, Globe, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { resetSystemData } from "@/lib/data/storage";
 import { LANGUAGE_OPTIONS } from "@/lib/i18n";
@@ -81,12 +81,6 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
       </div>
 
       <OfflineBadge visible={offline} className="shrink-0" />
-
-      {/* Subtle sector badge */}
-      <span className="hidden min-w-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted xs:flex sm:flex">
-        <MapPin className="h-3 w-3 shrink-0 text-civic-accent" aria-hidden="true" />
-        <span className="truncate">{role.sector ? `Islamabad (${role.sector})` : "Islamabad"}</span>
-      </span>
 
       <div className="flex shrink-0 items-center gap-1.5">
         {/* Language switcher */}

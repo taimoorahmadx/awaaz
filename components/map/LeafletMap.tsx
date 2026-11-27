@@ -26,6 +26,8 @@ export interface LeafletMapProps {
   zoom?: number;
   /** Whether to show Leaflet's +/- zoom control (default true). */
   showZoomControl?: boolean;
+  /** Increment to recenter the map to fit all pins around Islamabad. */
+  recenterSignal?: number;
 }
 
 /** Teardrop pin as inline SVG. Never use Leaflet's default PNG markers (404s in Next.js). */
@@ -48,6 +50,23 @@ function pinIcon(color: string, selected: boolean): L.DivIcon {
   });
 }
 
+function fitAllPins(map: L.Map, complaints: Complaint[], animate: boolean) {
+  if (complaints.length === 0) {
+    map.setView(F10_CENTER, DEFAULT_ZOOM, { animate });
+    return;
+  }
+  const [lat0, lng0] = F10_CENTER;
+  let dLat = 0;
+  let dLng = 0;
+  for (const c of complaints) {
+    dLat = Math.max(dLat, Math.abs(c.location.lat - lat0));
+    dLng = Math.max(dLng, Math.abs(c.location.lng - lng0));
+  }
+  const bounds = L.latLngBounds([lat0 - dLat, lng0 - dLng], [lat0 + dLat, lng0 + dLng]);
+  const fitZoom = Math.min(map.getBoundsZoom(bounds, false, L.point(48, 48)), MAX_FIT_ZOOM);
+  map.setView(F10_CENTER, fitZoom, { animate });
+}
+
 export default function LeafletMap({
   complaints,
   selectedId,
@@ -55,6 +74,7 @@ export default function LeafletMap({
   center,
   zoom,
   showZoomControl = true,
+  recenterSignal = 0,
 }: LeafletMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -106,6 +126,14 @@ export default function LeafletMap({
     };
   }, []);
 
+  // Recenter when requested by parent.
+  useEffect(() => {
+    if (recenterSignal === 0) return;
+    const map = mapRef.current;
+    if (!map) return;
+    fitAllPins(map, complaints, true);
+  }, [recenterSignal, complaints]);
+
   // (Re)draw pins whenever complaints or the selection change. 12-ish markers: cheap.
   useEffect(() => {
     const map = mapRef.current;
@@ -137,23 +165,14 @@ export default function LeafletMap({
     // First load: stay centred on F-10 but zoom out just enough to show every pin.
     if (!fittedRef.current && complaints.length > 0) {
       fittedRef.current = true;
-      const [lat0, lng0] = F10_CENTER;
-      let dLat = 0;
-      let dLng = 0;
-      for (const c of complaints) {
-        dLat = Math.max(dLat, Math.abs(c.location.lat - lat0));
-        dLng = Math.max(dLng, Math.abs(c.location.lng - lng0));
-      }
-      const bounds = L.latLngBounds([lat0 - dLat, lng0 - dLng], [lat0 + dLat, lng0 + dLng]);
-      const fitZoom = Math.min(map.getBoundsZoom(bounds, false, L.point(48, 48)), MAX_FIT_ZOOM);
-      map.setView(F10_CENTER, fitZoom, { animate: false });
+      fitAllPins(map, complaints, false);
     }
   }, [complaints, selectedId, centerLat, centerLng, zoom]);
 
   return (
     <div
       ref={containerRef}
-      className="awaaz-map h-full w-full"
+      className="awaaz-map awaaz-map-osm h-full w-full"
       role="region"
       aria-label="Map of reported hazards in Islamabad"
     />

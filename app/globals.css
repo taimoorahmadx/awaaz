@@ -26,12 +26,37 @@ body {
   display: none;
 }
 
-/* Leaflet map: dark civic look. Tiles are recoloured with a filter; offline shows the plain surface. */
+/* Leaflet map: dark civic look. CartoDB Dark Matter is natively dark (EN); OSM (UR) uses invert filter. */
 .awaaz-map.leaflet-container {
   @apply bg-civic-surface font-sans;
 }
-.awaaz-map .leaflet-tile-pane {
+.awaaz-map.awaaz-map-osm .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6);
+}
+.awaaz-map .leaflet-control-zoom {
+  border: 1px solid #223047 !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+}
+.awaaz-map .leaflet-control-zoom a {
+  background-color: #0f1622 !important;
+  color: #e2e8f0 !important;
+  border-bottom-color: #223047 !important;
+}
+.awaaz-map .leaflet-control-zoom a:hover {
+  background-color: #162030 !important;
+  color: #10b981 !important;
+}
+.awaaz-map .leaflet-control-attribution {
+  background: rgba(15, 22, 34, 0.78) !important;
+  color: #8a9ab3 !important;
+  font-size: 9px !important;
+  padding: 1px 6px !important;
+  border-top-left-radius: 6px;
+}
+.awaaz-map .leaflet-control-attribution a {
+  color: #94a3b8 !important;
 }
 /* SVG divIcon pins: strip Leaflet's default white divIcon box */
 .awaaz-pin {
