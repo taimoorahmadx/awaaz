@@ -68,10 +68,24 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
   async function handleVerify() {
     if (!afterDataUrl) {
       const now = new Date().toISOString();
-      const note = resolutionNote.trim() || "Worker marked issue as fixed; awaiting citizen sign-off.";
+      const trimmedNote = resolutionNote.trim();
+      const note = trimmedNote || "Worker marked issue as fixed; awaiting citizen sign-off.";
+      const nextComments = trimmedNote
+        ? [
+            ...(complaint.comments ?? []),
+            {
+              id: `c-${Date.now()}`,
+              authorId: "worker-sajid",
+              authorName: "Sajid",
+              text: trimmedNote,
+              createdAt: now,
+            },
+          ]
+        : complaint.comments;
       onUpdateComplaint({
         ...complaint,
         status: "PENDING_COMMUNITY_VERIFICATION",
+        comments: nextComments,
         updatedAt: now,
         history: [
           ...(complaint.history ?? []),
