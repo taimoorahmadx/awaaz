@@ -117,7 +117,7 @@ export default function GroupsShell({
                       onClick={() => setSelectedGroupId(group.id)}
                       data-testid="group-channel-card"
                       data-group-id={group.id}
-                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-civic-raised/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent"
+                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-civic-raised/60 active:bg-civic-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent"
                     >
                       <span
                         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
@@ -141,7 +141,7 @@ export default function GroupsShell({
                               />
                             )}
                           </div>
-                          <span className="flex shrink-0 items-center gap-1 text-[10px] text-civic-muted">
+                          <span className="flex shrink-0 items-center gap-1 text-[11px] tabular-nums text-civic-muted">
                             {group.isOfficial && <Pin className="h-2.5 w-2.5 text-amber-300/80" aria-hidden="true" />}
                             {lastMsg ? timeAgo(lastMsg.createdAt) : `${group.memberCount} members`}
                           </span>

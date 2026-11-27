@@ -134,12 +134,12 @@ export default function ComplaintDetailModal({
         aria-label="Complaint details"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 border-b border-civic-border bg-civic-raised/95 px-4 py-3 backdrop-blur">
+        <div className="sticky top-0 z-10 border-b border-civic-border bg-civic-raised/95 px-4 py-3.5 backdrop-blur">
           <DialogTitle
             dir={isRtl ? "rtl" : "ltr"}
             lang={isRtl ? "ur" : "en"}
             className={cn(
-              "font-bold text-slate-50 leading-snug pr-6",
+              "pr-8 font-bold leading-snug text-slate-50",
               isRtl ? "urdu text-right text-base" : "text-sm",
             )}
           >

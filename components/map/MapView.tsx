@@ -64,14 +64,14 @@ export default function MapView({ viewerId = "citizen-tariq", viewerName = "Tari
         onClick={() => setRecenterSignal((n) => n + 1)}
         aria-label="Recenter map on Islamabad"
         title="Recenter map"
-        className="absolute right-2.5 top-[78px] z-10 flex h-[30px] w-[30px] items-center justify-center rounded-lg border border-civic-border bg-civic-surface text-slate-200 shadow-lg shadow-black/45 transition hover:bg-civic-raised hover:text-civic-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+        className="absolute right-2.5 top-[78px] z-10 flex h-9 w-9 items-center justify-center rounded-lg border border-civic-border bg-civic-surface text-slate-200 shadow-lg shadow-black/45 transition hover:bg-civic-raised hover:text-civic-accent active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
       >
         <LocateFixed className="h-4 w-4" aria-hidden="true" />
       </button>
 
       <ul
         aria-label="Pin colour legend"
-        className="pointer-events-none absolute left-2 top-2 z-10 flex gap-2 rounded-full border border-civic-border bg-civic-surface/90 px-2.5 py-1 text-[10px] font-medium text-slate-200 backdrop-blur"
+        className="pointer-events-none absolute left-2 top-2 z-10 flex gap-2.5 rounded-full border border-civic-border bg-civic-surface/90 px-3 py-1.5 text-[11px] font-medium text-slate-200 backdrop-blur"
       >
         {LEGEND.map(({ label, color }) => (
           <li key={label} className="flex items-center gap-1">

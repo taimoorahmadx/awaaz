@@ -52,7 +52,7 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
 
   return (
     <section className="flex flex-col gap-3 p-3" aria-label="My reports">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">My Reports ({complaints.length})</h2>
+      <h2 className="text-xs font-semibold uppercase tracking-wide text-civic-muted tabular-nums">My Reports ({complaints.length})</h2>
       {sorted.map((c) => {
         const resolved = c.status === "RESOLVED";
         const alreadyConfirmed = citizenId ? c.communityImpact.verifiedBy.includes(citizenId) : false;
@@ -74,7 +74,7 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
                 setModalId(c.id);
               }
             }}
-            className={`cursor-pointer rounded-xl border bg-civic-surface p-3 ${resolved ? "border-green-500/60" : "border-civic-border"}`}
+            className={`cursor-pointer rounded-2xl border bg-civic-raised/85 p-3.5 shadow-lg shadow-black/25 transition hover:border-civic-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent ${resolved ? "border-green-500/60" : "border-civic-border"}`}
           >
             <header className="mb-2 flex items-start justify-between gap-2">
               <div className="min-w-0">
@@ -135,10 +135,10 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
                     handleConfirmFix(c);
                   }}
                   data-testid="confirm-fix-button"
-                  className={`flex-1 rounded-lg py-2 text-sm font-bold transition ${
+                  className={`min-h-[40px] flex-1 rounded-xl py-2 text-sm font-bold transition ${
                     alreadyConfirmed
-                      ? "bg-civic-raised text-civic-muted cursor-default"
-                      : "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                      ? "cursor-default bg-civic-surface text-civic-muted"
+                      : "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
                   }`}
                 >
                   {alreadyConfirmed ? "✓ Confirmed" : "Confirm Fix"}
@@ -150,7 +150,7 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
                       e.stopPropagation();
                       handleRejectFix(c);
                     }}
-                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/20"
+                    className="min-h-[40px] rounded-xl border border-red-500/40 bg-red-500/10 px-3.5 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                   >
                     Not Fixed
                   </button>

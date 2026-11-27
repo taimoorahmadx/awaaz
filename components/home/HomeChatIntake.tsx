@@ -1090,7 +1090,7 @@ export default function HomeChatIntake({
 
       {/* Bottom Sticky Chat Composer + Generate Ticket Action Strip */}
       <form
-        className="sticky bottom-16 border-t border-civic-border bg-civic-surface/95 px-3 pb-3 pt-2 backdrop-blur"
+        className="sticky bottom-16 border-t border-civic-border bg-civic-surface/95 px-3 pb-6 pt-2.5 backdrop-blur"
         onSubmit={(e) => {
           e.preventDefault();
           void sendChatTurn(null, text, attachedPhoto);

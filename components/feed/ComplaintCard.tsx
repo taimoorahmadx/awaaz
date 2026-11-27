@@ -37,7 +37,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
     complaint.afterPhotoUrl && complaint.status === "RESOLVED" ? complaint.afterPhotoUrl : complaint.beforePhotoUrl;
 
   const voteBtn = (active: boolean, activeClass: string) =>
-    `flex h-8 w-8 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent ${
+    `flex h-9 w-9 items-center justify-center rounded-full transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent ${
       active ? activeClass : "text-slate-300 hover:bg-civic-raised hover:text-slate-50"
     }`;
 
@@ -47,7 +47,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
   return (
     <article
       aria-labelledby={`title-${complaint.id}`}
-      className="rounded-2xl border border-civic-border bg-civic-raised p-3 shadow-lg shadow-black/30 cursor-pointer"
+      className="cursor-pointer rounded-2xl border border-civic-border bg-civic-raised p-3.5 shadow-lg shadow-black/30 transition hover:border-civic-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
       onClick={() => onOpenModal(complaint.id)}
       role="button"
       tabIndex={0}
@@ -112,11 +112,11 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
       </div>
 
       {/* Interaction bar */}
-      <div className="mt-2.5 flex items-center gap-2">
+      <div className="mt-3 flex items-center gap-2">
         <div
           role="group"
           aria-label="Vote on this complaint"
-          className="inline-flex h-8 items-center rounded-full bg-civic-surface ring-1 ring-civic-border"
+          className="inline-flex h-9 items-center rounded-full bg-civic-surface ring-1 ring-civic-border"
         >
           <button
             type="button"
@@ -128,7 +128,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
             <ArrowBigUp className={`h-4 w-4 ${upvoted ? "fill-current" : ""}`} aria-hidden="true" />
           </button>
           <span
-            className="px-1 text-center text-xs font-semibold tabular-nums text-slate-100"
+            className="px-1.5 text-center text-xs font-semibold tabular-nums text-slate-100"
             aria-live="polite"
             aria-label={`Score ${votes.score}`}
           >
@@ -151,7 +151,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
           aria-expanded={showComments}
           aria-controls={commentsId}
           onClick={(e) => { e.stopPropagation(); setShowComments((v) => !v); }}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full bg-civic-surface px-3 text-xs font-semibold tabular-nums text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full bg-civic-surface px-3.5 text-xs font-semibold tabular-nums text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
         >
           <MessageCircle className="h-4 w-4" aria-hidden="true" />
           <span>{complaint.comments.length}</span>
@@ -164,10 +164,10 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
           type="button"
           onClick={(e) => { e.stopPropagation(); if (!alreadyConfirmed) confirmFix(complaint.id, viewerId, viewerName); }}
           disabled={alreadyConfirmed}
-          className={`mt-2 w-full rounded-lg py-1.5 text-xs font-bold transition ${
+          className={`mt-2.5 min-h-[36px] w-full rounded-xl py-2 text-xs font-bold transition ${
             alreadyConfirmed
-              ? "bg-civic-surface text-civic-muted cursor-default"
-              : "bg-green-500 text-white hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+              ? "cursor-default bg-civic-surface text-civic-muted"
+              : "bg-green-500 text-white hover:bg-green-400 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
           }`}
         >
           {alreadyConfirmed ? `✓ ${t.feed.confirmed}` : t.feed.confirmFix}

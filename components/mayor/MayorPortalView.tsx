@@ -25,7 +25,7 @@ interface MayorPortalViewProps {
   onUpdateComplaint?: (c: Complaint) => void;
 }
 
-const card = "rounded-xl border border-civic-border bg-civic-surface p-3";
+const card = "rounded-2xl border border-civic-border bg-civic-raised/85 p-3.5";
 const sectionTitle = "mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400";
 
 /** Mayor / Commissioner portal with 5 executive tabs (MAYOR_PORTAL_ASCII.md). */
@@ -50,7 +50,7 @@ export default function MayorPortalView({
       onValueChange={(v) => setTab(v as MayorTab)}
       className="flex min-h-0 flex-1 flex-col"
     >
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-4">
         <TabsContent value="map" className="mt-0 flex min-h-0 flex-1 flex-col">
           <MapView
             viewerId="admin-nasir"
@@ -74,16 +74,16 @@ export default function MayorPortalView({
 
       <nav
         aria-label="Mayor portal sections"
-        className="sticky bottom-0 z-20 border-t border-civic-border bg-civic-surface"
+        className="sticky bottom-0 z-50 h-16 border-t border-civic-border bg-civic-surface/95 shadow-[0_-4px_20px_rgba(0,0,0,0.35)] backdrop-blur"
       >
-        <TabsList className="grid h-auto w-full grid-cols-5 rounded-none bg-transparent p-0">
+        <TabsList className="grid h-full w-full grid-cols-5 rounded-none bg-transparent p-0">
           {localizedTabs.map((item) => (
             <TabsTrigger
               key={item.id}
               value={item.id}
-              className="flex flex-col items-center rounded-none py-2 text-[10px] font-medium text-slate-400 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-amber-400 data-[state=active]:shadow-none"
+              className="flex h-full flex-col items-center justify-center gap-0.5 rounded-none text-[11px] font-medium text-civic-muted shadow-none transition hover:text-slate-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent data-[state=active]:bg-transparent data-[state=active]:text-amber-400 data-[state=active]:shadow-none"
             >
-              <span className="text-lg" aria-hidden="true">
+              <span className="text-lg leading-none" aria-hidden="true">
                 {item.icon}
               </span>
               {item.label}
@@ -128,25 +128,25 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
             Grade {cityHealth.grade}
           </span>
         </div>
-        <p data-testid="city-health-score" className={`mt-1 text-3xl font-bold ${cityColors.text}`}>
+        <p data-testid="city-health-score" className={`mt-1 text-3xl font-bold tabular-nums ${cityColors.text}`}>
           {cityHealth.score}
           <span className="text-base text-slate-400">/100</span>
         </p>
-        <p className="mt-1 text-xs text-slate-300">
+        <p className="mt-1 text-xs tabular-nums text-slate-300">
           Today&apos;s Operations: {resolved} of {total} Complaints Resolved ({pct}%)
         </p>
       </div>
 
       <div>
         <h2 className={sectionTitle}>{t.mayor.execKpis}</h2>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {kpis.map((k) => (
             <div key={k.label} className={card} data-testid={`mayor-kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}>
-              <p className="text-xl font-bold text-slate-100">
+              <p className="text-xl font-bold tabular-nums text-slate-100">
                 {k.icon} {k.value}
               </p>
               <p className="text-xs font-semibold text-slate-200">{k.label}</p>
-              <p className="text-[10px] text-slate-400">{k.sub}</p>
+              <p className="text-[11px] text-slate-400">{k.sub}</p>
             </div>
           ))}
         </div>

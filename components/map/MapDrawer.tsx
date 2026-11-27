@@ -79,7 +79,7 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
               type="button"
               onClick={onClose}
               aria-label="Close details"
-              className="-mr-1 -mt-0.5 shrink-0 rounded-full p-1.5 text-civic-muted transition hover:bg-civic-surface hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+              className="-mr-1.5 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-civic-muted transition hover:bg-civic-surface hover:text-slate-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -112,7 +112,7 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
           {t.statuses[complaint.status] ?? STATUS_LABELS[complaint.status]}
         </span>
         <span
-          className="ml-auto inline-flex items-center gap-0.5 rounded-full bg-civic-accent/15 px-2 py-0.5 text-civic-accent ring-1 ring-civic-accent/40"
+          className="ml-auto inline-flex items-center gap-0.5 rounded-full bg-civic-accent/15 px-2 py-0.5 tabular-nums text-civic-accent ring-1 ring-civic-accent/40"
           aria-label={`${complaint.votes.score} upvotes`}
         >
           <ArrowBigUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -120,12 +120,12 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
         </span>
       </div>
 
-      <p className="mt-2 text-[11px] text-civic-muted">{t.map.reportedBy} {complaint.reporter.citizenName}</p>
+      <p className="mt-2.5 text-[11px] text-civic-muted">{t.map.reportedBy} {complaint.reporter.citizenName}</p>
 
       <button
         type="button"
         onClick={() => onOpenModal(complaint.id)}
-        className="mt-3 w-full rounded-lg bg-civic-surface py-2 text-xs font-semibold text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+        className="mt-3 min-h-[40px] w-full rounded-xl bg-civic-surface py-2.5 text-xs font-semibold text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
       >
         {t.map.openDetails}
       </button>

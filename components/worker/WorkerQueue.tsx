@@ -56,7 +56,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
               key={d}
               type="button"
               onClick={() => setDeptFilter(d)}
-              className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 transition ${
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ring-1 transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent ${
                 active
                   ? "bg-civic-accent/20 text-civic-accent ring-civic-accent/60"
                   : "bg-civic-raised text-slate-300 ring-civic-border hover:text-slate-100"
@@ -120,7 +120,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
                   const updated = claimComplaint(c.id, "worker-sajid", "Sajid");
                   if (updated) onUpdateComplaint(updated);
                 }}
-                className="rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950"
+                className="min-h-[40px] rounded-xl bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950 transition hover:bg-civic-accent-strong active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100"
               >
                 {t.worker.claimTicket}
               </button>

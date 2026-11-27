@@ -23,7 +23,7 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-50 mx-auto h-16 max-w-md border-t border-civic-border bg-civic-surface/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-50 mx-auto h-16 max-w-md border-t border-civic-border bg-civic-surface/95 shadow-[0_-4px_20px_rgba(0,0,0,0.35)] backdrop-blur"
     >
       <ul className="grid h-full grid-cols-5">
         {TABS.map(({ id, icon: Icon }) => {
@@ -36,7 +36,7 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
                 type="button"
                 onClick={() => onChange(id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent ${
+                className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent ${
                   isActive ? "text-civic-accent" : "text-civic-muted hover:text-slate-200"
                 }`}
               >

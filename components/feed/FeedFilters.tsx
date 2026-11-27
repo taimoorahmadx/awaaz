@@ -104,7 +104,7 @@ export default function FeedFilters({
   return (
     <div ref={filterAnchorRef} className="relative flex flex-col gap-2 border-b border-civic-border bg-civic-bg px-3 py-2">
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] font-medium text-civic-muted" aria-live="polite">
+        <p className="text-xs font-medium tabular-nums text-civic-muted" aria-live="polite">
           {countText ?? ""}
         </p>
 
@@ -116,11 +116,11 @@ export default function FeedFilters({
                 type="button"
                 aria-label="Sort feed"
                 data-testid="sort-menu-trigger"
-                className="inline-flex items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2.5 py-1 text-xs font-medium text-slate-200 transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+                className="inline-flex h-8 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-3 text-xs font-medium text-slate-200 transition hover:border-civic-accent/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
               >
-                <ArrowUpDown className="h-3 w-3 text-civic-muted" aria-hidden="true" />
+                <ArrowUpDown className="h-3.5 w-3.5 text-civic-muted" aria-hidden="true" />
                 <span>{currentSortLabel}</span>
-                <ChevronDown className="h-3 w-3 text-civic-muted" aria-hidden="true" />
+                <ChevronDown className="h-3.5 w-3.5 text-civic-muted" aria-hidden="true" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-36 border-civic-border bg-civic-surface text-slate-100">
@@ -128,7 +128,7 @@ export default function FeedFilters({
                 <DropdownMenuItem
                   key={value}
                   onClick={() => onSortChange(value)}
-                  className="flex cursor-pointer items-center justify-between text-xs focus:bg-civic-raised focus:text-slate-50"
+                  className="flex cursor-pointer items-center justify-between py-2 text-xs focus:bg-civic-raised focus:text-slate-50"
                 >
                   <span>{label}</span>
                   {sort === value && <Check className="h-3.5 w-3.5 text-civic-accent" aria-hidden="true" />}
@@ -145,16 +145,16 @@ export default function FeedFilters({
             data-testid="open-filters-button"
             onClick={() => setFiltersOpen((v) => !v)}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent",
+              "inline-flex h-8 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent",
               activeCount > 0 || filtersOpen
                 ? "border-civic-accent/60 bg-civic-accent/15 text-civic-accent"
                 : "border-civic-border bg-civic-raised text-slate-200 hover:border-civic-accent/60",
             )}
           >
-            <SlidersHorizontal className="h-3 w-3" aria-hidden="true" />
+            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Filters</span>
             {activeCount > 0 && (
-              <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-civic-accent px-1 text-[10px] font-bold text-emerald-950">
+              <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-civic-accent px-1 text-[10px] font-bold tabular-nums text-emerald-950">
                 {activeCount}
               </span>
             )}

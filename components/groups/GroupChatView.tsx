@@ -70,12 +70,12 @@ export default function GroupChatView({
           type="button"
           onClick={onBack}
           aria-label="Back to channels"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-civic-border bg-civic-raised text-slate-200 transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-civic-border bg-civic-raised text-slate-200 transition hover:border-civic-accent/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </button>
         <h2 className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-50">{group.name}</h2>
-        <span className="flex shrink-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted">
+        <span className="flex shrink-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2.5 py-1 text-[11px] tabular-nums text-civic-muted">
           <Users className="h-3 w-3" aria-hidden="true" />
           {group.memberCount}
         </span>
@@ -104,7 +104,7 @@ export default function GroupChatView({
               type="button"
               onClick={() => setAlertExpanded((v) => !v)}
               aria-label={alertExpanded ? "Collapse alert" : "Expand alert"}
-              className="rounded p-0.5 text-amber-300/80 hover:text-amber-200"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-amber-300/80 transition hover:bg-amber-500/15 hover:text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
             >
               {alertExpanded ? (
                 <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
@@ -116,7 +116,7 @@ export default function GroupChatView({
               type="button"
               onClick={() => setAlertDismissed(true)}
               aria-label="Dismiss alert"
-              className="rounded p-0.5 text-amber-300/80 hover:text-amber-200"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-amber-300/80 transition hover:bg-amber-500/15 hover:text-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

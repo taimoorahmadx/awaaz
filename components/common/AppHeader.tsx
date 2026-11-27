@@ -92,9 +92,9 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
             aria-expanded={langOpen}
             aria-label={`${t.languageLabel}: ${currentLangOption.nativeLabel}`}
             data-testid="language-switcher"
-            className="flex items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-1 text-[11px] font-medium text-slate-100 transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+            className="flex h-9 items-center gap-1.5 rounded-full border border-civic-border bg-civic-raised px-2.5 text-xs font-medium text-slate-100 transition hover:border-civic-accent/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
           >
-            <Globe className="h-3 w-3 text-civic-accent" aria-hidden="true" />
+            <Globe className="h-3.5 w-3.5 text-civic-accent" aria-hidden="true" />
             <span>{currentLangOption.label}</span>
           </button>
 
@@ -102,9 +102,9 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
             <div
               role="menu"
               aria-label={t.languageLabel}
-              className="absolute right-0 mt-2 w-40 overflow-hidden rounded-xl border border-civic-border bg-civic-raised shadow-xl shadow-black/60"
+              className="absolute right-0 z-50 mt-2 w-44 overflow-hidden rounded-xl border border-civic-border bg-civic-raised shadow-xl shadow-black/60"
             >
-              <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-civic-muted">
+              <p className="px-3.5 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
                 {t.languageLabel}
               </p>
               {LANGUAGE_OPTIONS.map((opt) => {
@@ -120,7 +120,7 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
                       setLang(opt.id);
                       setLangOpen(false);
                     }}
-                    className={`flex w-full items-center justify-between px-3 py-2 text-left text-xs transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none ${
+                    className={`flex w-full items-center justify-between px-3.5 py-2.5 text-left text-xs transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none ${
                       active ? "font-semibold text-civic-accent" : "text-slate-100"
                     }`}
                   >
@@ -141,7 +141,7 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label={t.switchRoleAria(role.name, role.label)}
-            className="flex items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2.5 py-1 text-xs font-medium text-slate-100 transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+            className="flex h-9 items-center gap-1.5 rounded-full border border-civic-border bg-civic-raised px-3 text-xs font-medium text-slate-100 transition hover:border-civic-accent/60 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
           >
             <span aria-hidden="true">{role.emoji}</span>
             <span className="max-w-[5rem] truncate">{role.name}</span>
@@ -152,9 +152,9 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
             <div
               role="menu"
               aria-label="Demo roles"
-              className="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-civic-border bg-civic-raised shadow-xl shadow-black/60"
+              className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-civic-border bg-civic-raised shadow-xl shadow-black/60"
             >
-              <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-civic-muted">
+              <p className="px-3.5 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
                 {t.switchDemoRole}
               </p>
               {ROLES.map((r) => {
@@ -169,7 +169,7 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
                       onRoleChange(r.id);
                       setOpen(false);
                     }}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none ${active ? "text-civic-accent" : "text-slate-100"
+                    className={`flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left text-sm transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none ${active ? "text-civic-accent" : "text-slate-100"
                       }`}
                   >
                     <span aria-hidden="true">{r.emoji}</span>
@@ -192,7 +192,7 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
                   setOpen(false);
                   toast.success(t.resetSuccess);
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-amber-300 transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none"
+                className="flex w-full items-center gap-2 px-3.5 py-2.5 text-left text-xs font-medium text-amber-300 transition hover:bg-civic-surface focus-visible:bg-civic-surface focus-visible:outline-none"
               >
                 <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>{t.resetSystemData}</span>
