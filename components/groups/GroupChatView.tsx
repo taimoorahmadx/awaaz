@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Lock, Megaphone, Send, Users } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Lock, Megaphone, Send, Users, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addGroupMessage } from "@/lib/data/storage";
-import { timeAgo } from "@/lib/labels";
 import type { CivicGroup, Complaint, GroupMessage } from "@/lib/types";
 import ChatMessageBubble from "./ChatMessageBubble";
 
@@ -36,6 +35,8 @@ export default function GroupChatView({
   onConvertToTicket,
 }: GroupChatViewProps) {
   const [draft, setDraft] = useState("");
+  const [alertDismissed, setAlertDismissed] = useState(false);
+  const [alertExpanded, setAlertExpanded] = useState(false);
   const endRef = useRef<HTMLDivElement | null>(null);
   const prevCountRef = useRef(messages.length);
 
@@ -73,32 +74,52 @@ export default function GroupChatView({
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         </button>
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-sm font-semibold text-slate-50">{group.name}</h2>
-          <p className="truncate text-[11px] text-civic-muted">{group.description}</p>
-        </div>
+        <h2 className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-50">{group.name}</h2>
         <span className="flex shrink-0 items-center gap-1 rounded-full border border-civic-border bg-civic-raised px-2 py-0.5 text-[11px] text-civic-muted">
           <Users className="h-3 w-3" aria-hidden="true" />
           {group.memberCount}
         </span>
       </header>
 
-      {/* Latest Municipal Alert banner atop non-official channels (AC-10.4) */}
-      {!group.isOfficial && latestBroadcast && (
+      {/* Slim collapsible Municipal Alert strip atop non-official channels (AC-10.4) */}
+      {!group.isOfficial && latestBroadcast && !alertDismissed && (
         <aside
           data-testid="official-alert-banner"
           aria-label="Latest municipal alert"
-          className="mx-3 mt-3 flex items-start gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2.5"
+          className="mx-3 mt-2.5 flex items-start gap-2 rounded-xl border border-amber-500/35 bg-amber-500/10 px-2.5 py-1.5"
         >
-          <Megaphone className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center justify-between gap-2 text-[10px] font-semibold uppercase tracking-wider text-amber-300">
-              <span>Municipal Alert · {latestBroadcast.senderName}</span>
-              <time dateTime={latestBroadcast.createdAt} className="font-normal text-amber-200/80">
-                {timeAgo(latestBroadcast.createdAt)}
-              </time>
-            </div>
-            <p className="mt-0.5 line-clamp-2 text-xs text-slate-100">{latestBroadcast.text}</p>
+          <Megaphone className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" aria-hidden="true" />
+          <button
+            type="button"
+            onClick={() => setAlertExpanded((v) => !v)}
+            className="min-w-0 flex-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+          >
+            <p className={alertExpanded ? "text-xs text-slate-100" : "truncate text-xs text-slate-100"}>
+              <span className="font-semibold text-amber-300">Alert: </span>
+              {latestBroadcast.text}
+            </p>
+          </button>
+          <div className="flex shrink-0 items-center gap-0.5">
+            <button
+              type="button"
+              onClick={() => setAlertExpanded((v) => !v)}
+              aria-label={alertExpanded ? "Collapse alert" : "Expand alert"}
+              className="rounded p-0.5 text-amber-300/80 hover:text-amber-200"
+            >
+              {alertExpanded ? (
+                <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setAlertDismissed(true)}
+              aria-label="Dismiss alert"
+              className="rounded p-0.5 text-amber-300/80 hover:text-amber-200"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
           </div>
         </aside>
       )}
@@ -164,4 +185,3 @@ export default function GroupChatView({
     </section>
   );
 }
-
