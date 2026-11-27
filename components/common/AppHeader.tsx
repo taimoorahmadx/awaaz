@@ -71,16 +71,13 @@ export default function AppHeader({ role, onRoleChange, offline = false, onReset
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-1.5 border-b border-civic-border bg-civic-surface/90 px-3 backdrop-blur">
       {/* Branding */}
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="flex shrink-0 items-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/logo.jpg"
           alt="Awaaz logo"
           className="h-8 w-8 shrink-0 rounded-lg object-cover ring-1 ring-civic-accent/40"
         />
-        <p className={`text-sm font-semibold text-slate-50 ${lang === "ur" ? "urdu text-base" : ""}`} lang={lang === "ur" ? "ur" : "en"}>
-          {t.appName}
-        </p>
       </div>
 
       <OfflineBadge visible={offline} className="shrink-0" />

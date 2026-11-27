@@ -342,7 +342,7 @@
       "senderId": "admin-nasir",
       "senderName": "Comm. Nasir",
       "senderRole": "Mayor / Commissioner",
-      "text": "Citizen Verification Reminder: Please confirm repaired street lights and waste clearances via '+1 Confirm Fix' so contractor payouts can be audited accurately.",
+      "text": "Citizen Verification Reminder: Please confirm repaired street lights and waste clearances via 'Confirm Fix' so contractor payouts can be audited accurately.",
       "isOfficialAlert": true,
       "createdAt": "2026-11-24T14:00:00.000Z"
     },

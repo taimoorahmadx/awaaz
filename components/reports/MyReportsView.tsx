@@ -102,7 +102,7 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
                 data-testid="confirm-fix-button"
                 className="mt-3 w-full rounded-lg bg-green-500 py-2 text-sm font-bold text-white shadow-lg shadow-green-500/30 transition hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
               >
-                +1 Confirm Fix (Verified)
+                Confirm Fix
               </button>
             )}
           </article>

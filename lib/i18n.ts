@@ -190,7 +190,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       critical: "Critical",
       resolved: "Resolved",
       empty: "No complaints match this filter.",
-      confirmFix: "+1 Confirm Fix",
+      confirmFix: "Confirm Fix",
       confirmed: "Confirmed",
       impactsMeToo: "+1 Impacts Me Too",
       impacted: "Impacted",

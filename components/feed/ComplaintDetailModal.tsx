@@ -247,7 +247,7 @@ export default function ComplaintDetailModal({
                   : "bg-civic-surface text-civic-muted cursor-default",
               )}
             >
-              {alreadyConfirmed ? "✓ You confirmed this fix" : "+1 Confirm Fix"}
+              {alreadyConfirmed ? "✓ You confirmed this fix" : "Confirm Fix"}
             </button>
           )}
 
