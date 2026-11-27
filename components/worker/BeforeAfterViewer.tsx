@@ -149,12 +149,18 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
       <div className="grid grid-cols-2 gap-2">
         <figure className="flex flex-col gap-1">
           <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">Before</figcaption>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={complaint.beforePhotoUrl}
-            alt={`Before: ${complaint.title}`}
-            className="aspect-square w-full rounded-xl object-cover ring-1 ring-civic-border"
-          />
+          {complaint.beforePhotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={complaint.beforePhotoUrl}
+              alt={`Before: ${complaint.title}`}
+              className="aspect-square w-full rounded-xl object-cover ring-1 ring-civic-border"
+            />
+          ) : (
+            <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-civic-border bg-civic-surface text-xs text-civic-muted">
+              No photo attached
+            </div>
+          )}
         </figure>
         <figure className="flex flex-col gap-1">
           <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">After</figcaption>

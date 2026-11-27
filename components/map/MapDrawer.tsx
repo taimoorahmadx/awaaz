@@ -53,12 +53,14 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
       <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-civic-border" aria-hidden="true" />
 
       <div className="flex gap-3">
-        {/* eslint-disable-next-line @next/next/no-img-element -- local offline SVG, no optimisation needed */}
-        <img
-          src={photo}
-          alt={`Photo of ${complaint.category.toLowerCase()} at ${complaint.location.landmark}`}
-          className="h-24 w-24 shrink-0 rounded-xl border border-civic-border bg-civic-surface object-cover"
-        />
+        {photo && (
+          // eslint-disable-next-line @next/next/no-img-element -- local offline photo or compressed JPEG
+          <img
+            src={photo}
+            alt={`Photo of ${complaint.category.toLowerCase()} at ${complaint.location.landmark}`}
+            className="h-24 w-24 shrink-0 rounded-xl border border-civic-border bg-civic-surface object-cover"
+          />
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">

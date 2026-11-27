@@ -158,16 +158,19 @@ export default function ComplaintDetailModal({
           </div>
 
           {/* Photos */}
-          <div className="grid grid-cols-2 gap-2">
-            <figure>
-              <figcaption className="mb-1 text-[10px] uppercase tracking-wider text-civic-muted">Before</figcaption>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={complaint.beforePhotoUrl}
-                alt={`Before: ${complaint.title}`}
-                className="aspect-video w-full rounded-xl object-cover ring-1 ring-civic-border"
-              />
-            </figure>
+          {(complaint.beforePhotoUrl || complaint.afterPhotoUrl) && (
+            <div className="grid grid-cols-2 gap-2">
+              {complaint.beforePhotoUrl && (
+                <figure>
+                  <figcaption className="mb-1 text-[10px] uppercase tracking-wider text-civic-muted">Before</figcaption>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={complaint.beforePhotoUrl}
+                    alt={`Before: ${complaint.title}`}
+                    className="aspect-video w-full rounded-xl object-cover ring-1 ring-civic-border"
+                  />
+                </figure>
+              )}
             {complaint.afterPhotoUrl && (
               <figure>
                 <figcaption className="mb-1 text-[10px] uppercase tracking-wider text-civic-muted">After</figcaption>
@@ -180,6 +183,7 @@ export default function ComplaintDetailModal({
               </figure>
             )}
           </div>
+          )}
 
           {/* Summary in active language */}
           <p

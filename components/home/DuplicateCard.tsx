@@ -44,12 +44,14 @@ export default function DuplicateCard({
       </div>
 
       <div className="mt-3 flex gap-3 rounded-xl border border-civic-border bg-civic-surface p-2.5">
-        {/* eslint-disable-next-line @next/next/no-img-element -- local offline asset or compressed JPEG */}
-        <img
-          src={complaint.beforePhotoUrl}
-          alt={complaint.title}
-          className="h-16 w-16 shrink-0 rounded-lg border border-civic-border object-cover"
-        />
+        {complaint.beforePhotoUrl && (
+          // eslint-disable-next-line @next/next/no-img-element -- local offline asset or compressed JPEG
+          <img
+            src={complaint.beforePhotoUrl}
+            alt={complaint.title}
+            className="h-16 w-16 shrink-0 rounded-lg border border-civic-border object-cover"
+          />
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium">
             <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ring-1 ${URGENCY_BADGE[complaint.urgency]}`}>

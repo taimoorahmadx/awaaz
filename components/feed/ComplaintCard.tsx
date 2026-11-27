@@ -91,13 +91,15 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
         {getComplaintSummary(complaint, lang)}
       </p>
 
-      {/* eslint-disable-next-line @next/next/no-img-element -- local offline SVG, no optimisation needed */}
-      <img
-        src={photo}
-        alt={`Photo of ${complaint.category.toLowerCase()} at ${complaint.location.landmark}`}
-        loading="lazy"
-        className="mt-2 aspect-video w-full rounded-xl border border-civic-border bg-civic-surface object-cover"
-      />
+      {photo && (
+        // eslint-disable-next-line @next/next/no-img-element -- local offline photo or compressed JPEG
+        <img
+          src={photo}
+          alt={`Photo of ${complaint.category.toLowerCase()} at ${complaint.location.landmark}`}
+          loading="lazy"
+          className="mt-2 aspect-video w-full rounded-xl border border-civic-border bg-civic-surface object-cover"
+        />
+      )}
 
       <div className="mt-2 flex items-center gap-2 text-[11px]">
         <span className={`rounded-full px-2 py-0.5 font-medium ring-1 ${STATUS_BADGE[complaint.status]}`}>

@@ -38,7 +38,6 @@ The Playwright smoke test (`e2e/golden-path.spec.ts`, task T3.0) encodes this fl
 - Reddit-style nested comment threads (comments stay flat).
 - Evaluation suite (`evals/`) — parked for later (see `docs/progress.md` → Parking Lot).
 - A remote database / shared backend — parked for later (see `docs/progress.md` → Parking Lot).
-- Live Gemini API calls of any kind (including "quick checks") — the user tests live AI personally.
 - Any UI library other than shadcn/ui (no MUI, Chakra, daisyUI, Headless UI, etc.).
 - A big-bang rewrite of existing screens into shadcn. Swap to shadcn parts only inside files a task already touches.
 

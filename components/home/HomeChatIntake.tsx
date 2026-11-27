@@ -93,7 +93,7 @@ function toComplaint(
     urduTranscript: r.urduTranscript,
     englishSummary: r.englishSummary,
     romanSummary: r.romanSummary,
-    beforePhotoUrl: photoDataUrl || info.photo,
+    beforePhotoUrl: photoDataUrl ?? "",
     department: r.department,
     category: info.category,
     urgency: r.urgency,

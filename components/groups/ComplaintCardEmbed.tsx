@@ -27,12 +27,14 @@ export default function ComplaintCardEmbed({ complaint, onOpenDetail }: Complain
       aria-label={`View complaint details: ${complaint.title}`}
       className="mt-2 flex w-full items-center gap-2.5 rounded-xl border border-civic-border bg-civic-surface p-2 text-left transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={complaint.beforePhotoUrl}
-        alt={complaint.title}
-        className="h-12 w-14 shrink-0 rounded-lg object-cover ring-1 ring-civic-border"
-      />
+      {complaint.beforePhotoUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={complaint.beforePhotoUrl}
+          alt={complaint.title}
+          className="h-12 w-14 shrink-0 rounded-lg object-cover ring-1 ring-civic-border"
+        />
+      )}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-1 text-[10px] font-semibold">
           <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 ring-1 ${URGENCY_BADGE[complaint.urgency]}`}>

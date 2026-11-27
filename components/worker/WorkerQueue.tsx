@@ -40,8 +40,10 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
             <span className="ml-auto text-[11px] text-civic-muted">{c.sla.hoursRemaining}h SLA</span>
           </div>
           <div className="flex gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={c.beforePhotoUrl} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover ring-1 ring-civic-border" />
+            {c.beforePhotoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={c.beforePhotoUrl} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover ring-1 ring-civic-border" />
+            )}
             <div className="min-w-0">
               <h3 className="truncate text-sm font-semibold text-slate-50">{c.title}</h3>
               <p className="text-xs text-civic-muted">{DEPARTMENT_LABELS[c.department]} · {c.category}</p>
