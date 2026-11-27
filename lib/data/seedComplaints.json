@@ -10,21 +10,68 @@
     "category": "Open Manhole",
     "urgency": "CRITICAL",
     "status": "REPORTED",
-    "location": { "lat": 33.6950, "lng": 73.0130, "city": "Islamabad", "sector": "F-10", "landmark": "F-10 Markaz, near petrol pump", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-tariq", "citizenName": "Tariq" },
-    "votes": { "score": 47, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 320, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.695,
+      "lng": 73.013,
+      "city": "Islamabad",
+      "sector": "F-10",
+      "landmark": "F-10 Markaz, near petrol pump",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-tariq",
+      "citizenName": "Tariq"
+    },
+    "votes": {
+      "score": 47,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 320,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-001-1", "authorId": "citizen-bilal", "authorName": "Bilal", "text": "My cousin's bike wheel went in here last night. Please fix urgently.", "createdAt": "2026-11-24T06:40:00.000Z" },
-      { "id": "cmt-001-2", "authorId": "citizen-sana", "authorName": "Sana", "text": "میں نے بھی دیکھا، کم از کم کوئی رکاوٹ تو لگا دیں۔", "createdAt": "2026-11-24T07:15:00.000Z" }
+      {
+        "id": "cmt-001-1",
+        "authorId": "citizen-bilal",
+        "authorName": "Bilal",
+        "text": "My cousin's bike wheel went in here last night. Please fix urgently.",
+        "createdAt": "2026-11-24T06:40:00.000Z"
+      },
+      {
+        "id": "cmt-001-2",
+        "authorId": "citizen-sana",
+        "authorName": "Sana",
+        "text": "میں نے بھی دیکھا، کم از کم کوئی رکاوٹ تو لگا دیں۔",
+        "createdAt": "2026-11-24T07:15:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 9, "publicDensityRisk": "HIGH", "reasoning": "Uncovered drop on a busy commercial footpath; high fall risk after dark." },
-    "sla": { "hoursRemaining": 4, "isBreached": false, "escalationLevel": "WARNING" },
+    "priorityBreakdown": {
+      "issueSeverity": 9,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Uncovered drop on a busy commercial footpath; high fall risk after dark."
+    },
+    "sla": {
+      "hoursRemaining": 4,
+      "isBreached": false,
+      "escalationLevel": "WARNING"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-24T05:30:00.000Z", "actorId": "citizen-tariq", "actorName": "Tariq" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-24T05:30:00.000Z",
+        "actorId": "citizen-tariq",
+        "actorName": "Tariq"
+      }
     ],
     "createdAt": "2026-11-24T05:30:00.000Z",
-    "updatedAt": "2026-11-24T07:15:00.000Z"
+    "updatedAt": "2026-11-24T07:15:00.000Z",
+    "titleRoman": "F-10 Markaz mein khula manhole",
+    "romanSummary": "F-10 Markaz mein petrol pump ke sath manhole ka dhakkan ghaib hai, raat ko bohat khatarnak hai."
   },
   {
     "id": "cmp-002",
@@ -37,22 +84,73 @@
     "category": "Garbage Heap",
     "urgency": "MEDIUM",
     "status": "IN_PROGRESS",
-    "location": { "lat": 33.6990, "lng": 73.0170, "city": "Islamabad", "sector": "F-10", "landmark": "F-10/2, Street 23 corner", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-tariq", "citizenName": "Tariq" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 18, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 85, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.699,
+      "lng": 73.017,
+      "city": "Islamabad",
+      "sector": "F-10",
+      "landmark": "F-10/2, Street 23 corner",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-tariq",
+      "citizenName": "Tariq"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 18,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 85,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-002-1", "authorId": "citizen-hamza", "authorName": "Hamza", "text": "CDA truck came by yesterday but skipped this corner.", "createdAt": "2026-11-23T12:05:00.000Z" }
+      {
+        "id": "cmt-002-1",
+        "authorId": "citizen-hamza",
+        "authorName": "Hamza",
+        "text": "CDA truck came by yesterday but skipped this corner.",
+        "createdAt": "2026-11-23T12:05:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 5, "publicDensityRisk": "MEDIUM", "reasoning": "Residential street; health nuisance but no immediate injury risk." },
-    "sla": { "hoursRemaining": 20, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 5,
+      "publicDensityRisk": "MEDIUM",
+      "reasoning": "Residential street; health nuisance but no immediate injury risk."
+    },
+    "sla": {
+      "hoursRemaining": 20,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-22T09:10:00.000Z", "actorId": "citizen-tariq", "actorName": "Tariq" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-23T10:00:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Claimed for sanitation run" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-22T09:10:00.000Z",
+        "actorId": "citizen-tariq",
+        "actorName": "Tariq"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-23T10:00:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Claimed for sanitation run"
+      }
     ],
     "createdAt": "2026-11-22T09:10:00.000Z",
-    "updatedAt": "2026-11-23T14:00:00.000Z"
+    "updatedAt": "2026-11-23T14:00:00.000Z",
+    "titleRoman": "Gali number 23 mein kachray ka dher",
+    "romanSummary": "F-10/2 gali number 23 ke konay par teen din se kachra nahi uthaya gaya, badboo aur machhar hain."
   },
   {
     "id": "cmp-003",
@@ -66,31 +164,91 @@
     "category": "Broken Streetlight",
     "urgency": "HIGH",
     "status": "PENDING_COMMUNITY_VERIFICATION",
-    "location": { "lat": 33.6905, "lng": 73.0080, "city": "Islamabad", "sector": "F-10", "landmark": "F-10/4, road beside community park", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-tariq", "citizenName": "Tariq" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 29, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 150, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.6905,
+      "lng": 73.008,
+      "city": "Islamabad",
+      "sector": "F-10",
+      "landmark": "F-10/4, road beside community park",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-tariq",
+      "citizenName": "Tariq"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 29,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 150,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-003-1", "authorId": "worker-sajid", "authorName": "Sajid (Field Worker)", "text": "Replaced 4 sodium lamps and the faulty timer. Please confirm tonight.", "createdAt": "2026-11-23T17:30:00.000Z" }
+      {
+        "id": "cmt-003-1",
+        "authorId": "worker-sajid",
+        "authorName": "Sajid (Field Worker)",
+        "text": "Replaced 4 sodium lamps and the faulty timer. Please confirm tonight.",
+        "createdAt": "2026-11-23T17:30:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 6, "publicDensityRisk": "MEDIUM", "reasoning": "Dark stretch next to a park used by families in the evening." },
-    "sla": { "hoursRemaining": 12, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 6,
+      "publicDensityRisk": "MEDIUM",
+      "reasoning": "Dark stretch next to a park used by families in the evening."
+    },
+    "sla": {
+      "hoursRemaining": 12,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "aiVerification": {
       "passed": true,
       "confidence": 0.94,
       "verdict": "VERIFIED_RESOLVED",
       "reasoning": "Same pole and bracket visible in both photos; lamp is now lit and illuminating the road surface.",
-      "detectedChanges": ["Lamp head replaced", "Road surface illuminated"],
+      "detectedChanges": [
+        "Lamp head replaced",
+        "Road surface illuminated"
+      ],
       "verifiedAt": "2026-11-23T17:25:00.000Z"
     },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-18T19:45:00.000Z", "actorId": "citizen-tariq", "actorName": "Tariq" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-23T09:00:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid" },
-      { "type": "AI_VERIFIED", "status": "PENDING_COMMUNITY_VERIFICATION", "at": "2026-11-23T17:25:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Same pole and bracket visible; lamp now lit." }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-18T19:45:00.000Z",
+        "actorId": "citizen-tariq",
+        "actorName": "Tariq"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-23T09:00:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid"
+      },
+      {
+        "type": "AI_VERIFIED",
+        "status": "PENDING_COMMUNITY_VERIFICATION",
+        "at": "2026-11-23T17:25:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Same pole and bracket visible; lamp now lit."
+      }
     ],
     "createdAt": "2026-11-18T19:45:00.000Z",
-    "updatedAt": "2026-11-23T17:30:00.000Z"
+    "updatedAt": "2026-11-23T17:30:00.000Z",
+    "titleRoman": "F-10/4 park road ki streetlights band hain",
+    "romanSummary": "F-10/4 mein park ke sath wali sarak par sari streetlights ek haftay se band hain, raat ko andhera hota hai."
   },
   {
     "id": "cmp-004",
@@ -103,18 +261,53 @@
     "category": "Pothole",
     "urgency": "HIGH",
     "status": "REPORTED",
-    "location": { "lat": 33.6975, "lng": 73.0100, "city": "Islamabad", "sector": "F-10", "landmark": "Nazimuddin Road, F-10/1 signal", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-hamza", "citizenName": "Hamza" },
-    "votes": { "score": 33, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 600, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.6975,
+      "lng": 73.01,
+      "city": "Islamabad",
+      "sector": "F-10",
+      "landmark": "Nazimuddin Road, F-10/1 signal",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-hamza",
+      "citizenName": "Hamza"
+    },
+    "votes": {
+      "score": 33,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 600,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [],
-    "priorityBreakdown": { "issueSeverity": 7, "publicDensityRisk": "HIGH", "reasoning": "Arterial road with heavy two-wheeler traffic at the signal." },
-    "sla": { "hoursRemaining": 30, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 7,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Arterial road with heavy two-wheeler traffic at the signal."
+    },
+    "sla": {
+      "hoursRemaining": 30,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-23T08:20:00.000Z", "actorId": "citizen-hamza", "actorName": "Hamza" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-23T08:20:00.000Z",
+        "actorId": "citizen-hamza",
+        "actorName": "Hamza"
+      }
     ],
     "createdAt": "2026-11-23T08:20:00.000Z",
-    "updatedAt": "2026-11-23T08:20:00.000Z"
+    "updatedAt": "2026-11-23T08:20:00.000Z",
+    "titleRoman": "Nazimuddin Road par gehra garha",
+    "romanSummary": "Nazimuddin Road par F-10/1 ke signal ke paas bara garha hai, motorcycle walay gir rahe hain."
   },
   {
     "id": "cmp-005",
@@ -127,20 +320,61 @@
     "category": "Sewage Leak",
     "urgency": "HIGH",
     "status": "REPORTED",
-    "location": { "lat": 33.7280, "lng": 73.0760, "city": "Islamabad", "sector": "F-6", "landmark": "F-6 Super Market, rear service road", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-ayesha", "citizenName": "Ayesha" },
-    "votes": { "score": 26, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 240, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.728,
+      "lng": 73.076,
+      "city": "Islamabad",
+      "sector": "F-6",
+      "landmark": "F-6 Super Market, rear service road",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-ayesha",
+      "citizenName": "Ayesha"
+    },
+    "votes": {
+      "score": 26,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 240,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-005-1", "authorId": "citizen-sana", "authorName": "Sana", "text": "Shopkeepers are putting bricks down to walk across. Really bad.", "createdAt": "2026-11-24T04:50:00.000Z" }
+      {
+        "id": "cmt-005-1",
+        "authorId": "citizen-sana",
+        "authorName": "Sana",
+        "text": "Shopkeepers are putting bricks down to walk across. Really bad.",
+        "createdAt": "2026-11-24T04:50:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 7, "publicDensityRisk": "HIGH", "reasoning": "Busy market area; contamination and slip risk for shoppers." },
-    "sla": { "hoursRemaining": 16, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 7,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Busy market area; contamination and slip risk for shoppers."
+    },
+    "sla": {
+      "hoursRemaining": 16,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-23T22:15:00.000Z", "actorId": "citizen-ayesha", "actorName": "Ayesha" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-23T22:15:00.000Z",
+        "actorId": "citizen-ayesha",
+        "actorName": "Ayesha"
+      }
     ],
     "createdAt": "2026-11-23T22:15:00.000Z",
-    "updatedAt": "2026-11-24T04:50:00.000Z"
+    "updatedAt": "2026-11-24T04:50:00.000Z",
+    "titleRoman": "Super Market ke peechay sewage leak",
+    "romanSummary": "F-6 Super Market ke peechay gutter ubal raha hai, ganda pani sarak par phail gaya hai."
   },
   {
     "id": "cmp-006",
@@ -153,23 +387,80 @@
     "category": "Live Wire",
     "urgency": "CRITICAL",
     "status": "IN_PROGRESS",
-    "location": { "lat": 33.7240, "lng": 73.0790, "city": "Islamabad", "sector": "F-6", "landmark": "F-6/3, children's park gate", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-ayesha", "citizenName": "Ayesha" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 58, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 410, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.724,
+      "lng": 73.079,
+      "city": "Islamabad",
+      "sector": "F-6",
+      "landmark": "F-6/3, children's park gate",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-ayesha",
+      "citizenName": "Ayesha"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 58,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 410,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-006-1", "authorId": "citizen-bilal", "authorName": "Bilal", "text": "IESCO van is on site now, they have cordoned it off.", "createdAt": "2026-11-24T08:10:00.000Z" },
-      { "id": "cmt-006-2", "authorId": "citizen-ayesha", "authorName": "Ayesha", "text": "شکریہ، امید ہے آج ہی ٹھیک ہو جائے گا۔", "createdAt": "2026-11-24T08:22:00.000Z" }
+      {
+        "id": "cmt-006-1",
+        "authorId": "citizen-bilal",
+        "authorName": "Bilal",
+        "text": "IESCO van is on site now, they have cordoned it off.",
+        "createdAt": "2026-11-24T08:10:00.000Z"
+      },
+      {
+        "id": "cmt-006-2",
+        "authorId": "citizen-ayesha",
+        "authorName": "Ayesha",
+        "text": "شکریہ، امید ہے آج ہی ٹھیک ہو جائے گا۔",
+        "createdAt": "2026-11-24T08:22:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 10, "publicDensityRisk": "HIGH", "reasoning": "Live conductor within reach of children at a park entrance." },
-    "sla": { "hoursRemaining": 2, "isBreached": false, "escalationLevel": "ESCALATED_TO_COMMISSIONER" },
+    "priorityBreakdown": {
+      "issueSeverity": 10,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Live conductor within reach of children at a park entrance."
+    },
+    "sla": {
+      "hoursRemaining": 2,
+      "isBreached": false,
+      "escalationLevel": "ESCALATED_TO_COMMISSIONER"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-24T06:55:00.000Z", "actorId": "citizen-ayesha", "actorName": "Ayesha" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-24T07:30:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Cordoned off; repair crew en route" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-24T06:55:00.000Z",
+        "actorId": "citizen-ayesha",
+        "actorName": "Ayesha"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-24T07:30:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Cordoned off; repair crew en route"
+      }
     ],
     "createdAt": "2026-11-24T06:55:00.000Z",
-    "updatedAt": "2026-11-24T08:22:00.000Z"
+    "updatedAt": "2026-11-24T08:22:00.000Z",
+    "titleRoman": "F-6/3 park ke paas latakti bijli ki taar",
+    "romanSummary": "F-6/3 mein bachon ke park ke sath bijli ki nangi taar neeche latak rahi hai, current ka khatra hai."
   },
   {
     "id": "cmp-007",
@@ -183,33 +474,109 @@
     "category": "Garbage Heap",
     "urgency": "LOW",
     "status": "RESOLVED",
-    "location": { "lat": 33.7300, "lng": 73.0700, "city": "Islamabad", "sector": "F-6", "landmark": "Kohsar Market, F-6/1 parking", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-sana", "citizenName": "Sana" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 12, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 60, "verifiedCount": 3, "verifiedBy": ["citizen-sana", "citizen-ayesha", "citizen-bilal"], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.73,
+      "lng": 73.07,
+      "city": "Islamabad",
+      "sector": "F-6",
+      "landmark": "Kohsar Market, F-6/1 parking",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-sana",
+      "citizenName": "Sana"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 12,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 60,
+      "verifiedCount": 3,
+      "verifiedBy": [
+        "citizen-sana",
+        "citizen-ayesha",
+        "citizen-bilal"
+      ],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-007-1", "authorId": "citizen-sana", "authorName": "Sana", "text": "All clean now, thanks CDA.", "createdAt": "2026-11-22T11:00:00.000Z" }
+      {
+        "id": "cmt-007-1",
+        "authorId": "citizen-sana",
+        "authorName": "Sana",
+        "text": "All clean now, thanks CDA.",
+        "createdAt": "2026-11-22T11:00:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 3, "publicDensityRisk": "MEDIUM", "reasoning": "Cosmetic and hygiene issue in a parking area." },
-    "sla": { "hoursRemaining": 0, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 3,
+      "publicDensityRisk": "MEDIUM",
+      "reasoning": "Cosmetic and hygiene issue in a parking area."
+    },
+    "sla": {
+      "hoursRemaining": 0,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "aiVerification": {
       "passed": true,
       "confidence": 0.91,
       "verdict": "VERIFIED_RESOLVED",
       "reasoning": "Same bin and kerb visible; waste pile removed and ground cleared.",
-      "detectedChanges": ["Waste pile removed", "Ground cleared"],
+      "detectedChanges": [
+        "Waste pile removed",
+        "Ground cleared"
+      ],
       "verifiedAt": "2026-11-22T09:40:00.000Z"
     },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-20T16:30:00.000Z", "actorId": "citizen-sana", "actorName": "Sana" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-21T08:00:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid" },
-      { "type": "AI_VERIFIED", "status": "PENDING_COMMUNITY_VERIFICATION", "at": "2026-11-22T09:40:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Waste pile removed and ground cleared." },
-      { "type": "COMMUNITY_CONFIRMED", "status": "RESOLVED", "at": "2026-11-22T11:00:00.000Z", "actorId": "citizen-sana", "actorName": "Sana" },
-      { "type": "RESOLVED", "status": "RESOLVED", "at": "2026-11-22T11:00:00.000Z", "actorId": "citizen-sana", "actorName": "Sana" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-20T16:30:00.000Z",
+        "actorId": "citizen-sana",
+        "actorName": "Sana"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-21T08:00:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid"
+      },
+      {
+        "type": "AI_VERIFIED",
+        "status": "PENDING_COMMUNITY_VERIFICATION",
+        "at": "2026-11-22T09:40:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Waste pile removed and ground cleared."
+      },
+      {
+        "type": "COMMUNITY_CONFIRMED",
+        "status": "RESOLVED",
+        "at": "2026-11-22T11:00:00.000Z",
+        "actorId": "citizen-sana",
+        "actorName": "Sana"
+      },
+      {
+        "type": "RESOLVED",
+        "status": "RESOLVED",
+        "at": "2026-11-22T11:00:00.000Z",
+        "actorId": "citizen-sana",
+        "actorName": "Sana"
+      }
     ],
     "createdAt": "2026-11-20T16:30:00.000Z",
-    "updatedAt": "2026-11-22T11:00:00.000Z"
+    "updatedAt": "2026-11-22T11:00:00.000Z",
+    "titleRoman": "Kohsar Market parking mein kachra",
+    "romanSummary": "Kohsar Market ki parking mein kachra jama hai, koora daan bharay hue hain."
   },
   {
     "id": "cmp-008",
@@ -222,20 +589,61 @@
     "category": "Water Outage",
     "urgency": "HIGH",
     "status": "REPORTED",
-    "location": { "lat": 33.6880, "lng": 73.0310, "city": "Islamabad", "sector": "G-9", "landmark": "G-9 Markaz (Karachi Company)", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-usman", "citizenName": "Usman" },
-    "votes": { "score": 41, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 900, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.688,
+      "lng": 73.031,
+      "city": "Islamabad",
+      "sector": "G-9",
+      "landmark": "G-9 Markaz (Karachi Company)",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-usman",
+      "citizenName": "Usman"
+    },
+    "votes": {
+      "score": 41,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 900,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-008-1", "authorId": "citizen-hamza", "authorName": "Hamza", "text": "Same in G-9/1. Pump station seems down.", "createdAt": "2026-11-24T03:30:00.000Z" }
+      {
+        "id": "cmt-008-1",
+        "authorId": "citizen-hamza",
+        "authorName": "Hamza",
+        "text": "Same in G-9/1. Pump station seems down.",
+        "createdAt": "2026-11-24T03:30:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 7, "publicDensityRisk": "HIGH", "reasoning": "Dense residential blocks without drinking water." },
-    "sla": { "hoursRemaining": 0, "isBreached": true, "escalationLevel": "ESCALATED_TO_COMMISSIONER" },
+    "priorityBreakdown": {
+      "issueSeverity": 7,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Dense residential blocks without drinking water."
+    },
+    "sla": {
+      "hoursRemaining": 0,
+      "isBreached": true,
+      "escalationLevel": "ESCALATED_TO_COMMISSIONER"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-22T07:00:00.000Z", "actorId": "citizen-usman", "actorName": "Usman" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-22T07:00:00.000Z",
+        "actorId": "citizen-usman",
+        "actorName": "Usman"
+      }
     ],
     "createdAt": "2026-11-22T07:00:00.000Z",
-    "updatedAt": "2026-11-24T03:30:00.000Z"
+    "updatedAt": "2026-11-24T03:30:00.000Z",
+    "titleRoman": "G-9 Markaz ke paas do din se pani nahi aya",
+    "romanSummary": "G-9 Markaz (Karachi Company) ke paas hamare block mein do din se pani nahi aya, tanker bhi nahi aa raha."
   },
   {
     "id": "cmp-009",
@@ -248,18 +656,53 @@
     "category": "Low Gas Pressure",
     "urgency": "MEDIUM",
     "status": "REPORTED",
-    "location": { "lat": 33.6830, "lng": 73.0270, "city": "Islamabad", "sector": "G-9", "landmark": "G-9/4, Street 40", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-usman", "citizenName": "Usman" },
-    "votes": { "score": 22, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 300, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.683,
+      "lng": 73.027,
+      "city": "Islamabad",
+      "sector": "G-9",
+      "landmark": "G-9/4, Street 40",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-usman",
+      "citizenName": "Usman"
+    },
+    "votes": {
+      "score": 22,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 300,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [],
-    "priorityBreakdown": { "issueSeverity": 4, "publicDensityRisk": "MEDIUM", "reasoning": "Inconvenience during peak hours; no leak reported." },
-    "sla": { "hoursRemaining": 48, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 4,
+      "publicDensityRisk": "MEDIUM",
+      "reasoning": "Inconvenience during peak hours; no leak reported."
+    },
+    "sla": {
+      "hoursRemaining": 48,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-23T18:40:00.000Z", "actorId": "citizen-usman", "actorName": "Usman" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-23T18:40:00.000Z",
+        "actorId": "citizen-usman",
+        "actorName": "Usman"
+      }
     ],
     "createdAt": "2026-11-23T18:40:00.000Z",
-    "updatedAt": "2026-11-23T18:40:00.000Z"
+    "updatedAt": "2026-11-23T18:40:00.000Z",
+    "titleRoman": "G-9/4 mein gas ka pressure bohat kam",
+    "romanSummary": "G-9/4 mein subah aur shaam ko gas ka pressure bohat kam hota hai, khana pakana mushkil hai."
   },
   {
     "id": "cmp-010",
@@ -272,22 +715,73 @@
     "category": "Pothole",
     "urgency": "MEDIUM",
     "status": "IN_PROGRESS",
-    "location": { "lat": 33.6920, "lng": 73.0360, "city": "Islamabad", "sector": "G-9", "landmark": "G-9/2 main double road", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-hamza", "citizenName": "Hamza" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 15, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 200, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.692,
+      "lng": 73.036,
+      "city": "Islamabad",
+      "sector": "G-9",
+      "landmark": "G-9/2 main double road",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-hamza",
+      "citizenName": "Hamza"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 15,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 200,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [
-      { "id": "cmt-010-1", "authorId": "citizen-usman", "authorName": "Usman", "text": "Patchwork crew started on the north side this morning.", "createdAt": "2026-11-24T05:20:00.000Z" }
+      {
+        "id": "cmt-010-1",
+        "authorId": "citizen-usman",
+        "authorName": "Usman",
+        "text": "Patchwork crew started on the north side this morning.",
+        "createdAt": "2026-11-24T05:20:00.000Z"
+      }
     ],
-    "priorityBreakdown": { "issueSeverity": 5, "publicDensityRisk": "MEDIUM", "reasoning": "Multiple shallow potholes on a residential artery." },
-    "sla": { "hoursRemaining": 36, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 5,
+      "publicDensityRisk": "MEDIUM",
+      "reasoning": "Multiple shallow potholes on a residential artery."
+    },
+    "sla": {
+      "hoursRemaining": 36,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-21T10:00:00.000Z", "actorId": "citizen-hamza", "actorName": "Hamza" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-23T08:30:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Patchwork team dispatched" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-21T10:00:00.000Z",
+        "actorId": "citizen-hamza",
+        "actorName": "Hamza"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-23T08:30:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Patchwork team dispatched"
+      }
     ],
     "createdAt": "2026-11-21T10:00:00.000Z",
-    "updatedAt": "2026-11-24T05:20:00.000Z"
+    "updatedAt": "2026-11-24T05:20:00.000Z",
+    "titleRoman": "G-9/2 ki main sarak tooti hui hai",
+    "romanSummary": "G-9/2 ki main sarak par kai garhay hain, barish ke baad pani khara ho jata hai."
   },
   {
     "id": "cmp-011",
@@ -300,18 +794,53 @@
     "category": "Sewage Leak",
     "urgency": "HIGH",
     "status": "REPORTED",
-    "location": { "lat": 33.6650, "lng": 73.0600, "city": "Islamabad", "sector": "I-9", "landmark": "I-9 Industrial Area, Street 7", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-bilal", "citizenName": "Bilal" },
-    "votes": { "score": 19, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 450, "verifiedCount": 0, "verifiedBy": [], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.665,
+      "lng": 73.06,
+      "city": "Islamabad",
+      "sector": "I-9",
+      "landmark": "I-9 Industrial Area, Street 7",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-bilal",
+      "citizenName": "Bilal"
+    },
+    "votes": {
+      "score": 19,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 450,
+      "verifiedCount": 0,
+      "verifiedBy": [],
+      "impactConfirmedBy": []
+    },
     "comments": [],
-    "priorityBreakdown": { "issueSeverity": 6, "publicDensityRisk": "HIGH", "reasoning": "Heavy foot traffic at shift change; contamination risk." },
-    "sla": { "hoursRemaining": 10, "isBreached": false, "escalationLevel": "WARNING" },
+    "priorityBreakdown": {
+      "issueSeverity": 6,
+      "publicDensityRisk": "HIGH",
+      "reasoning": "Heavy foot traffic at shift change; contamination risk."
+    },
+    "sla": {
+      "hoursRemaining": 10,
+      "isBreached": false,
+      "escalationLevel": "WARNING"
+    },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-23T13:15:00.000Z", "actorId": "citizen-bilal", "actorName": "Bilal" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-23T13:15:00.000Z",
+        "actorId": "citizen-bilal",
+        "actorName": "Bilal"
+      }
     ],
     "createdAt": "2026-11-23T13:15:00.000Z",
-    "updatedAt": "2026-11-23T13:15:00.000Z"
+    "updatedAt": "2026-11-23T13:15:00.000Z",
+    "titleRoman": "I-9 Industrial Area mein gutter ubal raha hai",
+    "romanSummary": "I-9 Industrial Area mein factories ke samne gutter ubal raha hai, mazdooron ko guzarne mein mushkil hai."
   },
   {
     "id": "cmp-012",
@@ -325,30 +854,98 @@
     "category": "Broken Streetlight",
     "urgency": "LOW",
     "status": "RESOLVED",
-    "location": { "lat": 33.6600, "lng": 73.0520, "city": "Islamabad", "sector": "I-9", "landmark": "I-9/4, Street 12", "source": "LANDMARK" },
-    "reporter": { "citizenId": "citizen-bilal", "citizenName": "Bilal" },
-    "assignedTo": { "workerId": "worker-sajid", "workerName": "Sajid" },
-    "votes": { "score": 7, "upvotedBy": [], "downvotedBy": [] },
-    "communityImpact": { "affectedCount": 40, "verifiedCount": 2, "verifiedBy": ["citizen-bilal", "citizen-usman"], "impactConfirmedBy": [] },
+    "location": {
+      "lat": 33.66,
+      "lng": 73.052,
+      "city": "Islamabad",
+      "sector": "I-9",
+      "landmark": "I-9/4, Street 12",
+      "source": "LANDMARK"
+    },
+    "reporter": {
+      "citizenId": "citizen-bilal",
+      "citizenName": "Bilal"
+    },
+    "assignedTo": {
+      "workerId": "worker-sajid",
+      "workerName": "Sajid"
+    },
+    "votes": {
+      "score": 7,
+      "upvotedBy": [],
+      "downvotedBy": []
+    },
+    "communityImpact": {
+      "affectedCount": 40,
+      "verifiedCount": 2,
+      "verifiedBy": [
+        "citizen-bilal",
+        "citizen-usman"
+      ],
+      "impactConfirmedBy": []
+    },
     "comments": [],
-    "priorityBreakdown": { "issueSeverity": 3, "publicDensityRisk": "LOW", "reasoning": "Single lamp in a quiet lane." },
-    "sla": { "hoursRemaining": 0, "isBreached": false, "escalationLevel": "STANDARD" },
+    "priorityBreakdown": {
+      "issueSeverity": 3,
+      "publicDensityRisk": "LOW",
+      "reasoning": "Single lamp in a quiet lane."
+    },
+    "sla": {
+      "hoursRemaining": 0,
+      "isBreached": false,
+      "escalationLevel": "STANDARD"
+    },
     "aiVerification": {
       "passed": true,
       "confidence": 0.88,
       "verdict": "VERIFIED_RESOLVED",
       "reasoning": "Same pole visible; lamp now lit.",
-      "detectedChanges": ["Lamp lit"],
+      "detectedChanges": [
+        "Lamp lit"
+      ],
       "verifiedAt": "2026-11-21T18:10:00.000Z"
     },
     "history": [
-      { "type": "REPORTED", "status": "REPORTED", "at": "2026-11-19T20:00:00.000Z", "actorId": "citizen-bilal", "actorName": "Bilal" },
-      { "type": "CLAIMED", "status": "IN_PROGRESS", "at": "2026-11-21T07:00:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid" },
-      { "type": "AI_VERIFIED", "status": "PENDING_COMMUNITY_VERIFICATION", "at": "2026-11-21T18:10:00.000Z", "actorId": "worker-sajid", "actorName": "Sajid", "note": "Same pole visible; lamp now lit." },
-      { "type": "COMMUNITY_CONFIRMED", "status": "RESOLVED", "at": "2026-11-21T20:00:00.000Z", "actorId": "citizen-bilal", "actorName": "Bilal" },
-      { "type": "RESOLVED", "status": "RESOLVED", "at": "2026-11-21T20:00:00.000Z", "actorId": "citizen-bilal", "actorName": "Bilal" }
+      {
+        "type": "REPORTED",
+        "status": "REPORTED",
+        "at": "2026-11-19T20:00:00.000Z",
+        "actorId": "citizen-bilal",
+        "actorName": "Bilal"
+      },
+      {
+        "type": "CLAIMED",
+        "status": "IN_PROGRESS",
+        "at": "2026-11-21T07:00:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid"
+      },
+      {
+        "type": "AI_VERIFIED",
+        "status": "PENDING_COMMUNITY_VERIFICATION",
+        "at": "2026-11-21T18:10:00.000Z",
+        "actorId": "worker-sajid",
+        "actorName": "Sajid",
+        "note": "Same pole visible; lamp now lit."
+      },
+      {
+        "type": "COMMUNITY_CONFIRMED",
+        "status": "RESOLVED",
+        "at": "2026-11-21T20:00:00.000Z",
+        "actorId": "citizen-bilal",
+        "actorName": "Bilal"
+      },
+      {
+        "type": "RESOLVED",
+        "status": "RESOLVED",
+        "at": "2026-11-21T20:00:00.000Z",
+        "actorId": "citizen-bilal",
+        "actorName": "Bilal"
+      }
     ],
     "createdAt": "2026-11-19T20:00:00.000Z",
-    "updatedAt": "2026-11-21T20:30:00.000Z"
+    "updatedAt": "2026-11-21T20:30:00.000Z",
+    "titleRoman": "I-9/4 ki gali mein streetlight kharab",
+    "romanSummary": "I-9/4 ki rihaishi gali mein ek streetlight kharab hai."
   }
 ]

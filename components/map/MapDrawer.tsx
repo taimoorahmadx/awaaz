@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import { ArrowBigUp, Building2, MapPin, X } from "lucide-react";
 import type { Complaint } from "@/lib/types";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintTitle } from "@/lib/i18n";
 import {
   DEPARTMENT_LABELS,
   STATUS_BADGE,
@@ -20,6 +22,7 @@ interface MapDrawerProps {
 
 /** Slide-up bottom sheet for the tapped map pin. */
 export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawerProps) {
+  const { lang, t, isRtl } = useLanguage();
   const closeRef = useRef<HTMLButtonElement>(null);
   const openId = complaint?.id;
 
@@ -61,10 +64,13 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
           <div className="flex items-start justify-between gap-2">
             <h2
               id="map-drawer-title"
-              lang="ur"
-              className="urdu line-clamp-2 flex-1 text-right text-base font-bold text-slate-50"
+              dir={isRtl ? "rtl" : "ltr"}
+              lang={isRtl ? "ur" : "en"}
+              className={`line-clamp-2 flex-1 font-bold text-slate-50 ${
+                isRtl ? "urdu text-right text-base leading-relaxed" : "text-sm leading-snug"
+              }`}
             >
-              {complaint.titleUrdu}
+              {getComplaintTitle(complaint, lang)}
             </h2>
             <button
               ref={closeRef}
@@ -76,7 +82,6 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
               <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <p className="truncate text-sm text-slate-300">{complaint.title}</p>
           <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-civic-muted">
             <MapPin className="h-3 w-3 shrink-0" aria-hidden="true" />
             <span className="truncate">
@@ -95,14 +100,14 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
             style={{ backgroundColor: URGENCY_HEX[complaint.urgency] }}
             aria-hidden="true"
           />
-          {URGENCY_LABELS[complaint.urgency]}
+          {t.urgencies[complaint.urgency] ?? URGENCY_LABELS[complaint.urgency]}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-civic-surface px-2 py-0.5 text-slate-200 ring-1 ring-civic-border">
           <Building2 className="h-3 w-3" aria-hidden="true" />
-          {DEPARTMENT_LABELS[complaint.department]}
+          {t.departments[complaint.department] ?? DEPARTMENT_LABELS[complaint.department]}
         </span>
         <span className={`rounded-full px-2 py-0.5 ring-1 ${STATUS_BADGE[complaint.status]}`}>
-          {STATUS_LABELS[complaint.status]}
+          {t.statuses[complaint.status] ?? STATUS_LABELS[complaint.status]}
         </span>
         <span
           className="ml-auto inline-flex items-center gap-0.5 rounded-full bg-civic-accent/15 px-2 py-0.5 text-civic-accent ring-1 ring-civic-accent/40"
@@ -113,14 +118,14 @@ export default function MapDrawer({ complaint, onClose, onOpenModal }: MapDrawer
         </span>
       </div>
 
-      <p className="mt-2 text-[11px] text-civic-muted">Reported by {complaint.reporter.citizenName}</p>
+      <p className="mt-2 text-[11px] text-civic-muted">{t.map.reportedBy} {complaint.reporter.citizenName}</p>
 
       <button
         type="button"
         onClick={() => onOpenModal(complaint.id)}
         className="mt-3 w-full rounded-lg bg-civic-surface py-2 text-xs font-semibold text-slate-200 ring-1 ring-civic-border transition hover:bg-civic-raised hover:text-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
       >
-        View Full Details
+        {t.map.openDetails}
       </button>
     </section>
   );

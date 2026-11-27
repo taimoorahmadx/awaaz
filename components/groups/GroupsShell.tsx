@@ -6,6 +6,7 @@ import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import { useComplaints, useGroupMessages, useGroups } from "@/lib/data/storage";
 import { timeAgo } from "@/lib/labels";
 import type { CivicGroup, CivicGroupType, Complaint, GroupMessage } from "@/lib/types";
+import { useLanguage } from "@/components/common/LanguageProvider";
 import GroupChatView from "./GroupChatView";
 
 interface GroupsShellProps {
@@ -39,6 +40,7 @@ export default function GroupsShell({
   onConvertToTicket,
   onUpdateComplaint,
 }: GroupsShellProps) {
+  const { t } = useLanguage();
   const { groups, hydrated: groupsHydrated } = useGroups();
   const { messages } = useGroupMessages();
   const { complaints } = useComplaints();
@@ -89,12 +91,9 @@ export default function GroupsShell({
         <section className="flex flex-1 flex-col gap-4 px-4 py-4" data-testid="groups-channel-list">
           <div className="flex items-baseline justify-between">
             <div>
-              <h2 className="text-base font-semibold text-slate-50">Neighborhood Groups</h2>
-              <p className="text-xs text-civic-muted">Local channels & municipal advisories</p>
+              <h2 className="text-base font-semibold text-slate-50">{t.groups.title}</h2>
+              <p className="text-xs text-civic-muted">{t.groups.subtitle}</p>
             </div>
-            <span className="urdu text-sm text-civic-muted" lang="ur">
-              گروپس
-            </span>
           </div>
 
           {!groupsHydrated ? (

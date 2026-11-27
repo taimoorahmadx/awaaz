@@ -13,6 +13,8 @@ import {
   URGENCY_LABELS,
   timeAgo,
 } from "@/lib/labels";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintSummary, getComplaintTitle } from "@/lib/i18n";
 import CommentSection from "./CommentSection";
 
 interface ComplaintCardProps {
@@ -24,6 +26,7 @@ interface ComplaintCardProps {
 
 /** One Explore feed card: badges, Urdu + English text, photo, vote bar and expandable flat comments. */
 export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenModal }: ComplaintCardProps) {
+  const { lang, t, isRtl } = useLanguage();
   const [showComments, setShowComments] = useState(false);
   const { votes } = complaint;
   const upvoted = votes.upvotedBy.includes(viewerId);
@@ -60,27 +63,35 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
             style={{ backgroundColor: URGENCY_HEX[complaint.urgency] }}
             aria-hidden="true"
           />
-          {URGENCY_LABELS[complaint.urgency]}
+          {t.urgencies[complaint.urgency] ?? URGENCY_LABELS[complaint.urgency]}
         </span>
         <span className="inline-flex items-center gap-1 rounded-full bg-civic-surface px-2 py-0.5 text-slate-200 ring-1 ring-civic-border">
           <Building2 className="h-3 w-3" aria-hidden="true" />
-          {DEPARTMENT_LABELS[complaint.department]}
+          {t.departments[complaint.department] ?? DEPARTMENT_LABELS[complaint.department]}
         </span>
         <span className="ml-auto inline-flex items-center gap-1 text-civic-muted">
           <MapPin className="h-3 w-3" aria-hidden="true" />
-          Sector {complaint.location.sector} ·{" "}
+          {complaint.location.sector} ·{" "}
           <time dateTime={complaint.createdAt}>{timeAgo(complaint.createdAt)}</time>
         </span>
       </div>
 
-      {/* Titles */}
-      <h3 id={`title-${complaint.id}`} className="mt-2 text-sm font-semibold text-slate-50">
-        {complaint.title}
+      {/* Title & summary in active language only */}
+      <h3
+        id={`title-${complaint.id}`}
+        dir={isRtl ? "rtl" : "ltr"}
+        lang={isRtl ? "ur" : "en"}
+        className={`mt-2 font-semibold text-slate-50 ${isRtl ? "urdu text-right text-base leading-relaxed" : "text-sm"}`}
+      >
+        {getComplaintTitle(complaint, lang)}
       </h3>
-      <p lang="ur" className="urdu text-right text-base text-slate-100">
-        {complaint.titleUrdu}
+      <p
+        dir={isRtl ? "rtl" : "ltr"}
+        lang={isRtl ? "ur" : "en"}
+        className={`mt-1 leading-relaxed text-slate-300 ${isRtl ? "urdu text-right text-sm" : "text-xs"}`}
+      >
+        {getComplaintSummary(complaint, lang)}
       </p>
-      <p className="mt-1 text-xs leading-relaxed text-slate-300">{complaint.englishSummary}</p>
 
       {/* eslint-disable-next-line @next/next/no-img-element -- local offline SVG, no optimisation needed */}
       <img
@@ -92,7 +103,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
 
       <div className="mt-2 flex items-center gap-2 text-[11px]">
         <span className={`rounded-full px-2 py-0.5 font-medium ring-1 ${STATUS_BADGE[complaint.status]}`}>
-          {STATUS_LABELS[complaint.status]}
+          {t.statuses[complaint.status] ?? STATUS_LABELS[complaint.status]}
         </span>
         <span className="truncate text-civic-muted">{complaint.location.landmark}</span>
       </div>
@@ -156,7 +167,7 @@ export default function ComplaintCard({ complaint, viewerId, viewerName, onOpenM
               : "bg-green-500 text-white hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
           }`}
         >
-          {alreadyConfirmed ? "✓ You confirmed this fix" : "+1 Confirm Fix"}
+          {alreadyConfirmed ? `✓ ${t.feed.confirmed}` : t.feed.confirmFix}
         </button>
       )}
 

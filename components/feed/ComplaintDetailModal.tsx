@@ -8,6 +8,8 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintSummary, getComplaintTitle } from "@/lib/i18n";
 import {
   DEPARTMENT_LABELS,
   STATUS_BADGE,
@@ -91,6 +93,7 @@ export default function ComplaintDetailModal({
   onClose,
   onUpdateComplaint,
 }: ComplaintDetailModalProps) {
+  const { lang, t, isRtl } = useLanguage();
   if (!complaint) return null;
 
   const pct = (n: number) => `${Math.round(n * 100)}%`;
@@ -117,12 +120,16 @@ export default function ComplaintDetailModal({
       >
         {/* Header */}
         <div className="sticky top-0 z-10 border-b border-civic-border bg-civic-raised/95 px-4 py-3 backdrop-blur">
-          <DialogTitle className="text-sm font-bold text-slate-50 leading-snug pr-6">
-            {complaint.title}
+          <DialogTitle
+            dir={isRtl ? "rtl" : "ltr"}
+            lang={isRtl ? "ur" : "en"}
+            className={cn(
+              "font-bold text-slate-50 leading-snug pr-6",
+              isRtl ? "urdu text-right text-base" : "text-sm",
+            )}
+          >
+            {getComplaintTitle(complaint, lang)}
           </DialogTitle>
-          <p lang="ur" className="urdu text-right text-xs text-slate-300 mt-0.5">
-            {complaint.titleUrdu}
-          </p>
         </div>
 
         <div className="flex flex-col gap-4 p-4">
@@ -130,10 +137,10 @@ export default function ComplaintDetailModal({
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-medium">
             <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ring-1 ${URGENCY_BADGE[complaint.urgency]}`}>
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: URGENCY_HEX[complaint.urgency] }} aria-hidden />
-              {URGENCY_LABELS[complaint.urgency]}
+              {t.urgencies[complaint.urgency] ?? URGENCY_LABELS[complaint.urgency]}
             </span>
             <span className={`rounded-full px-2 py-0.5 ring-1 ${STATUS_BADGE[complaint.status]}`}>
-              {STATUS_LABELS[complaint.status]}
+              {t.statuses[complaint.status] ?? STATUS_LABELS[complaint.status]}
             </span>
             <span className="ml-auto flex items-center gap-1 text-civic-muted">
               <MapPin className="h-3 w-3" aria-hidden />
@@ -143,7 +150,7 @@ export default function ComplaintDetailModal({
 
           {/* Department + Reporter */}
           <div className="flex items-center gap-2 text-[11px] text-civic-muted">
-            <span className="font-medium text-slate-200">{DEPARTMENT_LABELS[complaint.department]}</span>
+            <span className="font-medium text-slate-200">{t.departments[complaint.department] ?? DEPARTMENT_LABELS[complaint.department]}</span>
             <span>·</span>
             <span>Reported by <strong className="text-slate-100">{complaint.reporter.citizenName}</strong></span>
             <span>·</span>
@@ -174,15 +181,17 @@ export default function ComplaintDetailModal({
             )}
           </div>
 
-          {/* English summary */}
-          <p className="text-xs leading-relaxed text-slate-300">{complaint.englishSummary}</p>
-
-          {/* Urdu transcript */}
-          {complaint.urduTranscript && (
-            <blockquote lang="ur" className="urdu rounded-xl border border-civic-border bg-civic-surface px-3 py-2 text-right text-sm text-slate-200">
-              {complaint.urduTranscript}
-            </blockquote>
-          )}
+          {/* Summary in active language */}
+          <p
+            dir={isRtl ? "rtl" : "ltr"}
+            lang={isRtl ? "ur" : "en"}
+            className={cn(
+              "leading-relaxed text-slate-300",
+              isRtl ? "urdu rounded-xl border border-civic-border bg-civic-surface px-3 py-2 text-right text-sm text-slate-200" : "text-xs",
+            )}
+          >
+            {getComplaintSummary(complaint, lang)}
+          </p>
 
           {/* Priority breakdown */}
           {complaint.priorityBreakdown && (

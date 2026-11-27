@@ -12,8 +12,10 @@ export const UrgencySchema = z.enum(URGENCIES).catch("MEDIUM");
 export const AudioAnalysisResponseSchema = z.object({
   urduTranscript: z.string(),
   englishSummary: z.string(),
+  romanSummary: z.string().optional().catch(undefined),
   title: z.string(),
   titleUrdu: z.string(),
+  titleRoman: z.string().optional().catch(undefined),
   category: z.enum(CATEGORIES).catch("Other"),
   department: DepartmentSchema,
   urgency: UrgencySchema,

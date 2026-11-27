@@ -1,15 +1,16 @@
 "use client";
 
 import { ClipboardList, Map, Mic, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { useLanguage } from "./LanguageProvider";
 
 export type CitizenTab = "explore" | "map" | "home" | "reports" | "groups";
 
-const TABS: { id: CitizenTab; label: string; icon: LucideIcon }[] = [
-  { id: "explore", label: "Explore", icon: Newspaper },
-  { id: "map", label: "Map", icon: Map },
-  { id: "home", label: "Home", icon: Mic },
-  { id: "reports", label: "My Reports", icon: ClipboardList },
-  { id: "groups", label: "Groups", icon: Users },
+const TABS: { id: CitizenTab; icon: LucideIcon }[] = [
+  { id: "explore", icon: Newspaper },
+  { id: "map", icon: Map },
+  { id: "home", icon: Mic },
+  { id: "reports", icon: ClipboardList },
+  { id: "groups", icon: Users },
 ];
 
 interface BottomNavProps {
@@ -18,15 +19,17 @@ interface BottomNavProps {
 }
 
 export default function BottomNav({ active, onChange }: BottomNavProps) {
+  const { lang, t } = useLanguage();
   return (
     <nav
       aria-label="Primary"
       className="fixed inset-x-0 bottom-0 z-50 mx-auto h-16 max-w-md border-t border-civic-border bg-civic-surface/95 backdrop-blur"
     >
       <ul className="grid h-full grid-cols-5">
-        {TABS.map(({ id, label, icon: Icon }) => {
+        {TABS.map(({ id, icon: Icon }) => {
           const isActive = id === active;
           const isHome = id === "home";
+          const label = t.nav[id];
           return (
             <li key={id} className="flex">
               <button
@@ -51,7 +54,7 @@ export default function BottomNav({ active, onChange }: BottomNavProps) {
                 ) : (
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 )}
-                <span>{label}</span>
+                <span className={lang === "ur" ? "urdu text-[11px]" : ""}>{label}</span>
               </button>
             </li>
           );

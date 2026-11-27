@@ -7,8 +7,11 @@ export const MOCK_AUDIO_ANALYSIS: AudioAnalysisResponse = {
     "جناح سپر مارکیٹ کے پاس ایف ٹین میں تین دن سے کچرے کا بڑا ڈھیر پڑا ہے، بدبو بہت زیادہ ہے اور بچے بیمار ہو رہے ہیں۔ براہ کرم جلدی صاف کروائیں۔",
   englishSummary:
     "A large garbage heap has been lying near Jinnah Super Market in F-10 for three days, causing a strong smell and making children sick.",
+  romanSummary:
+    "Jinnah Super Market F-10 ke paas teen din se kachray ka bara dher para hai, badboo bohat zyada hai aur bachay bimar ho rahe hain.",
   title: "Garbage heap near Jinnah Super Market",
   titleUrdu: "جناح سپر مارکیٹ کے پاس کچرے کا ڈھیر",
+  titleRoman: "Jinnah Super Market ke paas kachray ka dher",
   category: "Garbage Heap",
   department: "CDA_SANITATION",
   urgency: "HIGH",
@@ -27,8 +30,10 @@ export function buildAudioFallback(text: string, sectorHint: string): AudioAnaly
   return {
     urduTranscript: text,
     englishSummary: text,
+    romanSummary: text,
     title: info.title,
     titleUrdu: info.titleUrdu,
+    titleRoman: info.titleRoman,
     category: info.category,
     department: info.department,
     urgency: info.urgency,

@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Bot, Loader2, MapPin, Mic, Plus, Send, X } from "lucide-react";
+import { Loader2, MapPin, Mic, Plus, Send, X } from "lucide-react";
 import type { Complaint, Department, GeoLocation, Urgency } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
+import { useLanguage } from "@/components/common/LanguageProvider";
 import WaveformVisualizer from "@/components/audio/WaveformVisualizer";
 import DuplicateCard from "@/components/home/DuplicateCard";
 import { categoryInfo } from "@/lib/categories";
@@ -20,8 +21,10 @@ import {
 interface AnalyzeAudioResult {
   urduTranscript: string;
   englishSummary: string;
+  romanSummary?: string;
   title: string;
   titleUrdu: string;
+  titleRoman?: string;
   category: string;
   department: Department;
   urgency: Urgency;
@@ -84,8 +87,10 @@ function toComplaint(
     id: `cmp-${Date.now()}`,
     title: r.title,
     titleUrdu: r.titleUrdu,
+    titleRoman: r.titleRoman,
     urduTranscript: r.urduTranscript,
     englishSummary: r.englishSummary,
+    romanSummary: r.romanSummary,
     beforePhotoUrl: photoDataUrl || info.photo,
     department: r.department,
     category: info.category,
@@ -127,6 +132,7 @@ export default function HomeChatIntake({
         ? "طارق بھائی"
         : "شہری";
   const { complaints } = useComplaints();
+  const { lang, t, isRtl } = useLanguage();
   const [text, setText] = useState("");
   const [attachedPhoto, setAttachedPhoto] = useState<CompressedImage | null>(null);
   const [recording, setRecording] = useState(false);
@@ -327,14 +333,26 @@ export default function HomeChatIntake({
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 py-4 text-center">
         {!result && !loading && (
           <>
-            <span className="flex h-20 w-20 flex-col items-center justify-center rounded-2xl bg-civic-raised text-civic-accent ring-1 ring-civic-border">
-              <Bot className="h-8 w-8" aria-hidden="true" />
-              <span className="mt-1 text-[10px] font-semibold uppercase tracking-wider">Awaaz</span>
-            </span>
-            <p className="urdu text-xl text-slate-50" lang="ur">
-              السلام علیکم {urduName}! 👋
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.jpg"
+              alt="Awaaz"
+              className="h-20 w-20 rounded-2xl object-cover ring-1 ring-civic-border shadow-lg"
+            />
+            <p
+              dir={isRtl ? "rtl" : "ltr"}
+              lang={isRtl ? "ur" : "en"}
+              className={`text-slate-50 ${isRtl ? "urdu text-xl" : "text-lg font-semibold"}`}
+            >
+              {t.home.greeting(isRtl ? urduName : citizenName)}
             </p>
-            <p className="text-sm text-civic-muted">How can I help you today?</p>
+            <p
+              dir={isRtl ? "rtl" : "ltr"}
+              lang={isRtl ? "ur" : "en"}
+              className={`text-civic-muted ${isRtl ? "urdu text-sm" : "text-sm"}`}
+            >
+              {t.home.subtitle}
+            </p>
           </>
         )}
 
@@ -351,7 +369,7 @@ export default function HomeChatIntake({
         {loading && (
           <div className="flex items-center gap-2 text-sm text-civic-muted" role="status">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            Awaaz AI is triaging your complaint…
+            {t.home.analyzingPrompt}
           </div>
         )}
 
@@ -372,13 +390,13 @@ export default function HomeChatIntake({
                 data-testid="triage-department"
                 className="rounded-full border border-civic-accent/40 bg-civic-accent/10 px-2.5 py-0.5 text-[11px] font-semibold text-civic-accent"
               >
-                {DEPT_LABEL[result.department] ?? result.department}
+                {t.departments[result.department] ?? DEPT_LABEL[result.department] ?? result.department}
               </span>
               <span
                 data-testid="triage-urgency"
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${URGENCY_STYLE[result.urgency] ?? URGENCY_STYLE.MEDIUM}`}
               >
-                {result.urgency}
+                {lang === "en" ? result.urgency : (t.urgencies[result.urgency] ?? result.urgency)}
               </span>
               {locationChip && (
                 <span
@@ -390,11 +408,30 @@ export default function HomeChatIntake({
               )}
               <OfflineBadge visible={isFallback} />
             </div>
-            <h3 className="text-base font-semibold text-slate-50">{result.title}</h3>
-            <p className="urdu mt-2 text-right text-lg leading-relaxed text-slate-100" lang="ur" dir="rtl">
-              {result.urduTranscript}
+            <h3
+              dir={isRtl ? "rtl" : "ltr"}
+              lang={isRtl ? "ur" : "en"}
+              className={`font-semibold text-slate-50 ${isRtl ? "urdu text-right text-lg leading-relaxed" : "text-base"}`}
+            >
+              {lang === "ur"
+                ? result.titleUrdu || result.title
+                : lang === "roman"
+                  ? result.titleRoman || result.title
+                  : result.title}
+            </h3>
+            <p
+              dir={isRtl ? "rtl" : "ltr"}
+              lang={isRtl ? "ur" : "en"}
+              className={`mt-2 leading-relaxed text-civic-muted ${
+                isRtl ? "urdu text-right text-base text-slate-100" : "text-sm"
+              }`}
+            >
+              {lang === "ur"
+                ? result.urduTranscript || result.englishSummary
+                : lang === "roman"
+                  ? result.romanSummary || result.englishSummary
+                  : result.englishSummary}
             </p>
-            <p className="mt-2 text-sm text-civic-muted">{result.englishSummary}</p>
             {activeComplaint?.beforePhotoUrl.startsWith("data:") && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -493,13 +530,14 @@ export default function HomeChatIntake({
               value={text}
               onChange={(e) => setText(e.target.value)}
               disabled={loading}
-              placeholder="Describe issue in Urdu or English..."
-              className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-civic-muted focus:outline-none"
+              dir={isRtl ? "rtl" : "ltr"}
+              placeholder={t.home.placeholder}
+              className={`min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-civic-muted focus:outline-none ${isRtl ? "urdu text-right" : ""}`}
             />
             {canSubmit ? (
               <button
                 type="submit"
-                aria-label="Send complaint"
+                aria-label={t.home.sendComplaint}
                 disabled={loading}
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50"
               >
@@ -510,7 +548,7 @@ export default function HomeChatIntake({
                 type="button"
                 onClick={startRecording}
                 disabled={loading}
-                aria-label="Record Urdu voice note"
+                aria-label={t.home.startVoice}
                 aria-pressed={false}
                 className="flex h-10 w-10 shrink-0 animate-soft-pulse items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100 disabled:opacity-50"
               >

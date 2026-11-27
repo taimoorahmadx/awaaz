@@ -266,3 +266,28 @@ test("worker Home only shows tickets assigned to the active worker", async ({ pa
   await expect(page.locator('[data-testid="worker-ticket"][data-complaint-id="cmp-006"]')).toBeVisible();
   await expect(page.locator('[data-testid="worker-ticket"][data-complaint-id="cmp-002"]')).toHaveCount(0);
 });
+
+test("custom logo renders and language switcher toggles EN / Urdu / Roman cleanly", async ({ page }) => {
+  const headerLogo = page.getByRole("img", { name: "Awaaz logo" });
+  await expect(headerLogo).toBeVisible();
+  await expect(headerLogo).toHaveAttribute("src", "/logo.jpg");
+
+  // Default English: Explore card shows English title without stacked Urdu title
+  await gotoTab(page, "Explore");
+  await expect(page.getByText("Open manhole at F-10 Markaz")).toBeVisible();
+  await expect(page.getByText("ایف-10 مرکز میں کھلا مین ہول")).toHaveCount(0);
+
+  // Switch to Urdu
+  await page.getByTestId("language-switcher").click();
+  await page.getByTestId("lang-option-ur").click();
+  await expect(page.getByText("ایف-10 مرکز میں کھلا مین ہول")).toBeVisible();
+  await expect(page.getByText("Open manhole at F-10 Markaz")).toHaveCount(0);
+
+  // Switch to Roman Urdu and verify persistence across reload
+  await page.getByTestId("language-switcher").click();
+  await page.getByTestId("lang-option-roman").click();
+  await expect(page.getByText("F-10 Markaz mein khula manhole")).toBeVisible();
+  await page.reload();
+  await gotoTab(page, "Explore");
+  await expect(page.getByText("F-10 Markaz mein khula manhole")).toBeVisible();
+});

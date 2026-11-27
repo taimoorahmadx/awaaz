@@ -11,8 +11,8 @@ An optional typed note and/or hazard photo may also be provided.
 
 Tasks:
 1. Transcribe the speech verbatim in Urdu script (urduTranscript). If there is no audio, use the typed note.
-2. Write a 1–2 sentence English summary (englishSummary).
-3. Write a short English title (title, max 8 words) and its Urdu equivalent (titleUrdu).
+2. Write a 1–2 sentence English summary (englishSummary) and a 1–2 sentence Roman Urdu summary (romanSummary).
+3. Write a short English title (title, max 8 words), its Urdu equivalent (titleUrdu), and its Roman Urdu equivalent (titleRoman).
 4. Pick exactly one category from this fixed list and route it to the department shown:
 ${CATEGORY_LINES}
    Use "Other" if nothing fits. Never invent a new category.
@@ -22,7 +22,7 @@ ${CATEGORY_LINES}
 8. Optionally add priorityBreakdown: issueSeverity (integer 1–10), publicDensityRisk, and a one-sentence reasoning.
 
 Respond ONLY with JSON matching:
-{"urduTranscript": string, "englishSummary": string, "title": string, "titleUrdu": string,
+{"urduTranscript": string, "englishSummary": string, "romanSummary": string, "title": string, "titleUrdu": string, "titleRoman": string,
  "category": ${CATEGORIES.map((c) => `"${c}"`).join("|")},
  "department": "CDA_SANITATION"|"CDA_ROADS"|"IESCO"|"WASA"|"SNGPL",
  "urgency": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW", "landmark": string, "sector": string,

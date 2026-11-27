@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Nastaliq_Urdu } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { LanguageProvider } from "@/components/common/LanguageProvider";
 import "./globals.css";
 
 // Fonts are downloaded at build time and self-hosted, so runtime stays offline-safe.
@@ -18,7 +19,7 @@ const urdu = Noto_Nastaliq_Urdu({
 });
 
 export const metadata: Metadata = {
-  title: "Awaaz (آواز)",
+  title: "Awaaz",
   description:
     "Civic hazard reporting for Islamabad — speak in Urdu, get it triaged, see it fixed.",
 };
@@ -35,11 +36,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable} ${urdu.variable}`}>
       <body className="min-h-dvh font-sans">
-        {/* Mobile-first container, centered on desktop */}
-        <div className="relative mx-auto flex min-h-dvh max-w-md flex-col border-x border-civic-border/60 bg-civic-surface shadow-2xl shadow-black/50">
-          {children}
-        </div>
-        <Toaster />
+        <LanguageProvider>
+          {/* Mobile-first container, centered on desktop */}
+          <div className="relative mx-auto flex min-h-dvh max-w-md flex-col border-x border-civic-border/60 bg-civic-surface shadow-2xl shadow-black/50">
+            {children}
+          </div>
+          <Toaster />
+        </LanguageProvider>
       </body>
     </html>
   );

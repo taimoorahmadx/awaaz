@@ -92,8 +92,10 @@ export interface Complaint {
   id: string;
   title: string;
   titleUrdu: string;
+  titleRoman?: string;
   urduTranscript: string;
   englishSummary: string;
+  romanSummary?: string;
   /** Local path under /images/hazards/ or an inline SVG data URI. Never an external URL. */
   beforePhotoUrl: string;
   afterPhotoUrl?: string;
