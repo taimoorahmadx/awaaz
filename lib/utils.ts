@@ -254,7 +254,12 @@ export function scoreToGrade(score: number): CivicGrade {
  * score = clamp(0, 100, round(100 - (openCritical*15 + openHigh*8 + openMedium*3) + resolvedRatio*20))
  */
 export function computeSectorHealth(complaints: Complaint[]): SectorHealth[] {
-  return HEALTH_SECTORS.map((sector) => {
+  const seen = new Set<string>(HEALTH_SECTORS);
+  for (const c of complaints) {
+    if (c.location.sector) seen.add(c.location.sector);
+  }
+  const sectors = Array.from(seen);
+  return sectors.map((sector) => {
     const sectorComplaints = complaints.filter((c) => c.location.sector === sector);
     const totalComplaints = sectorComplaints.length;
     const resolvedComplaints = sectorComplaints.filter((c) => c.status === "RESOLVED").length;

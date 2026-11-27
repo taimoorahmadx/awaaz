@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import dynamic from "next/dynamic";
-import { ExternalLink, MapIcon, MapPin } from "lucide-react";
+import { ExternalLink, MapIcon, MapPin, RotateCcw } from "lucide-react";
 import type { Complaint } from "@/lib/types";
+import { unclaimComplaint } from "@/lib/data/storage";
 import { STATUS_BADGE, STATUS_LABELS, URGENCY_BADGE, URGENCY_LABELS } from "@/lib/labels";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintTitle } from "@/lib/i18n";
+import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import BeforeAfterViewer from "./BeforeAfterViewer";
 
 const noop = () => {};
@@ -27,11 +32,14 @@ interface WorkerHomeProps {
 
 /** Worker Home tab: assigned active route cards (mini map + Google Maps link + AI verification). */
 export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: WorkerHomeProps) {
+  const { lang, t, isRtl } = useLanguage();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const assigned = complaints.filter((c) => c.assignedTo?.workerId === workerId);
   const inProgress = assigned.filter((c) => c.status === "IN_PROGRESS");
   const awaitingSignOff = assigned.filter((c) => c.status === "PENDING_COMMUNITY_VERIFICATION");
   // Keep IN_PROGRESS first and PENDING_COMMUNITY_VERIFICATION in the same list so BeforeAfterViewer stays mounted on verify.
   const myWork = [...inProgress, ...awaitingSignOff];
+  const selected = complaints.find((c) => c.id === selectedId) ?? null;
 
   if (myWork.length === 0) {
     return (
@@ -66,21 +74,47 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
           >
             <div className="flex items-center gap-2">
               <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ${URGENCY_BADGE[c.urgency]}`}>
-                {URGENCY_LABELS[c.urgency]}
+                {t.urgencies[c.urgency] ?? URGENCY_LABELS[c.urgency]}
               </span>
               <span className={`rounded-full px-2 py-0.5 text-[11px] ring-1 ${STATUS_BADGE[c.status]}`}>
-                {STATUS_LABELS[c.status]}
+                {t.statuses[c.status] ?? STATUS_LABELS[c.status]}
               </span>
               <span className="ml-auto text-[11px] text-civic-muted">{sector}</span>
+              {isInProgress && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = unclaimComplaint(c.id, workerId, "Sajid");
+                    if (updated) onUpdateComplaint(updated);
+                  }}
+                  title="Return ticket to queue"
+                  className="inline-flex items-center gap-1 rounded-md border border-civic-border px-2 py-0.5 text-[11px] text-civic-muted transition hover:border-red-500/40 hover:text-red-300"
+                >
+                  <RotateCcw className="h-3 w-3" aria-hidden="true" />
+                  Unclaim
+                </button>
+              )}
             </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-slate-50">{c.title}</h3>
+            <button
+              type="button"
+              onClick={() => setSelectedId(c.id)}
+              className="text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent rounded-lg"
+            >
+              <h3
+                dir={isRtl ? "rtl" : "ltr"}
+                className={`font-semibold text-slate-50 ${isRtl ? "urdu text-right text-base" : "text-sm"}`}
+              >
+                {getComplaintTitle(c, lang)}
+              </h3>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-civic-muted">
                 <MapPin className="h-3.5 w-3.5 shrink-0 text-civic-accent" aria-hidden="true" />
                 <span>{landmark}</span>
+                {c.comments.length > 0 && (
+                  <span className="ml-auto text-[11px] text-civic-accent">💬 {c.comments.length}</span>
+                )}
               </p>
-            </div>
+            </button>
 
             {isInProgress && (
               <div
@@ -118,6 +152,14 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
           </article>
         );
       })}
+
+      <ComplaintDetailModal
+        complaint={selected}
+        viewerId={workerId}
+        viewerName="Sajid"
+        onClose={() => setSelectedId(null)}
+        onUpdateComplaint={onUpdateComplaint}
+      />
     </section>
   );
 }

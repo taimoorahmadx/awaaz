@@ -1,8 +1,9 @@
 "use client";
 
-import { CheckCircle2, Clock, MapPin, Shield, ShieldOff, UserCheck, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, MapPin, Megaphone, RotateCcw, Shield, ShieldOff, UserCheck, XCircle } from "lucide-react";
 import type { Complaint, ComplaintEvent, ComplaintEventType } from "@/lib/types";
-import { confirmFix } from "@/lib/data/storage";
+import { confirmFix, rejectFix } from "@/lib/data/storage";
+import CommentSection from "./CommentSection";
 import {
   Dialog,
   DialogContent,
@@ -33,13 +34,16 @@ interface ComplaintDetailModalProps {
 const EVENT_META: Record<ComplaintEventType, { label: string; color: string }> = {
   REPORTED:            { label: "Reported",               color: "text-slate-300" },
   CLAIMED:             { label: "Claimed by worker",      color: "text-blue-300" },
+  UNCLAIMED:           { label: "Returned to queue",      color: "text-slate-300" },
   WORKER_FIXED:        { label: "Marked fixed by worker", color: "text-emerald-400" },
   AI_VERIFIED:         { label: "AI Verified",            color: "text-green-400" },
   AI_REJECTED:         { label: "AI Rejected",            color: "text-red-400" },
   COMMUNITY_CONFIRMED: { label: "Community Confirmed",    color: "text-cyan-300" },
+  FIX_REJECTED:        { label: "Reopened by citizen",    color: "text-amber-300" },
   RESOLVED:            { label: "Resolved",               color: "text-green-300" },
   IMPACT_ADDED:        { label: "Impact Added",           color: "text-slate-300" },
   URGENCY_RAISED:      { label: "Urgency Raised",         color: "text-amber-300" },
+  DISPATCHED:          { label: "Rapid crew dispatched",  color: "text-red-300" },
 };
 
 function EventIcon({ type }: { type: ComplaintEventType }) {
@@ -47,11 +51,14 @@ function EventIcon({ type }: { type: ComplaintEventType }) {
   switch (type) {
     case "REPORTED":            return <Clock className={cn(size, "text-slate-400")} aria-hidden />;
     case "CLAIMED":             return <UserCheck className={cn(size, "text-blue-300")} aria-hidden />;
+    case "UNCLAIMED":           return <RotateCcw className={cn(size, "text-slate-400")} aria-hidden />;
     case "WORKER_FIXED":        return <CheckCircle2 className={cn(size, "text-emerald-400")} aria-hidden />;
     case "AI_VERIFIED":         return <Shield className={cn(size, "text-green-400")} aria-hidden />;
     case "AI_REJECTED":         return <ShieldOff className={cn(size, "text-red-400")} aria-hidden />;
     case "COMMUNITY_CONFIRMED": return <CheckCircle2 className={cn(size, "text-cyan-300")} aria-hidden />;
+    case "FIX_REJECTED":        return <RotateCcw className={cn(size, "text-amber-300")} aria-hidden />;
     case "RESOLVED":            return <CheckCircle2 className={cn(size, "text-green-300")} aria-hidden />;
+    case "DISPATCHED":          return <Megaphone className={cn(size, "text-red-300")} aria-hidden />;
     default:                    return <Clock className={cn(size, "text-slate-400")} aria-hidden />;
   }
 }
@@ -105,6 +112,12 @@ export default function ComplaintDetailModal({
   function handleConfirmFix(e: React.MouseEvent) {
     e.stopPropagation();
     const updated = confirmFix(complaint!.id, viewerId, viewerName);
+    if (updated) onUpdateComplaint(updated);
+  }
+
+  function handleRejectFix(e: React.MouseEvent) {
+    e.stopPropagation();
+    const updated = rejectFix(complaint!.id, viewerId, viewerName);
     if (updated) onUpdateComplaint(updated);
   }
 
@@ -239,23 +252,43 @@ export default function ComplaintDetailModal({
             </div>
           )}
 
-          {/* +1 Confirm Fix button */}
-          {complaint.status === "PENDING_COMMUNITY_VERIFICATION" && (
-            <button
-              type="button"
-              onClick={handleConfirmFix}
-              disabled={!canConfirm}
-              data-testid="modal-confirm-fix-button"
-              className={cn(
-                "w-full rounded-xl py-2.5 text-sm font-bold shadow-lg transition",
-                canConfirm
-                  ? "bg-green-500 text-white hover:bg-green-400 shadow-green-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
-                  : "bg-civic-surface text-civic-muted cursor-default",
+          {/* +1 Confirm Fix / Reject Fix buttons */}
+          {complaint.status === "PENDING_COMMUNITY_VERIFICATION" && !viewerId.startsWith("worker-") && (
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleConfirmFix}
+                disabled={!canConfirm}
+                data-testid="modal-confirm-fix-button"
+                className={cn(
+                  "flex-1 rounded-xl py-2.5 text-sm font-bold shadow-lg transition",
+                  canConfirm
+                    ? "bg-green-500 text-white hover:bg-green-400 shadow-green-500/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                    : "bg-civic-surface text-civic-muted cursor-default",
+                )}
+              >
+                {alreadyConfirmed ? "✓ You confirmed this fix" : "Confirm Fix"}
+              </button>
+              {canConfirm && (
+                <button
+                  type="button"
+                  onClick={handleRejectFix}
+                  data-testid="modal-reject-fix-button"
+                  className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2.5 text-xs font-semibold text-red-300 transition hover:bg-red-500/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                >
+                  Not Fixed
+                </button>
               )}
-            >
-              {alreadyConfirmed ? "✓ You confirmed this fix" : "Confirm Fix"}
-            </button>
+            </div>
           )}
+
+          {/* Comments */}
+          <CommentSection
+            complaintId={complaint.id}
+            comments={complaint.comments}
+            viewerId={viewerId}
+            viewerName={viewerName}
+          />
 
           {/* Lifecycle Timeline */}
           {timeline.length > 0 && (

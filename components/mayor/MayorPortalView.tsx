@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { Complaint } from "@/lib/types";
+import type { Complaint, Department } from "@/lib/types";
+import { DEPARTMENT_LABELS } from "@/lib/labels";
 import { computeCityHealth, computeSectorHealth, gradeColorClasses } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MapView from "@/components/map/MapView";
@@ -48,16 +49,16 @@ export default function MayorPortalView({
           />
         </TabsContent>
         <TabsContent value="alerts" className="mt-0">
-          <MayorAlertsTab complaints={complaints} />
+          <MayorAlertsTab complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
         </TabsContent>
         <TabsContent value="home" className="mt-0">
           <HomeTab complaints={complaints} onNav={setTab} />
         </TabsContent>
         <TabsContent value="depts" className="mt-0">
-          <DeptsTab />
+          <DeptsTab complaints={complaints} />
         </TabsContent>
         <TabsContent value="contractors" className="mt-0">
-          <MayorContractorsTab complaints={complaints} />
+          <MayorContractorsTab complaints={complaints} onUpdateComplaint={onUpdateComplaint} />
         </TabsContent>
       </div>
 
@@ -98,7 +99,7 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
   const pct = total ? ((resolved / total) * 100).toFixed(1) : "0.0";
 
   const kpis = [
-    { icon: "📥", value: total, label: "Total Filed", sub: "Across 4 Islamabad Sectors" },
+    { icon: "📥", value: total, label: "Total Filed", sub: `Across ${sectorHealth.length} Islamabad Sectors` },
     { icon: "🟢", value: resolved, label: "Verified Fixed", sub: "Citizen + AI Verified" },
     { icon: "🟡", value: inProgress, label: "In Progress", sub: "Field Teams Active" },
     { icon: "🔴", value: critical, label: "Critical Open", sub: "Immediate Action Req" },
@@ -200,27 +201,57 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
   );
 }
 
-function DeptsTab() {
-  const depts = [
-    { rank: "🥇", name: "⚡ IESCO (Power & Streetlights)", total: 42, resolved: 40, pct: "95.2", time: "42 mins", sla: "97%", status: "🟢 Exceptional Performance" },
-    { rank: "🥈", name: "🕳️ CDA Sanitation & Sewerage", total: 58, resolved: 51, pct: "87.9", time: "1h 45m", sla: "89%", status: "🟢 Solid Operation (1 Escalation Open)" },
-    { rank: "⚠️", name: "💧 WASA (Water Supply & Drainage)", total: 32, resolved: 24, pct: "75.0", time: "3h 10m", sla: "74%", status: "🟡 Warning: Tanker/Drainage response lagging" },
-    { rank: "⚠️", name: "🔥 SNGPL (Gas Supply & Pressure)", total: 16, resolved: 11, pct: "68.7", time: "4h 30m", sla: "68%", status: "🟡 Low winter pressure spikes" },
-  ];
+const ALL_DEPTS: { id: Department; icon: string }[] = [
+  { id: "IESCO", icon: "⚡" },
+  { id: "CDA_SANITATION", icon: "🕳️" },
+  { id: "CDA_ROADS", icon: "🛣️" },
+  { id: "WASA", icon: "💧" },
+  { id: "SNGPL", icon: "🔥" },
+];
+
+function DeptsTab({ complaints }: { complaints: Complaint[] }) {
+  const depts = ALL_DEPTS.map(({ id, icon }) => {
+    const list = complaints.filter((c) => c.department === id);
+    const total = list.length;
+    const resolved = list.filter((c) => c.status === "RESOLVED").length;
+    const inProgress = list.filter((c) => c.status === "IN_PROGRESS").length;
+    const overdue = list.filter((c) => c.status !== "RESOLVED" && c.sla.isBreached).length;
+    const pctNum = total ? (resolved / total) * 100 : 0;
+    const onTimeRate = total ? `${Math.round(((total - overdue) / total) * 100)}%` : "—";
+    const status =
+      total === 0
+        ? "⚪ No open tickets"
+        : overdue > 0
+          ? `🟡 ${overdue} overdue · ${inProgress} in progress`
+          : pctNum >= 75
+            ? "🟢 Strong resolution rate"
+            : `🟡 ${inProgress} in progress · ${total - resolved} open`;
+
+    return {
+      id,
+      name: `${icon} ${DEPARTMENT_LABELS[id]}`,
+      total,
+      resolved,
+      pctNum,
+      pct: pctNum.toFixed(1),
+      onTimeRate,
+      status,
+    };
+  }).sort((a, b) => b.pctNum - a.pctNum || b.total - a.total);
+
   return (
     <div className="flex flex-col gap-3 p-3">
-      <h2 className={sectionTitle}>Municipal Agency Leaderboard (Today)</h2>
+      <h2 className={sectionTitle}>Municipal Agency Leaderboard (Live)</h2>
       {depts.map((d, i) => (
-        <div key={d.name} className={card}>
+        <div key={d.id} className={card}>
           <div className="flex justify-between text-sm font-semibold text-slate-100">
             <span>{i + 1}. {d.name}</span>
-            <span>#{i + 1} {d.rank}</span>
+            <span>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}</span>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-300">
             <span>Complaints: {d.total}</span>
             <span>Resolved: {d.resolved} ({d.pct}%)</span>
-            <span>Avg. Fix Time: {d.time}</span>
-            <span>On-Time Rate: {d.sla}</span>
+            <span>On-Time Rate: {d.onTimeRate}</span>
           </div>
           <p className="mt-1 text-[11px] text-slate-400">{d.status}</p>
         </div>

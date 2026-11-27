@@ -62,13 +62,16 @@ export interface AIVerificationResult {
 export type ComplaintEventType =
   | "REPORTED"
   | "CLAIMED"
+  | "UNCLAIMED"
   | "WORKER_FIXED"
   | "AI_VERIFIED"
   | "AI_REJECTED"
   | "COMMUNITY_CONFIRMED"
+  | "FIX_REJECTED"
   | "RESOLVED"
   | "IMPACT_ADDED"
-  | "URGENCY_RAISED";
+  | "URGENCY_RAISED"
+  | "DISPATCHED";
 
 // T3.3: lifecycle history event
 export interface ComplaintEvent {
@@ -137,6 +140,8 @@ export interface Complaint {
     escalationLevel: "STANDARD" | "WARNING" | "ESCALATED_TO_COMMISSIONER";
   };
   aiVerification?: AIVerificationResult;
+  /** Set when Mayor/Commissioner dispatches a rapid crew. */
+  dispatchedAt?: string;
   // T3.3: lifecycle history. Missing on old data → treat as [] and synthesize a REPORTED event.
   history?: ComplaintEvent[];
   createdAt: string;

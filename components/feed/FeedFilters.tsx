@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const SECTOR_OPTIONS = ["All", "F-10", "F-6", "G-9", "I-9"] as const;
-export type SectorFilter = (typeof SECTOR_OPTIONS)[number];
+export type SectorFilter = string;
 
 /** Urgency buckets match the map pins: open tickets by urgency, resolved ones grouped on their own. */
 export type UrgencyFilter = "ALL" | Urgency | "RESOLVED";
@@ -39,6 +39,8 @@ interface FeedFiltersProps {
   sort: SortMode;
   /** Viewer's home sector, starred in the sector list */
   homeSector: string;
+  /** Dynamic list of available sectors (defaults to SECTOR_OPTIONS) */
+  sectors?: string[];
   sectorHealth?: SectorHealth[];
   /** Compact count text displayed on the left of the toolbar */
   countText?: string;
@@ -61,6 +63,7 @@ export default function FeedFilters({
   urgency,
   sort,
   homeSector,
+  sectors,
   sectorHealth = [],
   countText,
   onSectorChange,
@@ -230,7 +233,7 @@ export default function FeedFilters({
                 Sector
               </p>
               <div role="group" aria-label="Filter by sector" className="flex flex-wrap gap-2">
-                {SECTOR_OPTIONS.map((s) => {
+                {(sectors ?? [...SECTOR_OPTIONS]).map((s) => {
                   const health = s === "All" ? undefined : healthBySector.get(s);
                   return (
                     <button

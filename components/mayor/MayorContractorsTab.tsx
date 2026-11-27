@@ -1,19 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { AlertTriangle, CheckCircle2, Lock, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { toggleContractorPayout, useContractors } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS } from "@/lib/labels";
+import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import type { Complaint, Contractor } from "@/lib/types";
 
 interface MayorContractorsTabProps {
   complaints: Complaint[];
+  onUpdateComplaint?: (c: Complaint) => void;
 }
 
 /** Mayor Contractors tab: persisted contractor ledger with Freeze/Unfreeze Payout Switch (AC-10.3) + AI fraud flags. */
-export default function MayorContractorsTab({ complaints }: MayorContractorsTabProps) {
+export default function MayorContractorsTab({ complaints, onUpdateComplaint }: MayorContractorsTabProps) {
   const { contractors, hydrated } = useContractors();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = complaints.find((c) => c.id === selectedId) ?? null;
 
   const frozenCount = contractors.filter((c) => c.payoutStatus === "FROZEN").length;
   const totalFlagged = contractors.reduce((sum, c) => sum + c.flaggedIncidents, 0);
@@ -28,7 +33,7 @@ export default function MayorContractorsTab({ complaints }: MayorContractorsTabP
   const kpis = [
     { v: `🛡️ ${avgResolution}%`, l: "Avg Fix Integrity", s: "Confirmed by AI + Citizens" },
     { v: `🚫 ${totalFlagged}`, l: "Flagged Incidents", s: "Tracked Across Vendors" },
-    { v: "💰 ₨ 240,000", l: "Protected", s: "Taxpayer Funds Preserved" },
+    { v: `💰 ₨ ${(frozenCount * 120000).toLocaleString()}`, l: "Protected", s: "Taxpayer Funds Preserved" },
     {
       v: `🔒 ${frozenCount}`,
       l: "Payouts Frozen",
@@ -156,48 +161,43 @@ export default function MayorContractorsTab({ complaints }: MayorContractorsTabP
           Flagged Audit Incidents
         </h2>
 
-        {rejectedComplaints.map((c) => (
-          <div key={c.id} className="rounded-xl border border-red-500/50 bg-civic-surface p-3">
-            <p className="flex items-center gap-1 text-[11px] font-bold text-red-400">
-              <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
-              AI VERIFICATION REJECTED · {c.id.toUpperCase()}
-            </p>
-            <p className="text-xs font-medium text-slate-200">
-              {c.title} · {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
-            </p>
-            {c.aiVerification && (
-              <p className="mt-1 text-[11px] italic text-slate-400">
-                🤖 Rejected ({Math.round(c.aiVerification.confidence * 100)}%): &quot;
-                {c.aiVerification.reasoning}&quot;
-              </p>
-            )}
+        {rejectedComplaints.length === 0 ? (
+          <div className="rounded-xl border border-civic-border bg-civic-surface p-3 text-xs text-slate-400">
+            No AI-rejected incidents flagged right now.
           </div>
-        ))}
-
-        <div className="rounded-xl border border-red-500/50 bg-civic-surface p-3">
-          <p className="text-[11px] font-bold text-red-400">
-            🚨 CONTRACTOR FRAUD FLAGGED • #ISB-1028
-          </p>
-          <p className="text-xs text-slate-300">
-            Contractor: Apex Infra Ltd • Pothole Patching (Zone-1)
-          </p>
-          <p className="mt-2 text-xs text-slate-200">
-            🤖 AI Vision Verdict:{" "}
-            <span className="font-bold text-red-400">❌ REJECTED (34%)</span>
-          </p>
-          <p className="text-[11px] italic text-slate-400">
-            &quot;Pothole still visible. Photo taken from angle without new asphalt cover. Landmark
-            curb does not match.&quot;
-          </p>
-          <p className="mt-2 text-xs text-slate-200">
-            👤 Citizen Sign-Off:{" "}
-            <span className="font-bold text-red-400">❌ Disapproved by Tariq</span>
-          </p>
-          <p className="text-[11px] italic text-slate-400">
-            &quot;Pothole is still there, worker only took photo&quot;
-          </p>
-        </div>
+        ) : (
+          rejectedComplaints.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setSelectedId(c.id)}
+              className="w-full rounded-xl border border-red-500/50 bg-civic-surface p-3 text-left transition hover:border-red-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
+            >
+              <p className="flex items-center gap-1 text-[11px] font-bold text-red-400">
+                <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+                AI VERIFICATION REJECTED · {c.id.toUpperCase()}
+              </p>
+              <p className="text-xs font-medium text-slate-200">
+                {c.title} · {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
+              </p>
+              {c.aiVerification && (
+                <p className="mt-1 text-[11px] italic text-slate-400">
+                  🤖 Rejected ({Math.round(c.aiVerification.confidence * 100)}%): &quot;
+                  {c.aiVerification.reasoning}&quot;
+                </p>
+              )}
+            </button>
+          ))
+        )}
       </section>
+
+      <ComplaintDetailModal
+        complaint={selected}
+        viewerId="admin-nasir"
+        viewerName="Comm. Nasir"
+        onClose={() => setSelectedId(null)}
+        onUpdateComplaint={(c) => onUpdateComplaint?.(c)}
+      />
     </div>
   );
 }

@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { addGroupMessage, useGroupMessages } from "@/lib/data/storage";
+import { addGroupMessage, dispatchRapidCrew, useGroupMessages } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS, STATUS_LABELS, timeAgo } from "@/lib/labels";
+import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import type { Complaint } from "@/lib/types";
 
 interface MayorAlertsTabProps {
   complaints: Complaint[];
+  onUpdateComplaint?: (c: Complaint) => void;
 }
 
 const DEFAULT_TITLE = "Emergency Civic Advisory";
@@ -21,11 +23,12 @@ const DEFAULT_BODY =
 const MUNICIPAL_ALERTS_GROUP_ID = "grp-municipal-alerts";
 
 /** Mayor Alerts tab: live critical escalations + editable Emergency Broadcast to Municipal Alerts (AC-10.4). */
-export default function MayorAlertsTab({ complaints }: MayorAlertsTabProps) {
+export default function MayorAlertsTab({ complaints, onUpdateComplaint }: MayorAlertsTabProps) {
   const { messages } = useGroupMessages();
   const [title, setTitle] = useState(DEFAULT_TITLE);
   const [body, setBody] = useState(DEFAULT_BODY);
-  const [escalatedIds, setEscalatedIds] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = complaints.find((c) => c.id === selectedId) ?? null;
 
   const criticalOpen = complaints.filter(
     (c) => c.status !== "RESOLVED" && (c.urgency === "CRITICAL" || c.sla.isBreached),
@@ -157,27 +160,34 @@ export default function MayorAlertsTab({ complaints }: MayorAlertsTabProps) {
           </div>
         ) : (
           criticalOpen.map((c) => {
-            const escalated = escalatedIds.includes(c.id);
+            const escalated = Boolean(c.dispatchedAt);
             return (
               <div
                 key={c.id}
                 className="rounded-xl border border-red-500/50 bg-civic-surface p-3"
               >
-                <p className="flex items-center gap-1 text-[11px] font-bold text-red-400">
-                  <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {c.sla.isBreached ? "OVERDUE" : "CRITICAL"} · {c.id.toUpperCase()} ·{" "}
-                  {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-100">{c.title}</p>
-                <p className="text-[11px] text-slate-400">
-                  {c.location.landmark} · {STATUS_LABELS[c.status]}
-                  {c.assignedTo ? ` · Assigned: ${c.assignedTo.workerName}` : ""}
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedId(c.id)}
+                  className="w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent rounded-lg"
+                >
+                  <p className="flex items-center gap-1 text-[11px] font-bold text-red-400">
+                    <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    {c.sla.isBreached ? "OVERDUE" : "CRITICAL"} · {c.id.toUpperCase()} ·{" "}
+                    {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-100">{c.title}</p>
+                  <p className="text-[11px] text-slate-400">
+                    {c.location.landmark} · {STATUS_LABELS[c.status]}
+                    {c.assignedTo ? ` · Assigned: ${c.assignedTo.workerName}` : ""}
+                  </p>
+                </button>
                 <button
                   type="button"
                   disabled={escalated}
                   onClick={() => {
-                    setEscalatedIds((prev) => [...prev, c.id]);
+                    const updated = dispatchRapidCrew(c.id, "admin-nasir", "Comm. Nasir");
+                    if (updated) onUpdateComplaint?.(updated);
                     toast.success(`Priority crew dispatched for ${c.id.toUpperCase()}`);
                   }}
                   className={`mt-2 w-full rounded-lg py-1.5 text-xs font-bold transition ${
@@ -193,6 +203,14 @@ export default function MayorAlertsTab({ complaints }: MayorAlertsTabProps) {
           })
         )}
       </section>
+
+      <ComplaintDetailModal
+        complaint={selected}
+        viewerId="admin-nasir"
+        viewerName="Comm. Nasir"
+        onClose={() => setSelectedId(null)}
+        onUpdateComplaint={(c) => onUpdateComplaint?.(c)}
+      />
     </div>
   );
 }

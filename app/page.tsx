@@ -53,8 +53,11 @@ export default function Page() {
     <>
       <AppHeader
         role={role}
-        onRoleChange={setRoleId}
-        offline={offline}
+        onRoleChange={(nextRole) => {
+          setRoleId(nextRole);
+          if (nextRole === "worker" || nextRole === "mayor") setOffline(false);
+        }}
+        offline={role.kind === "citizen" && tab === "home" ? offline : false}
         onResetData={() => setOffline(false)}
       />
 

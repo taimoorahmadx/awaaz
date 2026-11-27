@@ -7,7 +7,7 @@ import { useComplaints } from "@/lib/data/storage";
 import { computeSectorHealth } from "@/lib/utils";
 import ComplaintCard from "./ComplaintCard";
 import ComplaintDetailModal from "./ComplaintDetailModal";
-import FeedFilters, { type SectorFilter, type SortMode, type UrgencyFilter } from "./FeedFilters";
+import FeedFilters, { SECTOR_OPTIONS, type SectorFilter, type SortMode, type UrgencyFilter } from "./FeedFilters";
 
 const URGENCY_RANK: Record<Urgency, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
@@ -54,6 +54,14 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpda
     [complaints, sector, urgency, sort],
   );
 
+  const sectorOptions = useMemo(() => {
+    const set = new Set<string>(SECTOR_OPTIONS);
+    for (const c of complaints) {
+      if (c.location.sector) set.add(c.location.sector);
+    }
+    return Array.from(set);
+  }, [complaints]);
+
   const sectorHealth = useMemo(
     () => (hydrated ? computeSectorHealth(complaints) : []),
     [complaints, hydrated],
@@ -68,6 +76,7 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpda
         urgency={urgency}
         sort={sort}
         homeSector={homeSector}
+        sectors={sectorOptions}
         sectorHealth={sectorHealth}
         countText={hydrated ? `${visible.length} ${visible.length === 1 ? "complaint" : "complaints"}` : "Loading complaints…"}
         onSectorChange={setSector}

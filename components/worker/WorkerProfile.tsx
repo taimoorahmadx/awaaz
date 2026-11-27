@@ -7,19 +7,22 @@ import { useComplaints } from "@/lib/data/storage";
 export default function WorkerProfile() {
   const { complaints, hydrated } = useComplaints();
 
-  const activeCount = hydrated
-    ? complaints.filter((c) => c.status === "IN_PROGRESS" && c.assignedTo?.workerId === "worker-sajid").length
-    : 0;
-  const pendingSignOffCount = hydrated
-    ? complaints.filter(
-        (c) => c.status === "PENDING_COMMUNITY_VERIFICATION" && c.assignedTo?.workerId === "worker-sajid",
-      ).length
-    : 0;
+  const assigned = hydrated
+    ? complaints.filter((c) => c.assignedTo?.workerId === "worker-sajid")
+    : [];
+  const activeCount = assigned.filter((c) => c.status === "IN_PROGRESS").length;
+  const pendingSignOffCount = assigned.filter(
+    (c) => c.status === "PENDING_COMMUNITY_VERIFICATION",
+  ).length;
+  const resolvedCount = assigned.filter((c) => c.status === "RESOLVED").length;
+  const aiChecked = assigned.filter((c) => c.aiVerification !== undefined);
+  const aiPassed = aiChecked.filter((c) => c.aiVerification?.passed === true).length;
+  const approvalRate = aiChecked.length > 0 ? `${Math.round((aiPassed / aiChecked.length) * 100)}%` : "—";
 
   const stats = [
-    { label: "Approval rate", value: "98%" },
-    { label: "Tickets closed", value: "142" },
-    { label: "Avg. fix time", value: "6h" },
+    { label: "AI approval", value: approvalRate },
+    { label: "Resolved", value: String(resolvedCount) },
+    { label: "Total assigned", value: String(assigned.length) },
   ];
 
   return (

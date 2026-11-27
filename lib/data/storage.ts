@@ -314,6 +314,104 @@ export function claimComplaint(
   }));
 }
 
+/**
+ * Citizen disputes/rejects a claimed fix while PENDING_COMMUNITY_VERIFICATION:
+ * moves ticket back to IN_PROGRESS and records FIX_REJECTED in history (plus optional comment).
+ */
+export function rejectFix(
+  id: string,
+  profileId: string,
+  profileName: string = "Citizen",
+  note?: string,
+): Complaint | null {
+  if (!isBrowser()) return null;
+  const current = readOrSeedSlot(complaintSlot).find((c) => c.id === id);
+  if (!current || current.status !== "PENDING_COMMUNITY_VERIFICATION") return current ?? null;
+  const now = nowIso();
+  const trimmedNote = note?.trim();
+  const event: ComplaintEvent = {
+    type: "FIX_REJECTED",
+    status: "IN_PROGRESS",
+    at: now,
+    actorId: profileId,
+    actorName: profileName,
+    note: trimmedNote || "Citizen reported the issue is still unresolved.",
+  };
+  return updateComplaint(id, (c) => ({
+    ...c,
+    status: "IN_PROGRESS",
+    comments: trimmedNote
+      ? [
+          ...c.comments,
+          {
+            id: makeId("cmt"),
+            authorId: profileId,
+            authorName: profileName,
+            text: trimmedNote,
+            createdAt: now,
+          },
+        ]
+      : c.comments,
+    history: [...(c.history ?? []), event],
+  }));
+}
+
+/**
+ * Worker releases a claimed IN_PROGRESS ticket back to REPORTED so another crew can claim it.
+ */
+export function unclaimComplaint(
+  id: string,
+  workerId: string,
+  workerName: string,
+): Complaint | null {
+  if (!isBrowser()) return null;
+  const current = readOrSeedSlot(complaintSlot).find((c) => c.id === id);
+  if (!current || current.status !== "IN_PROGRESS") return current ?? null;
+  const now = nowIso();
+  const event: ComplaintEvent = {
+    type: "UNCLAIMED",
+    status: "REPORTED",
+    at: now,
+    actorId: workerId,
+    actorName: workerName,
+    note: "Returned to open queue.",
+  };
+  return updateComplaint(id, (c) => ({
+    ...c,
+    status: "REPORTED",
+    assignedTo: undefined,
+    history: [...(c.history ?? []), event],
+  }));
+}
+
+/**
+ * Mayor/Commissioner dispatches a rapid crew to a critical/overdue ticket and persists it.
+ */
+export function dispatchRapidCrew(
+  id: string,
+  mayorId: string = "admin-nasir",
+  mayorName: string = "Comm. Nasir",
+): Complaint | null {
+  if (!isBrowser()) return null;
+  const current = readOrSeedSlot(complaintSlot).find((c) => c.id === id);
+  if (!current || current.dispatchedAt) return current ?? null;
+  const now = nowIso();
+  const event: ComplaintEvent = {
+    type: "DISPATCHED",
+    status: current.status,
+    at: now,
+    actorId: mayorId,
+    actorName: mayorName,
+    note: "Priority rapid crew dispatched.",
+  };
+  return updateComplaint(id, (c) => ({
+    ...c,
+    dispatchedAt: now,
+    sla: { ...c.sla, escalationLevel: "ESCALATED_TO_COMMISSIONER" },
+    history: [...(c.history ?? []), event],
+  }));
+}
+
 const NEXT_URGENCY: Record<Urgency, Urgency> = {
   LOW: "MEDIUM",
   MEDIUM: "HIGH",

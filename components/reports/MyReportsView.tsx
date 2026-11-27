@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { CheckCircle2, ClipboardList } from "lucide-react";
 import type { Complaint } from "@/lib/types";
-import { confirmFix } from "@/lib/data/storage";
+import { confirmFix, rejectFix } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS, STATUS_BADGE, STATUS_LABELS, timeAgo } from "@/lib/labels";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintTitle } from "@/lib/i18n";
 import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import LifecycleStepper from "./LifecycleStepper";
 
@@ -21,12 +23,19 @@ interface MyReportsViewProps {
 
 /** My Reports tab: the citizen's own tickets with lifecycle + "+1 Confirm Fix". */
 export default function MyReportsView({ complaints, onUpdateComplaint, citizenId, citizenName = "Citizen" }: MyReportsViewProps) {
+  const { lang, t, isRtl } = useLanguage();
   const [modalId, setModalId] = useState<string | null>(null);
   const modalComplaint = modalId ? complaints.find((c) => c.id === modalId) ?? null : null;
 
   const handleConfirmFix = (c: Complaint) => {
     if (!citizenId) return;
     const updated = confirmFix(c.id, citizenId, citizenName);
+    if (updated) onUpdateComplaint(updated);
+  };
+
+  const handleRejectFix = (c: Complaint) => {
+    if (!citizenId) return;
+    const updated = rejectFix(c.id, citizenId, citizenName);
     if (updated) onUpdateComplaint(updated);
   };
 
@@ -46,6 +55,10 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
       <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">My Reports ({complaints.length})</h2>
       {sorted.map((c) => {
         const resolved = c.status === "RESOLVED";
+        const alreadyConfirmed = citizenId ? c.communityImpact.verifiedBy.includes(citizenId) : false;
+        const workerFixNote = [...(c.history ?? [])]
+          .reverse()
+          .find((ev) => ev.type === "WORKER_FIXED")?.note;
         return (
           <article
             key={c.id}
@@ -65,9 +78,14 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
           >
             <header className="mb-2 flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <h3 className="truncate text-sm font-semibold text-slate-100">{c.title}</h3>
+                <h3
+                  dir={isRtl ? "rtl" : "ltr"}
+                  className={`truncate font-semibold text-slate-100 ${isRtl ? "urdu text-right text-base" : "text-sm"}`}
+                >
+                  {getComplaintTitle(c, lang)}
+                </h3>
                 <p className="text-[11px] text-slate-400">
-                  #{c.id} • {DEPARTMENT_LABELS[c.department]} • {c.location.sector} • {timeAgo(c.createdAt)}
+                  #{c.id} • {t.departments[c.department] ?? DEPARTMENT_LABELS[c.department]} • {c.location.sector} • {timeAgo(c.createdAt)}
                 </p>
               </div>
               <span
@@ -77,7 +95,7 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
                 }`}
               >
                 {resolved && <CheckCircle2 className="mr-1 inline h-3 w-3" aria-hidden="true" />}
-                {STATUS_LABELS[c.status]}
+                {t.statuses[c.status] ?? STATUS_LABELS[c.status]}
               </span>
             </header>
 
@@ -92,18 +110,52 @@ export default function MyReportsView({ complaints, onUpdateComplaint, citizenId
               </p>
             )}
 
+            {!c.aiVerification && workerFixNote && (
+              <p className="mt-2 text-[11px] text-emerald-300">
+                👷 Worker note: {workerFixNote}
+              </p>
+            )}
+
+            {c.afterPhotoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={c.afterPhotoUrl}
+                alt={`Fix photo for ${c.title}`}
+                className="mt-2 h-24 w-full rounded-lg object-cover ring-1 ring-civic-border"
+              />
+            )}
+
             {c.status === "PENDING_COMMUNITY_VERIFICATION" && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleConfirmFix(c);
-                }}
-                data-testid="confirm-fix-button"
-                className="mt-3 w-full rounded-lg bg-green-500 py-2 text-sm font-bold text-white shadow-lg shadow-green-500/30 transition hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
-              >
-                Confirm Fix
-              </button>
+              <div className="mt-3 flex gap-2">
+                <button
+                  type="button"
+                  disabled={alreadyConfirmed}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConfirmFix(c);
+                  }}
+                  data-testid="confirm-fix-button"
+                  className={`flex-1 rounded-lg py-2 text-sm font-bold transition ${
+                    alreadyConfirmed
+                      ? "bg-civic-raised text-civic-muted cursor-default"
+                      : "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:bg-green-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300"
+                  }`}
+                >
+                  {alreadyConfirmed ? "✓ Confirmed" : "Confirm Fix"}
+                </button>
+                {!alreadyConfirmed && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRejectFix(c);
+                    }}
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300 transition hover:bg-red-500/20"
+                  >
+                    Not Fixed
+                  </button>
+                )}
+              </div>
             )}
           </article>
         );

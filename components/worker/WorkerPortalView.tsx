@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ClipboardList, Home, User } from "lucide-react";
+import { toast } from "sonner";
 import type { Complaint } from "@/lib/types";
 import WorkerQueue from "./WorkerQueue";
 import WorkerHome from "./WorkerHome";
@@ -35,7 +36,11 @@ export default function WorkerPortalView({
 
   function handleUpdate(c: Complaint) {
     onUpdateComplaint(c);
-    if (c.status === "IN_PROGRESS") setTab("home");
+    if (c.status === "IN_PROGRESS") {
+      toast.success("Ticket claimed — added to Home", {
+        action: { label: "View", onClick: () => setTab("home") },
+      });
+    }
   }
 
   return (
@@ -66,9 +71,15 @@ export default function WorkerPortalView({
               tab === id ? "text-civic-accent" : "text-civic-muted"
             }`}
           >
-            <Icon className="h-5 w-5" aria-hidden="true" />
+            <span className="relative">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {id === "home" && activeWorkCount > 0 && (
+                <span className="absolute -right-2.5 -top-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-civic-accent px-1 text-[9px] font-bold text-slate-950">
+                  {activeWorkCount}
+                </span>
+              )}
+            </span>
             {label}
-            {id === "home" && activeWorkCount > 0 && <span className="sr-only">({activeWorkCount})</span>}
           </button>
         ))}
       </nav>
