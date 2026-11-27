@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { getGemini, GEMINI_MODEL, withTimeout } from "@/lib/ai/gemini";
+import {
+  AI_MULTIMODAL_TIMEOUT_MS,
+  AI_TIMEOUT_MS,
+  GEMINI_MODEL,
+  getGemini,
+  isTimeoutError,
+  withTimeout,
+  withTransientRetry,
+} from "@/lib/ai/gemini";
 import { buildIntakeChatPrompt, buildIntakeSystemInstruction } from "@/lib/ai/prompts";
 import { IntakeChatResponseSchema } from "@/lib/ai/schemas";
 import { buildIntakeChatFallback } from "@/lib/ai/mocks";
 
 export const runtime = "nodejs";
-
-const MULTIMODAL_TIMEOUT_MS = 22_000;
+export const maxDuration = 60;
 
 interface HistoryTurn {
   role: "user" | "assistant";
@@ -14,6 +21,7 @@ interface HistoryTurn {
   hasPhoto?: boolean;
 }
 
+type FallbackKind = "unavailable" | "timeout" | "error";
 type GeminiPart = { text: string } | { inlineData: { mimeType: string; data: string } };
 type GeminiContent = { role: "user" | "model"; parts: GeminiPart[] };
 
@@ -24,7 +32,7 @@ export async function POST(req: Request) {
   let lang: "en" | "ur" | "roman" = "en";
   let history: HistoryTurn[] = [];
 
-  const fallback = (reason: string) => {
+  const fallback = (reason: string, fallbackReason: FallbackKind = "error") => {
     console.warn("[intake-chat] DEMO-FALLBACK:", reason);
     const combinedUserText = [
       ...history.filter((h) => h.role === "user").map((h) => h.text),
@@ -41,6 +49,7 @@ export async function POST(req: Request) {
         lang,
       }),
       isOfflineFallback: true,
+      fallbackReason,
     });
   };
 
@@ -71,8 +80,8 @@ export async function POST(req: Request) {
   }
 
   const ai = getGemini();
-  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
-  if (!audio && !text && !photo) return fallback("empty turn");
+  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
+  if (!audio && !text && !photo) return fallback("empty turn", "error");
 
   try {
     // Build proper multi-turn contents (user / model), keeping last 8 turns for token efficiency.
@@ -108,74 +117,79 @@ export async function POST(req: Request) {
       contents.push({ role: "user", parts: latestParts });
 
       const result = await withTimeout(
-        ai.models.generateContent({
-          model: GEMINI_MODEL,
-          contents,
-          config: {
-            responseMimeType: "application/json",
-            thinkingConfig: { thinkingBudget: 0 },
-            maxOutputTokens: 250,
-          },
-        }),
-        MULTIMODAL_TIMEOUT_MS,
+        withTransientRetry(() =>
+          ai.models.generateContent({
+            model: GEMINI_MODEL,
+            contents,
+            config: {
+              responseMimeType: "application/json",
+              thinkingConfig: { thinkingBudget: 0 },
+              maxOutputTokens: 250,
+            },
+          }),
+        ),
+        AI_MULTIMODAL_TIMEOUT_MS,
       );
 
       const raw = result.text ?? "";
       const parsed = IntakeChatResponseSchema.safeParse(JSON.parse(raw));
-      if (!parsed.success) return fallback(`schema mismatch: ${parsed.error.message}`);
+      if (!parsed.success) return fallback(`schema mismatch: ${parsed.error.message}`, "error");
       return NextResponse.json({ ...parsed.data, isOfflineFallback: false });
     }
 
     // Text / photo turns stream plain conversational text so words appear right away.
+    // Wait for the first chunk inside withTimeout so timeouts or empty/failed streams
+    // return a proper isOfflineFallback JSON response instead of faking a live stream.
     contents.push({ role: "user", parts: latestParts });
+    const streamTimeoutMs = photo ? AI_MULTIMODAL_TIMEOUT_MS : AI_TIMEOUT_MS;
     const stream = await withTimeout(
-      ai.models.generateContentStream({
-        model: GEMINI_MODEL,
-        contents,
-        config: {
-          systemInstruction: buildIntakeSystemInstruction(lang),
-          thinkingConfig: { thinkingBudget: 0 },
-          maxOutputTokens: 150,
-        },
-      }),
-      photo ? MULTIMODAL_TIMEOUT_MS : undefined,
+      withTransientRetry(() =>
+        ai.models.generateContentStream({
+          model: GEMINI_MODEL,
+          contents,
+          config: {
+            systemInstruction: buildIntakeSystemInstruction(lang),
+            thinkingConfig: { thinkingBudget: 0 },
+            maxOutputTokens: 150,
+          },
+        }),
+      ),
+      streamTimeoutMs,
     );
+
+    const iterator = stream[Symbol.asyncIterator]();
+    let firstDelta = "";
+    let streamDone = false;
+    while (!firstDelta) {
+      const next = await withTimeout(iterator.next(), streamTimeoutMs);
+      if (next.done) {
+        streamDone = true;
+        break;
+      }
+      firstDelta = next.value?.text ?? "";
+    }
+    if (streamDone && !firstDelta) {
+      return fallback("empty stream from Gemini", "error");
+    }
 
     const encoder = new TextEncoder();
     const readable = new ReadableStream({
       async start(controller) {
-        let emitted = false;
         try {
-          for await (const chunk of stream) {
-            const delta = chunk.text ?? "";
+          if (firstDelta) {
+            controller.enqueue(encoder.encode(firstDelta));
+          }
+          while (true) {
+            const next = await iterator.next();
+            if (next.done) break;
+            const delta = next.value?.text ?? "";
             if (delta) {
-              emitted = true;
               controller.enqueue(encoder.encode(delta));
             }
-          }
-          if (!emitted) {
-            const fb = buildIntakeChatFallback({
-              latestText: text,
-              combinedText: text,
-              hasAudio: false,
-              hasPhoto: Boolean(photo),
-              lang,
-            });
-            controller.enqueue(encoder.encode(fb.reply));
           }
           controller.close();
         } catch (streamErr) {
           console.warn("[intake-chat] stream error:", streamErr);
-          if (!emitted) {
-            const fb = buildIntakeChatFallback({
-              latestText: text,
-              combinedText: text,
-              hasAudio: false,
-              hasPhoto: Boolean(photo),
-              lang,
-            });
-            controller.enqueue(encoder.encode(fb.reply));
-          }
           controller.close();
         }
       },
@@ -189,6 +203,9 @@ export async function POST(req: Request) {
       },
     });
   } catch (err) {
-    return fallback(err instanceof Error ? err.message : String(err));
+    return fallback(
+      err instanceof Error ? err.message : String(err),
+      isTimeoutError(err) ? "timeout" : "error",
+    );
   }
 }

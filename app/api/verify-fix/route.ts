@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
-import { getGemini, GEMINI_MODEL, withTimeout } from "@/lib/ai/gemini";
+import {
+  AI_MULTIMODAL_TIMEOUT_MS,
+  GEMINI_MODEL,
+  getGemini,
+  withTimeout,
+  withTransientRetry,
+} from "@/lib/ai/gemini";
 import { buildVerificationPrompt } from "@/lib/ai/prompts";
 import { buildVerifyFallback, buildVerifyRejection, UNREADABLE_PHOTO_REASONING } from "@/lib/ai/mocks";
 import { interpretVerificationReply } from "@/lib/ai/verification";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // INTEGRATOR NOTE (spec §4.2): request = JSON { complaintId, beforePhotoBase64, beforeMimeType,
 // afterPhotoBase64, afterMimeType, category }. Images may be raw base64 (MIME from the *MimeType
@@ -83,16 +90,19 @@ export async function POST(req: Request) {
 
   try {
     const result = await withTimeout(
-      ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [
-          {
-            role: "user",
-            parts,
-          },
-        ],
-        config: { responseMimeType: "application/json" },
-      }),
+      withTransientRetry(() =>
+        ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [
+            {
+              role: "user",
+              parts,
+            },
+          ],
+          config: { responseMimeType: "application/json" },
+        }),
+      ),
+      AI_MULTIMODAL_TIMEOUT_MS,
     );
 
     // Fail closed: malformed reply → rejecting fallback (passed: false), never a pass.

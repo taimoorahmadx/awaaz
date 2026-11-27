@@ -16,6 +16,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { Complaint, Department, GeoLocation, IssueCategory, Urgency } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
 import { useLanguage } from "@/components/common/LanguageProvider";
@@ -33,6 +34,8 @@ import {
   type GpsReading,
 } from "@/lib/utils";
 
+type FallbackReason = "unavailable" | "timeout" | "error";
+
 // INTEGRATOR NOTE: local mirror of AudioAnalysisResponse (lib/ai/schemas.ts) + route flags,
 // kept local so this client component doesn't import zod schemas.
 interface AnalyzeAudioResult {
@@ -48,6 +51,7 @@ interface AnalyzeAudioResult {
   landmark: string;
   sector: string;
   isOfflineFallback?: boolean;
+  fallbackReason?: FallbackReason;
 }
 
 interface IntakeChatApiResult {
@@ -55,6 +59,7 @@ interface IntakeChatApiResult {
   reply: string;
   readyToGenerate: boolean;
   isOfflineFallback?: boolean;
+  fallbackReason?: FallbackReason;
 }
 
 interface ChatTurn {
@@ -64,6 +69,7 @@ interface ChatTurn {
   photoDataUrl?: string;
   isVoice?: boolean;
   isOfflineFallback?: boolean;
+  fallbackReason?: FallbackReason;
 }
 
 interface HomeChatIntakeProps {
@@ -369,6 +375,9 @@ export default function HomeChatIntake({
       const data = (await res.json()) as IntakeChatApiResult;
       const isFallback = Boolean(data.isOfflineFallback);
       onFallbackChange?.(isFallback);
+      if (isFallback && data.fallbackReason === "timeout" && typeof navigator !== "undefined" && navigator.onLine) {
+        toast.warning("Awaaz AI timed out — showing a quick local reply.", { id: "ai-timeout-fallback" });
+      }
 
       const resolvedTranscript = data.userTranscript?.trim() || optimisticText;
 
@@ -379,6 +388,7 @@ export default function HomeChatIntake({
           role: "assistant",
           text: data.reply,
           isOfflineFallback: isFallback,
+          fallbackReason: data.fallbackReason,
         },
       ]);
     } catch {
@@ -403,7 +413,19 @@ export default function HomeChatIntake({
         text: m.text,
       }));
       fd.append("conversation", JSON.stringify(conversationPayload));
-      if (activePhoto) {
+      let lastPhotoTurnIdx = -1;
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i].photoDataUrl) {
+          lastPhotoTurnIdx = i;
+          break;
+        }
+      }
+      const photoAlreadyDescribedByAi =
+        lastPhotoTurnIdx >= 0 &&
+        messages
+          .slice(lastPhotoTurnIdx + 1)
+          .some((m) => m.role === "assistant" && !m.isOfflineFallback && m.text.trim().length > 0);
+      if (activePhoto && !photoAlreadyDescribedByAi) {
         fd.append("photo", base64ToBlob(activePhoto.base64, activePhoto.mimeType), "photo.jpg");
       }
       const effectiveHomeSector = selectedSector || sector;
@@ -418,6 +440,11 @@ export default function HomeChatIntake({
       const isFallback = Boolean(data.isOfflineFallback);
       setResult(data);
       onFallbackChange?.(isFallback);
+      if (isFallback && data.fallbackReason === "timeout" && typeof navigator !== "undefined" && navigator.onLine) {
+        toast.warning("AI ticket generation timed out — created a local draft you can edit.", {
+          id: "ai-timeout-fallback",
+        });
+      }
 
       const combinedCitizenText = messages
         .filter((m) => m.role === "user")
@@ -506,6 +533,7 @@ export default function HomeChatIntake({
     setImpactSubmitted(false);
     setLocationChip("");
     setError(null);
+    onFallbackChange?.(false);
   }
 
   async function handleUseGps() {

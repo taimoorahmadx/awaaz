@@ -4,9 +4,10 @@ import { GoogleGenAI } from "@google/genai";
 // Server-side only. Never import this file from components/ or any client code.
 // gemini-2.0-flash was retired (API 404); use the model the API recommends.
 export const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
-// Configurable via AI_TIMEOUT_MS (ms). Default 12000ms so full multimodal triage doesn't clip at 5s.
+// Configurable via AI_TIMEOUT_MS (ms). Defaults allow slow multimodal turns on Vercel/local without tripping fallback early.
 const parsedTimeout = Number(process.env.AI_TIMEOUT_MS);
-export const AI_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 12000;
+export const AI_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 25000;
+export const AI_MULTIMODAL_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 45000;
 
 let client: GoogleGenAI | null = null;
 
@@ -27,4 +28,25 @@ export function withTimeout<T>(promise: Promise<T>, ms: number = AI_TIMEOUT_MS):
     timer = setTimeout(() => reject(new Error(`Gemini timeout after ${ms}ms`)), ms);
   });
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+export function isTimeoutError(err: unknown): boolean {
+  return err instanceof Error && err.message.startsWith("Gemini timeout after ");
+}
+
+function isTransientGeminiError(err: unknown): boolean {
+  if (isTimeoutError(err)) return false;
+  const msg = err instanceof Error ? err.message : String(err);
+  return /\b(429|502|503|504)\b|RESOURCE_EXHAUSTED|UNAVAILABLE|ECONNRESET|ETIMEDOUT|fetch failed/i.test(msg);
+}
+
+/** Retries once after a brief delay on fast transient network/429/503 errors (never on timeouts). */
+export async function withTransientRetry<T>(fn: () => Promise<T>, delayMs = 500): Promise<T> {
+  try {
+    return await fn();
+  } catch (err) {
+    if (!isTransientGeminiError(err)) throw err;
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    return fn();
+  }
 }

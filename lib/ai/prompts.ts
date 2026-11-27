@@ -19,14 +19,12 @@ ${CATEGORY_LINES}
 5. Set department to the department of the chosen category.
 6. Set urgency: CRITICAL (immediate danger to life, e.g. live wire, gas leak, open manhole), HIGH (health hazard or many affected), MEDIUM (significant inconvenience), LOW (minor).
 7. Extract the landmark mentioned (e.g. "near Jinnah Super Market") and the Islamabad sector (e.g. "F-10", "G-9"). Use "" if not mentioned. Do not return coordinates.
-8. Optionally add priorityBreakdown: issueSeverity (integer 1–10), publicDensityRisk, and a one-sentence reasoning.
 
 Respond ONLY with JSON matching:
 {"urduTranscript": string, "englishSummary": string, "romanSummary": string, "title": string, "titleUrdu": string, "titleRoman": string,
  "category": ${CATEGORIES.map((c) => `"${c}"`).join("|")},
  "department": "CDA_SANITATION"|"CDA_ROADS"|"IESCO"|"WASA"|"SNGPL",
- "urgency": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW", "landmark": string, "sector": string,
- "priorityBreakdown"?: {"issueSeverity": number, "publicDensityRisk": "HIGH"|"MEDIUM"|"LOW", "reasoning": string}}`;
+ "urgency": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW", "landmark": string, "sector": string}`;
 
 export function buildVerificationPrompt(
   category: string,

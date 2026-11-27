@@ -1,15 +1,26 @@
 import { NextResponse } from "next/server";
-import { getGemini, GEMINI_MODEL, withTimeout } from "@/lib/ai/gemini";
+import {
+  AI_MULTIMODAL_TIMEOUT_MS,
+  AI_TIMEOUT_MS,
+  GEMINI_MODEL,
+  getGemini,
+  isTimeoutError,
+  withTimeout,
+  withTransientRetry,
+} from "@/lib/ai/gemini";
 import { AUDIO_TRIAGE_PROMPT } from "@/lib/ai/prompts";
 import { AudioAnalysisResponseSchema } from "@/lib/ai/schemas";
 import { buildAudioFallback } from "@/lib/ai/mocks";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 interface ConversationTurn {
   role: "user" | "assistant";
   text: string;
 }
+
+type FallbackKind = "unavailable" | "timeout" | "error";
 
 // INTEGRATOR NOTE (spec §4.1): request = multipart/form-data { audio?: Blob, photo?: Blob, text?: string, conversation?: string, sectorHint?: string }.
 // Response = AudioAnalysisResponse & { isOfflineFallback: boolean }.
@@ -22,7 +33,7 @@ export async function POST(req: Request) {
   let conversation: ConversationTurn[] = [];
 
   // DEMO-FALLBACK: instant, input-aware triage (keyword match on typed text / conversation) so the demo never stalls.
-  const fallback = (reason: string) => {
+  const fallback = (reason: string, fallbackReason: FallbackKind = "error") => {
     console.warn("[analyze-audio] DEMO-FALLBACK:", reason);
     const citizenHistoryText = conversation
       .filter((t) => t.role === "user")
@@ -30,7 +41,11 @@ export async function POST(req: Request) {
       .filter(Boolean)
       .join(" ");
     const combinedText = [citizenHistoryText, text].filter(Boolean).join(" ").trim();
-    return NextResponse.json({ ...buildAudioFallback(combinedText, sectorHint), isOfflineFallback: true });
+    return NextResponse.json({
+      ...buildAudioFallback(combinedText, sectorHint),
+      isOfflineFallback: true,
+      fallbackReason,
+    });
   };
 
   try {
@@ -60,8 +75,8 @@ export async function POST(req: Request) {
   }
 
   const ai = getGemini();
-  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
-  if (!audio && !text && !photo && conversation.length === 0) return fallback("no audio, text, or photo provided");
+  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
+  if (!audio && !text && !photo && conversation.length === 0) return fallback("no audio, text, or photo provided", "error");
 
   try {
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
@@ -92,22 +107,28 @@ export async function POST(req: Request) {
     }
 
     const result = await withTimeout(
-      ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [{ role: "user", parts }],
-        config: {
-          responseMimeType: "application/json",
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
-      audio || photo ? 22_000 : undefined,
+      withTransientRetry(() =>
+        ai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: [{ role: "user", parts }],
+          config: {
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 0 },
+            maxOutputTokens: 600,
+          },
+        }),
+      ),
+      audio || photo ? AI_MULTIMODAL_TIMEOUT_MS : AI_TIMEOUT_MS,
     );
 
     const raw = result.text ?? "";
     const parsed = AudioAnalysisResponseSchema.safeParse(JSON.parse(raw));
-    if (!parsed.success) return fallback(`schema mismatch: ${parsed.error.message}`);
+    if (!parsed.success) return fallback(`schema mismatch: ${parsed.error.message}`, "error");
     return NextResponse.json({ ...parsed.data, isOfflineFallback: false });
   } catch (err) {
-    return fallback(err instanceof Error ? err.message : String(err));
+    return fallback(
+      err instanceof Error ? err.message : String(err),
+      isTimeoutError(err) ? "timeout" : "error",
+    );
   }
 }

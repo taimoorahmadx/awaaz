@@ -120,16 +120,20 @@ export function buildAudioFallback(text: string, sectorHint: string): AudioAnaly
   if (!text) return MOCK_AUDIO_ANALYSIS;
   const info = matchCategory(text);
   const sectorMatch = /\b([EFGHI]-\d{1,2})\b/i.exec(text);
+  const isTreeOrRoadBlock =
+    info.category === "Other" &&
+    (/\b(tree|trees|darakht|darakt|branch|branches|blocked|block)\b/i.test(text) || text.includes("درخت"));
+
   return {
     urduTranscript: text,
     englishSummary: text,
     romanSummary: text,
-    title: info.title,
-    titleUrdu: info.titleUrdu,
-    titleRoman: info.titleRoman,
+    title: isTreeOrRoadBlock ? "Fallen tree / road obstruction" : info.title,
+    titleUrdu: isTreeOrRoadBlock ? "سڑک پر گرا ہوا درخت / رکاوٹ" : info.titleUrdu,
+    titleRoman: isTreeOrRoadBlock ? "Sarak par gira hua darakht / rukawat" : info.titleRoman,
     category: info.category,
-    department: info.department,
-    urgency: info.urgency,
+    department: isTreeOrRoadBlock ? "CDA_ROADS" : info.department,
+    urgency: isTreeOrRoadBlock ? "HIGH" : info.urgency,
     landmark: "",
     sector: sectorMatch ? sectorMatch[1].toUpperCase() : sectorHint,
   };
