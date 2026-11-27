@@ -220,7 +220,7 @@ function DeptsTab() {
             <span>Complaints: {d.total}</span>
             <span>Resolved: {d.resolved} ({d.pct}%)</span>
             <span>Avg. Fix Time: {d.time}</span>
-            <span>SLA Compliance: {d.sla}</span>
+            <span>On-Time Rate: {d.sla}</span>
           </div>
           <p className="mt-1 text-[11px] text-slate-400">{d.status}</p>
         </div>

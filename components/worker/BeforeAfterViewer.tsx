@@ -44,6 +44,7 @@ async function urlToDataUrl(url: string): Promise<string> {
 
 export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: BeforeAfterViewerProps) {
   const [afterDataUrl, setAfterDataUrl] = useState<string | null>(complaint.afterPhotoUrl ?? null);
+  const [resolutionNote, setResolutionNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VerifyResponse | null>(null);
@@ -65,12 +66,34 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
   }
 
   async function handleVerify() {
-    if (!afterDataUrl) return;
+    if (!afterDataUrl) {
+      const now = new Date().toISOString();
+      const note = resolutionNote.trim() || "Worker marked issue as fixed; awaiting citizen sign-off.";
+      onUpdateComplaint({
+        ...complaint,
+        status: "PENDING_COMMUNITY_VERIFICATION",
+        updatedAt: now,
+        history: [
+          ...(complaint.history ?? []),
+          {
+            type: "WORKER_FIXED" as const,
+            status: "PENDING_COMMUNITY_VERIFICATION" as const,
+            at: now,
+            actorId: "worker-sajid",
+            actorName: "Sajid",
+            note,
+          },
+        ],
+      });
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
     try {
-      const before = splitDataUrl(await urlToDataUrl(complaint.beforePhotoUrl));
+      const before = complaint.beforePhotoUrl
+        ? splitDataUrl(await urlToDataUrl(complaint.beforePhotoUrl))
+        : { mime: "", base64: "" };
       const after = splitDataUrl(afterDataUrl);
       const res = await fetch("/api/verify-fix", {
         method: "POST",
@@ -82,6 +105,7 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
           beforeMimeType: before.mime,
           afterMimeType: after.mime,
           category: complaint.category,
+          summary: complaint.englishSummary || complaint.title,
         }),
       });
       if (!res.ok) throw new Error(`Verification failed (${res.status})`);
@@ -182,23 +206,34 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
       </div>
 
       {!alreadyVerified && (
-        <div className="flex gap-2">
-          {afterDataUrl && (
-            <label className="cursor-pointer rounded-lg border border-civic-border px-3 py-2 text-xs text-civic-muted hover:text-slate-200">
-              Change photo
-              <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
-            </label>
+        <div className="flex flex-col gap-2">
+          {!afterDataUrl && (
+            <input
+              type="text"
+              value={resolutionNote}
+              onChange={(e) => setResolutionNote(e.target.value)}
+              placeholder="Optional fix note (e.g. leak sealed, supply restored)"
+              className="w-full rounded-lg border border-civic-border bg-civic-surface px-3 py-2 text-xs text-slate-200 placeholder:text-civic-muted focus:border-civic-accent focus:outline-none"
+            />
           )}
-          <button
-            type="button"
-            onClick={handleVerify}
-            data-testid="verify-fix-button"
-            disabled={!afterDataUrl || loading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-            {loading ? "Verifying…" : "Verify Fix"}
-          </button>
+          <div className="flex gap-2">
+            {afterDataUrl && (
+              <label className="cursor-pointer rounded-lg border border-civic-border px-3 py-2 text-xs text-civic-muted hover:text-slate-200">
+                Change photo
+                <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
+              </label>
+            )}
+            <button
+              type="button"
+              onClick={handleVerify}
+              data-testid="verify-fix-button"
+              disabled={loading}
+              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              {loading ? "Verifying…" : afterDataUrl ? "Verify Fix" : "Mark Fixed & Request Sign-off"}
+            </button>
+          </div>
         </div>
       )}
 

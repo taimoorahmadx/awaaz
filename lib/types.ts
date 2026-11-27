@@ -62,6 +62,7 @@ export interface AIVerificationResult {
 export type ComplaintEventType =
   | "REPORTED"
   | "CLAIMED"
+  | "WORKER_FIXED"
   | "AI_VERIFIED"
   | "AI_REJECTED"
   | "COMMUNITY_CONFIRMED"

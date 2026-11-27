@@ -43,8 +43,10 @@ export async function POST(req: Request) {
   }
   const complaintId = typeof body.complaintId === "string" ? body.complaintId : "";
   const category = typeof body.category === "string" && body.category ? body.category : "civic issue";
-  // Parsed BEFORE the AI check, so the fallback can always compare the two photos.
-  const before = parseImage(body.beforePhotoBase64, body.beforeMimeType);
+  const summary = typeof body.summary === "string" ? body.summary : "";
+  const hasBeforeInput = typeof body.beforePhotoBase64 === "string" && body.beforePhotoBase64.trim().length > 0;
+  // Parsed BEFORE the AI check, so the fallback can always compare the two photos when both exist.
+  const before = hasBeforeInput ? parseImage(body.beforePhotoBase64, body.beforeMimeType) : null;
   const after = parseImage(body.afterPhotoBase64, body.afterMimeType);
 
   // DEMO-FALLBACK: deterministic, input-aware (rejects identical/missing After photo), <300ms.
@@ -62,8 +64,22 @@ export async function POST(req: Request) {
   const ai = getGemini();
   if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
   if (!after) return fallback("missing or unreadable After image");
-  if (!before) return reject("unreadable Before image");
-  if (!before.mimeType || !after.mimeType) return reject("missing image MIME type");
+  if (hasBeforeInput && !before) return reject("unreadable Before image");
+  if (!after.mimeType || (before && !before.mimeType)) return reject("missing image MIME type");
+
+  const parts = before
+    ? [
+        { text: buildVerificationPrompt(category, { hasBefore: true }) },
+        { text: "Image 1 (BEFORE):" },
+        { inlineData: { mimeType: before.mimeType!, data: before.data } },
+        { text: "Image 2 (AFTER):" },
+        { inlineData: { mimeType: after.mimeType, data: after.data } },
+      ]
+    : [
+        { text: buildVerificationPrompt(category, { hasBefore: false, summary }) },
+        { text: "Image (AFTER):" },
+        { inlineData: { mimeType: after.mimeType, data: after.data } },
+      ];
 
   try {
     const result = await withTimeout(
@@ -72,13 +88,7 @@ export async function POST(req: Request) {
         contents: [
           {
             role: "user",
-            parts: [
-              { text: buildVerificationPrompt(category) },
-              { text: "Image 1 (BEFORE):" },
-              { inlineData: { mimeType: before.mimeType, data: before.data } },
-              { text: "Image 2 (AFTER):" },
-              { inlineData: { mimeType: after.mimeType, data: after.data } },
-            ],
+            parts,
           },
         ],
         config: { responseMimeType: "application/json" },

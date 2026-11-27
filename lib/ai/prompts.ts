@@ -28,7 +28,26 @@ Respond ONLY with JSON matching:
  "urgency": "CRITICAL"|"HIGH"|"MEDIUM"|"LOW", "landmark": string, "sector": string,
  "priorityBreakdown"?: {"issueSeverity": number, "publicDensityRisk": "HIGH"|"MEDIUM"|"LOW", "reasoning": string}}`;
 
-export function buildVerificationPrompt(category: string): string {
+export function buildVerificationPrompt(
+  category: string,
+  options?: { hasBefore?: boolean; summary?: string },
+): string {
+  const hasBefore = options?.hasBefore !== false;
+  if (!hasBefore) {
+    const context = options?.summary ? ` (${options.summary})` : "";
+    return `You are an impartial civic works inspector in Islamabad, Pakistan.
+No BEFORE photo was provided by the citizen. You are given one AFTER photo showing the worker's claimed repair for a "${category}" issue${context}.
+
+Check that the photo shows a safe, resolved state with no visible "${category}" hazard remaining.
+Reject if the hazard is still clearly visible or the photo is completely unrelated.
+
+Respond ONLY with JSON matching:
+{"verdict": "VERIFIED_RESOLVED"|"REJECTED_UNRESOLVED",
+ "confidence": number (0.0–1.0, your confidence in the verdict),
+ "reasoning": string (1–2 sentences, English),
+ "detectedChanges": string[] (short phrases describing what the photo shows)}`;
+  }
+
   return `You are an impartial civic works inspector in Islamabad, Pakistan.
 You are given two photos. Image 1 is BEFORE (the reported "${category}" problem). Image 2 is AFTER (the worker's claimed repair).
 

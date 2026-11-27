@@ -153,7 +153,7 @@ export default function MayorAlertsTab({ complaints }: MayorAlertsTabProps) {
 
         {criticalOpen.length === 0 ? (
           <div className="rounded-xl border border-civic-border bg-civic-surface p-3 text-xs text-slate-400">
-            No critical or SLA-breached tickets open right now.
+            No critical or overdue tickets open right now.
           </div>
         ) : (
           criticalOpen.map((c) => {
@@ -165,7 +165,7 @@ export default function MayorAlertsTab({ complaints }: MayorAlertsTabProps) {
               >
                 <p className="flex items-center gap-1 text-[11px] font-bold text-red-400">
                   <ShieldAlert className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  {c.sla.isBreached ? "SLA BREACHED" : "CRITICAL"} · {c.id.toUpperCase()} ·{" "}
+                  {c.sla.isBreached ? "OVERDUE" : "CRITICAL"} · {c.id.toUpperCase()} ·{" "}
                   {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-100">{c.title}</p>

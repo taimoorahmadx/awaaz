@@ -37,7 +37,9 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
             <span className={`rounded-full px-2 py-0.5 text-[11px] ring-1 ${STATUS_BADGE[c.status]}`}>
               {STATUS_LABELS[c.status]}
             </span>
-            <span className="ml-auto text-[11px] text-civic-muted">{c.sla.hoursRemaining}h SLA</span>
+            <span className={`ml-auto text-[11px] ${c.sla.isBreached ? "font-medium text-red-400" : "text-civic-muted"}`}>
+              {c.sla.isBreached ? "Overdue" : `${c.sla.hoursRemaining}h left`}
+            </span>
           </div>
           <div className="flex gap-3">
             {c.beforePhotoUrl && (

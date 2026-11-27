@@ -31,14 +31,15 @@ interface ComplaintDetailModalProps {
 
 // Map event types to labels + icons + colour
 const EVENT_META: Record<ComplaintEventType, { label: string; color: string }> = {
-  REPORTED:            { label: "Reported",            color: "text-slate-300" },
-  CLAIMED:             { label: "Claimed by worker",   color: "text-blue-300" },
-  AI_VERIFIED:         { label: "AI Verified",         color: "text-green-400" },
-  AI_REJECTED:         { label: "AI Rejected",         color: "text-red-400" },
-  COMMUNITY_CONFIRMED: { label: "Community Confirmed", color: "text-cyan-300" },
-  RESOLVED:            { label: "Resolved",            color: "text-green-300" },
-  IMPACT_ADDED:        { label: "Impact Added",        color: "text-slate-300" },
-  URGENCY_RAISED:      { label: "Urgency Raised",      color: "text-amber-300" },
+  REPORTED:            { label: "Reported",               color: "text-slate-300" },
+  CLAIMED:             { label: "Claimed by worker",      color: "text-blue-300" },
+  WORKER_FIXED:        { label: "Marked fixed by worker", color: "text-emerald-400" },
+  AI_VERIFIED:         { label: "AI Verified",            color: "text-green-400" },
+  AI_REJECTED:         { label: "AI Rejected",            color: "text-red-400" },
+  COMMUNITY_CONFIRMED: { label: "Community Confirmed",    color: "text-cyan-300" },
+  RESOLVED:            { label: "Resolved",               color: "text-green-300" },
+  IMPACT_ADDED:        { label: "Impact Added",           color: "text-slate-300" },
+  URGENCY_RAISED:      { label: "Urgency Raised",         color: "text-amber-300" },
 };
 
 function EventIcon({ type }: { type: ComplaintEventType }) {
@@ -46,6 +47,7 @@ function EventIcon({ type }: { type: ComplaintEventType }) {
   switch (type) {
     case "REPORTED":            return <Clock className={cn(size, "text-slate-400")} aria-hidden />;
     case "CLAIMED":             return <UserCheck className={cn(size, "text-blue-300")} aria-hidden />;
+    case "WORKER_FIXED":        return <CheckCircle2 className={cn(size, "text-emerald-400")} aria-hidden />;
     case "AI_VERIFIED":         return <Shield className={cn(size, "text-green-400")} aria-hidden />;
     case "AI_REJECTED":         return <ShieldOff className={cn(size, "text-red-400")} aria-hidden />;
     case "COMMUNITY_CONFIRMED": return <CheckCircle2 className={cn(size, "text-cyan-300")} aria-hidden />;
@@ -211,9 +213,9 @@ export default function ComplaintDetailModal({
           <div className="flex items-center gap-2 text-[11px]">
             <Clock className="h-3.5 w-3.5 text-civic-muted" aria-hidden />
             {complaint.sla.isBreached ? (
-              <span className="text-red-400 font-medium">SLA Breached · {complaint.sla.escalationLevel.replace(/_/g, " ")}</span>
+              <span className="text-red-400 font-medium">Overdue · {complaint.sla.escalationLevel.replace(/_/g, " ")}</span>
             ) : (
-              <span className="text-civic-muted">{complaint.sla.hoursRemaining}h SLA remaining</span>
+              <span className="text-civic-muted">Fix due in {complaint.sla.hoursRemaining}h</span>
             )}
           </div>
 
