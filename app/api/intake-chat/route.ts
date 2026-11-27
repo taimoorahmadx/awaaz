@@ -137,14 +137,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ ...parsed.data, isOfflineFallback: false });
     }
 
-    // Text / photo turns stream plain conversational text so words appear right away.
-    // Wait for the first chunk inside withTimeout so timeouts or empty/failed streams
-    // return a proper isOfflineFallback JSON response instead of faking a live stream.
+    // Text / photo turns use non-streaming generateContent so neither local dev nor Vercel
+    // stalls on SSE chunk buffering. HomeChatIntake handles JSON replies natively.
     contents.push({ role: "user", parts: latestParts });
-    const streamTimeoutMs = photo ? AI_MULTIMODAL_TIMEOUT_MS : AI_TIMEOUT_MS;
-    const stream = await withTimeout(
+    const turnTimeoutMs = photo ? AI_MULTIMODAL_TIMEOUT_MS : AI_TIMEOUT_MS;
+    const t0 = Date.now();
+    const result = await withTimeout(
       withTransientRetry(() =>
-        ai.models.generateContentStream({
+        ai.models.generateContent({
           model: GEMINI_MODEL,
           contents,
           config: {
@@ -154,53 +154,19 @@ export async function POST(req: Request) {
           },
         }),
       ),
-      streamTimeoutMs,
+      turnTimeoutMs,
     );
 
-    const iterator = stream[Symbol.asyncIterator]();
-    let firstDelta = "";
-    let streamDone = false;
-    while (!firstDelta) {
-      const next = await withTimeout(iterator.next(), streamTimeoutMs);
-      if (next.done) {
-        streamDone = true;
-        break;
-      }
-      firstDelta = next.value?.text ?? "";
+    const reply = (result.text ?? "").trim();
+    if (!reply) {
+      return fallback("empty reply from Gemini", "error");
     }
-    if (streamDone && !firstDelta) {
-      return fallback("empty stream from Gemini", "error");
-    }
-
-    const encoder = new TextEncoder();
-    const readable = new ReadableStream({
-      async start(controller) {
-        try {
-          if (firstDelta) {
-            controller.enqueue(encoder.encode(firstDelta));
-          }
-          while (true) {
-            const next = await iterator.next();
-            if (next.done) break;
-            const delta = next.value?.text ?? "";
-            if (delta) {
-              controller.enqueue(encoder.encode(delta));
-            }
-          }
-          controller.close();
-        } catch (streamErr) {
-          console.warn("[intake-chat] stream error:", streamErr);
-          controller.close();
-        }
-      },
-    });
-
-    return new Response(readable, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-cache",
-      },
+    console.info(`[intake-chat] live reply in ${Date.now() - t0}ms`);
+    return NextResponse.json({
+      userTranscript: text,
+      reply,
+      readyToGenerate: true,
+      isOfflineFallback: false,
     });
   } catch (err) {
     return fallback(

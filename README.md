@@ -5,8 +5,8 @@
 <h1 align="center">آواز — Awaaz</h1>
 
 <p align="center">
-  <strong>Voice-First Civic Accountability &amp; AI-Verified Municipal Governance</strong><br />
-  <em>Speak in Urdu, Roman Urdu, or English — triage civic issues with Gemini, verify repairs with Vision AI, and hold city services accountable.</em>
+  <strong>AI-Powered Civic Governance Platform</strong><br />
+  <em>Connecting citizens, field workers, and city leadership — report issues via Urdu voice or photo, route them automatically, and verify every repair with Vision AI.</em>
 </p>
 
 <p align="center">
@@ -64,7 +64,6 @@ Traditional civic grievance portals fail citizens through language barriers, rig
 
 ### Application Architecture
 
-<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
 ```mermaid
 flowchart TD
     subgraph ClientLayer["Client Layer - Next.js 15 PWA"]
@@ -126,7 +125,6 @@ Awaaz uses browser `localStorage` hydrated from pre-seeded Islamabad JSON datase
 
 ### Component Relationships
 
-<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
 ```mermaid
 flowchart LR
     subgraph cPresentation["Presentation Layer"]
