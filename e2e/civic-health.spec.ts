@@ -54,10 +54,12 @@ test.describe("civic health scorecard (UI)", () => {
   }) => {
     // 1. Explore sector chips show seed grades: F-10 C, F-6 B, G-9 B, I-9 A
     await gotoCitizenTab(page, "Explore");
+    await page.getByTestId("open-filters-button").click();
     await expect(page.getByTestId("sector-chip-grade-F-10")).toHaveText("C");
     await expect(page.getByTestId("sector-chip-grade-F-6")).toHaveText("B");
     await expect(page.getByTestId("sector-chip-grade-G-9")).toHaveText("B");
     await expect(page.getByTestId("sector-chip-grade-I-9")).toHaveText("A");
+    await page.keyboard.press("Escape");
 
     // 2. Mayor Home shows Citywide 84 / B and F-10 66 / C on seed data
     await switchRole(page, "Nasir");
@@ -88,7 +90,9 @@ test.describe("civic health scorecard (UI)", () => {
 
     // 4. Explore F-10 chip now shows Grade B
     await gotoCitizenTab(page, "Explore");
+    await page.getByTestId("open-filters-button").click();
     await expect(page.getByTestId("sector-chip-grade-F-10")).toHaveText("B");
+    await page.keyboard.press("Escape");
 
     // 5. Mayor Home now shows F-10 86/100 Grade B and Citywide 89/100 Grade B
     await switchRole(page, "Nasir");

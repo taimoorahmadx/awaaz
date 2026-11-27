@@ -69,14 +69,11 @@ export default function ComplaintFeed({ viewerId, viewerName, homeSector, onUpda
         sort={sort}
         homeSector={homeSector}
         sectorHealth={sectorHealth}
+        countText={hydrated ? `${visible.length} ${visible.length === 1 ? "complaint" : "complaints"}` : "Loading complaints…"}
         onSectorChange={setSector}
         onUrgencyChange={setUrgency}
         onSortChange={setSort}
       />
-
-      <p className="px-4 pt-2 text-[11px] text-civic-muted" aria-live="polite">
-        {hydrated ? `${visible.length} ${visible.length === 1 ? "complaint" : "complaints"}` : "Loading complaints…"}
-      </p>
 
       {hydrated && visible.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 px-6 py-12 text-center text-civic-muted">
