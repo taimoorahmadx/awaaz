@@ -245,7 +245,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       Other: "Other",
     },
     home: {
-      greeting: (name) => `What needs fixing, ${name}?`,
+      greeting: (name) => `Raise your voice, ${name}.`,
       subtitle: "Tap the mic to report in Urdu, or type your civic issue below.",
       micPrompt: "Tap to speak",
       recordingPrompt: "Listening… tap to stop",
@@ -459,7 +459,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       Other: "دیگر مسئلہ",
     },
     home: {
-      greeting: (name) => `${name}، کیا مسئلہ حل کرنا ہے؟`,
+      greeting: (name) => `${name}، اپنی آواز اٹھائیں۔`,
       subtitle: "اردو میں بولنے کے لیے مائیک دبائیں یا نیچے اپنا مسئلہ لکھیں۔",
       micPrompt: "بولنے کے لیے دبائیں",
       recordingPrompt: "سن رہے ہیں… روکنے کے لیے دبائیں",
@@ -673,7 +673,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       Other: "Deegar Masla",
     },
     home: {
-      greeting: (name) => `Kya masla hal karna hai, ${name}?`,
+      greeting: (name) => `Apni awaaz uthayein, ${name}.`,
       subtitle: "Urdu mein bolne ke liye mic dabayein ya neeche apna masla likhein.",
       micPrompt: "Bolne ke liye dabayein",
       recordingPrompt: "Sun rahe hain… rokne ke liye dabayein",

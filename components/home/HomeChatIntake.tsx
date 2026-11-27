@@ -22,6 +22,7 @@ import OfflineBadge from "@/components/common/OfflineBadge";
 import { useLanguage } from "@/components/common/LanguageProvider";
 import WaveformVisualizer from "@/components/audio/WaveformVisualizer";
 import DuplicateCard from "@/components/home/DuplicateCard";
+import ShaderWaveBg from "@/components/home/ShaderWaveBg";
 import { CATEGORIES, CATEGORY_TABLE, categoryInfo } from "@/lib/categories";
 import { base64ToBlob, compressImage, type CompressedImage } from "@/lib/image";
 import { addImpactConfirmation, getComplaints, useComplaints } from "@/lib/data/storage";
@@ -709,7 +710,12 @@ export default function HomeChatIntake({
     : "";
 
   return (
-    <section className="flex flex-1 flex-col">
+    <section className="relative flex flex-1 flex-col">
+      <ShaderWaveBg
+        active={recording || isBusy}
+        dim={messages.length > 0 || Boolean(activeComplaint)}
+      />
+
       {/* Hidden input for replacing/adding photo directly inside the Draft Ticket card */}
       <input
         ref={draftPhotoInputRef}
@@ -721,7 +727,7 @@ export default function HomeChatIntake({
       />
 
       <div
-        className={`flex flex-1 flex-col gap-3 px-4 py-4 ${
+        className={`relative z-10 flex flex-1 flex-col gap-3 px-4 py-4 ${
           messages.length === 0 && !activeComplaint && !isBusy ? "items-center justify-center text-center" : ""
         }`}
       >
@@ -731,7 +737,7 @@ export default function HomeChatIntake({
             <img
               src="/logo.jpg"
               alt="Awaaz"
-              className="h-20 w-20 rounded-2xl object-cover shadow-lg ring-1 ring-civic-border"
+              className="h-20 w-20 rounded-2xl object-cover shadow-[0_0_40px_-8px_rgba(16,185,129,0.55)] ring-1 ring-emerald-400/35"
             />
             <p
               dir={isRtl ? "rtl" : "ltr"}
@@ -739,13 +745,6 @@ export default function HomeChatIntake({
               className={`text-slate-50 ${isRtl ? "urdu text-xl" : "text-lg font-semibold"}`}
             >
               {t.home.greeting(isRtl ? urduName : citizenName)}
-            </p>
-            <p
-              dir={isRtl ? "rtl" : "ltr"}
-              lang={isRtl ? "ur" : "en"}
-              className={`text-xs leading-relaxed text-civic-muted ${isRtl ? "urdu text-sm" : ""}`}
-            >
-              {t.home.chatSubtitle}
             </p>
           </div>
         )}
@@ -1118,6 +1117,7 @@ export default function HomeChatIntake({
 
       {/* Bottom Sticky Chat Composer + Generate Ticket Action Strip */}
       <form
+        autoComplete="off"
         className="sticky bottom-16 border-t border-civic-border bg-civic-surface/95 px-3 pb-6 pt-2.5 backdrop-blur"
         onSubmit={(e) => {
           e.preventDefault();
@@ -1268,6 +1268,7 @@ export default function HomeChatIntake({
             <input
               id="intake-text"
               type="text"
+              autoComplete="off"
               value={text}
               onChange={(e) => setText(e.target.value)}
               disabled={isBusy}
