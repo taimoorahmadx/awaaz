@@ -44,9 +44,9 @@ Acceptance criteria:
 - AC-4.6 IF the response has `passed: false` THE SYSTEM SHALL show a red "AI Rejected (NN%): <reasoning>" badge, store `aiVerification` (with `passed: false`), keep status `IN_PROGRESS`, and append an `AI_REJECTED` history event.
 - AC-4.7 IF the AI is unavailable THE SYSTEM SHALL use the deterministic verification fallback (§5.3) with `isOfflineFallback: true` and show the offline chip.
 
-### US-5 (MUST): Community Sign-Off & "+1 Confirm Fix"
+### US-5 (MUST): Community Sign-Off & "Confirm Fix"
 Acceptance criteria:
-- AC-5.1 WHILE a ticket is `PENDING_COMMUNITY_VERIFICATION` THE SYSTEM SHALL show an active "+1 Confirm Fix (Verified)" button in My Reports, on the Explore card, and in the Detail Modal.
+- AC-5.1 WHILE a ticket is `PENDING_COMMUNITY_VERIFICATION` THE SYSTEM SHALL show an active "Confirm Fix" button (localized in Urdu/Roman Urdu) in My Reports, on the Explore card, and in the Detail Modal, plus "Not Fixed" to reopen.
 - AC-5.2 WHEN a citizen taps it THE SYSTEM SHALL set status `RESOLVED`, increment `communityImpact.verifiedCount`, append the citizen to `communityImpact.verifiedBy`, append `COMMUNITY_CONFIRMED` and `RESOLVED` history events, and turn the badge vibrant green immediately.
 - AC-5.3 A citizen already in `verifiedBy` SHALL NOT be able to confirm again (button disabled with "You confirmed this fix").
 
@@ -328,8 +328,8 @@ The route SHALL use `beforeMimeType` / `afterMimeType` (or the data-URL MIME) �
 ## 5. AI Behavior Specification
 
 ### 5.1 Model & runtime
-- **Model:** `process.env.GEMINI_MODEL`, default `gemini-3.8-flash` (GA since Sept 2026). Gemini 2.0 Flash was shut down June 1, 2026 — never use `gemini-2.0-*` / `gemini-2.5-*` ids.
-- **Timeout:** `process.env.AI_TIMEOUT_MS`, default `5000`. Default stays until real latency is measured (OPEN D7).
+- **Model:** `process.env.GEMINI_MODEL`, default `gemini-3.5-flash`. Gemini 2.0 Flash was shut down June 1, 2026 — never use `gemini-2.0-*` / `gemini-2.5-*` ids.
+- **Timeout:** `process.env.AI_TIMEOUT_MS`, default `12000` (`/api/intake-chat` uses `22000`).
 - **Force fallback:** `AI_FORCE_FALLBACK=1` makes `getGemini()` return `null` so every route uses its fallback. Used by Playwright and whenever live calls aren't approved (OPEN D2).
 - Requests use `responseMimeType: "application/json"`; output is validated with Zod.
 

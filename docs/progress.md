@@ -33,7 +33,7 @@
 ## Decisions Made
 - Build all Phase 2 features: Groups, duplicate detection, dynamic Civic Health, interactive Mayor desk, PWA manifest.
 - D1 (location source): GPS if allowed (accuracy ≤ 100m, inside Islamabad box) → landmark table match → sector centre. Duplicate check only for GPS/landmark sources. Details in spec AC-11.3.
-- Model id: `GEMINI_MODEL` env, default `gemini-3.8-flash`. Gemini 2.0 Flash was shut down June 1, 2026.
+- **Model id:** `GEMINI_MODEL` env, default `gemini-3.5-flash` (with `AI_TIMEOUT_MS` default `12000` in `lib/ai/gemini.ts`; `/api/intake-chat` uses `22000`). Gemini 2.0 Flash was shut down June 1, 2026.
 - Confidence is 0.0–1.0 everywhere; displayed as `Math.round(c * 100)%`.
 - Fallback latency target: <300ms everywhere.
 - 5 profiles: Tariq (Citizen/F-10), Ayesha (Citizen/F-6), Anonymous Citizen, Sajid (Worker), Comm. Nasir (Mayor).
@@ -43,7 +43,8 @@
 - Complaints get a `history` event log and `assignedTo`.
 - Duplicate matching: same department + same fixed category, ≤50m. Urgency +1 level at 2 and 4 "+1 Impacts Me Too" confirmations, capped at CRITICAL.
 - Civic Health: formula in spec AC-12.1, A–F grades with no plus/minus; seed data gives city 84 (B), F-10 66 (C) → 86 (B) after resolving `cmp-001`.
-- Cut: Groups voice notes (recording and playback), bilingual UI toggle. Worker route kept small (mini map + Google Maps link).
+- **Added after Sprint 5:** Multi-turn conversational intake (`/api/intake-chat`, editable Draft Ticket card, manual sector/GPS picker in `HomeChatIntake.tsx`), Trilingual UI switcher (`EN`, `اردو`, `Roman` in `lib/i18n.ts` and `LanguageProvider.tsx`), and Apple HIG UI polish (touch targets, card elevation, unified bottom nav bars, composer spacing).
+- **Cut:** Groups voice notes (recording and playback). Worker route kept small (mini map + Google Maps link).
 - Playwright approved for E2E (`@playwright/test` 1.64.0, Chromium).
 - **Playwright Setup:** Playwright installed (exact pin, Chromium 156, headless launch verified, no system deps needed). Playwright VS Code extension installed. Playwright MCP configured and verified.
 - **D6 closed: use shadcn/ui.** Initialized shadcn@2.3.0 (New York, Neutral, CSS variables). Keep the current civic dark look by mapping shadcn variables to the `civic-*` palette. `tailwind-merge` pinned to 2.6.1, exact versions, `.npmrc`, dark theme variables.

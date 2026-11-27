@@ -31,6 +31,7 @@ graph TD
     end
 
     subgraph Server [Next.js Route Handlers - Server-Side Only]
+        ApiChat["POST /api/intake-chat (Multi-turn Conversational Intake & Draft Readiness)"]
         ApiAudio["POST /api/analyze-audio (Multimodal Audio/Text/Photo to Structured JSON)"]
         ApiVision["POST /api/verify-fix (Before vs After Multimodal Vision Verification)"]
         FallbackEngine["Deterministic Mock Fallback Engine (<300ms)"]
@@ -38,7 +39,7 @@ graph TD
     end
 
     subgraph External [AI Infrastructure]
-        GeminiFlash["Google Gemini (GEMINI_MODEL, default gemini-3.8-flash, @google/genai SDK)"]
+        GeminiFlash["Google Gemini (GEMINI_MODEL, default gemini-3.5-flash, @google/genai SDK)"]
     end
 
     UI --> Header
@@ -50,24 +51,27 @@ graph TD
     Roles --> CivicHealthEngine
     Seed -.->|Initial Hydration / Reset| Store
 
-    HomeTab -->|Audio / Text Prompt + Photo| ApiAudio
+    HomeTab -->|Chat Turn / Audio / Photo| ApiChat
+    HomeTab -->|Generate Ticket| ApiAudio
     WorkerPortal -->|Before Base64 + After Base64| ApiVision
 
+    ApiChat --> ZodValidator
     ApiAudio --> ZodValidator
     ApiVision --> ZodValidator
 
-    ZodValidator -->|"Real API Call (AI_TIMEOUT_MS, default 5s)"| GeminiFlash
+    ZodValidator -->|"Real API Call (AI_TIMEOUT_MS, default 12s)"| GeminiFlash
     GeminiFlash -.->|Timeout / Quota / Offline| FallbackEngine
     FallbackEngine -->|Deterministic Structured Fallback| UI
     GeminiFlash -->|Harmonized Verified JSON| UI
 ```
 
 ### Architecture Flow Walkthrough
-1. **Client-Side State Engine:** The client runs a hydrated `localStorage` repository pre-seeded with 12 Islamabad municipal records, 5 civic group channels with seeded messages (`seedGroups.json`), and contractor statuses. All status transitions (`REPORTED` → `IN_PROGRESS` → `PENDING_COMMUNITY_VERIFICATION` → `RESOLVED`) append a `history` event. Votes, flat comments, group messages, and `+1 Confirm Fix` happen instantly in client storage. Photos are compressed client-side (`lib/image.ts`, ≤800px JPEG 0.7) before storage.
-2. **Harmonized Server-Side AI Gateway:** All AI calls go through Next.js route handlers; keys stay server-side. Responses are validated with Zod, fail closed, and follow `docs/spec.md` §4 exactly:
-   - `/api/analyze-audio`: Urdu transcript, English summary, fixed `category`, department, urgency, landmark, sector, optional priority breakdown. No coordinates (resolved client-side: GPS → landmark table → sector centre, spec AC-11.3).
+1. **Client-Side State Engine:** The client runs a hydrated `localStorage` repository pre-seeded with 12 Islamabad municipal records, 5 civic group channels with seeded messages (`seedGroups.json`), and contractor statuses. All status transitions (`REPORTED` → `IN_PROGRESS` → `PENDING_COMMUNITY_VERIFICATION` → `RESOLVED`) append a `history` event. Votes, flat comments, group messages, and `Confirm Fix` happen instantly in client storage. Photos are compressed client-side (`lib/image.ts`, ≤800px JPEG 0.7) before storage.
+2. **Harmonized Server-Side AI Gateway:** All AI calls go through Next.js route handlers; keys stay server-side. Responses are validated with Zod, fail closed, and follow `docs/spec.md` §4:
+   - `/api/intake-chat`: multi-turn conversational intake (audio/text/photo + `lang` + `history`) returning `{ userTranscript, reply, readyToGenerate }`.
+   - `/api/analyze-audio`: Urdu/Roman/English transcript & summaries, fixed `category`, department, urgency, landmark, sector, optional priority breakdown. No coordinates (resolved client-side: GPS → landmark table → sector centre, spec AC-11.3).
    - `/api/verify-fix`: `passed` (decided server-side: verdict VERIFIED_RESOLVED and confidence ≥ 0.60), `confidence` (0.0–1.0), `verdict`, `reasoning`, `detectedChanges`.
-3. **Resilience & Fallback Layer:** Each route races Gemini against `AI_TIMEOUT_MS` (default 5000ms). On timeout, missing key, network/5xx error, unparseable output, or `AI_FORCE_FALLBACK=1`, a deterministic `// DEMO-FALLBACK` returns in <300ms with `isOfflineFallback: true`. The audio fallback derives the category from typed-text keywords; the verify fallback rejects an After photo identical to the Before photo. The UI shows the "Offline Mode (Synced locally)" chip.
+3. **Resilience & Fallback Layer:** Each route races Gemini against `AI_TIMEOUT_MS` (default 12000ms; `/api/intake-chat` uses 22000ms). On timeout, missing key, network/5xx error, unparseable output, or `AI_FORCE_FALLBACK=1`, a deterministic `// DEMO-FALLBACK` returns in <300ms with `isOfflineFallback: true`. The audio fallback derives the category from typed-text keywords; the verify fallback rejects an After photo identical to the Before photo. The UI shows the "Offline Mode (Synced locally)" chip.
 4. **Test Harness:** Playwright (`e2e/`) runs the golden path against `next start -p 3100` with `AI_FORCE_FALLBACK=1`, so tests are deterministic and make no live AI calls.
 
 ---
@@ -77,7 +81,7 @@ graph TD
 - **Next.js 15 (App Router) + TypeScript (strict):** Unified frontend and serverless API in a single repo with type safety and zero CORS issues.
 - **Tailwind CSS v3.4 + Lucide Icons:** Production-grade civic tech dark aesthetic (`civic-*` palette) with fast token-based styling.
 - **Vanilla Leaflet (`leaflet`) wrapped in React `useRef`:** Dynamically imported client-side (`ssr: false`) with `L.divIcon()` SVG pins to avoid React 19 peer conflicts and broken marker PNGs.
-- **Google Gemini via `@google/genai` (model from `GEMINI_MODEL`, default `gemini-3.8-flash`):** Official SDK handling raw Urdu audio (`inlineData` with dynamic MIME type) and Before/After image comparison. Gemini 2.0 Flash was shut down June 1, 2026 — never use `gemini-2.0-*` / `gemini-2.5-*`.
+- **Google Gemini via `@google/genai` (model from `GEMINI_MODEL`, default `gemini-3.5-flash`):** Official SDK handling raw Urdu audio (`inlineData` with dynamic MIME type) and Before/After image comparison. Gemini 2.0 Flash was shut down June 1, 2026 — never use `gemini-2.0-*` / `gemini-2.5-*`.
 - **Playwright (`@playwright/test` 1.64.0, Chromium):** Golden-path regression gate for unattended builds; fake media stream flags allow mic/waveform tests.
 - **shadcn/ui 2.3.0 (Radix-based, code copied into `components/ui/`):** accessible Dialog/Sheet/Tabs/Dropdown/Switch/Toast with keyboard + focus handling for free. 2.3.0 because the project is on Tailwind v3; theme variables mapped to the `civic-*` palette so the dark look is unchanged; `tailwind-merge` pinned to 2.x.
 - **Zod (`zod`):** Enforces strict runtime validation on Gemini structured outputs, guaranteeing schema conformity before UI consumption.
@@ -93,6 +97,8 @@ graph TD
 awaaz/
 ├── app/
 │   ├── api/
+│   │   ├── intake-chat/
+│   │   │   └── route.ts          # Multi-turn conversational intake chat handler
 │   │   ├── analyze-audio/
 │   │   │   └── route.ts          # Multimodal Urdu audio/text/photo extraction handler
 │   │   └── verify-fix/
@@ -107,9 +113,10 @@ awaaz/
 │   ├── audio/
 │   │   └── WaveformVisualizer.tsx# Web Audio API canvas waveform + 0:30 timer (T3.2; MediaRecorder stays in HomeChatIntake)
 │   ├── common/
-│   │   ├── AppHeader.tsx         # Header: role switcher (5 profiles), sector badge, offline chip, Reset System Data
+│   │   ├── AppHeader.tsx         # Header: role switcher (5 profiles), language switcher, offline chip, Reset System Data
 │   │   ├── BottomNav.tsx         # Symmetrical 5-tab bottom navigation
 │   │   ├── ComingSoon.tsx        # Placeholder shell (no longer used by Groups after T4.1)
+│   │   ├── LanguageProvider.tsx  # Trilingual EN / Urdu / Roman Urdu context
 │   │   └── OfflineBadge.tsx      # "Offline Mode (Synced locally)" badge
 │   ├── feed/
 │   │   ├── ComplaintCard.tsx     # Rich card with photo, badges, Upvote/Downvote & comments
@@ -130,8 +137,9 @@ awaaz/
 │   │   ├── LeafletMap.tsx        # Leaflet map instance with SVG divIcons
 │   │   └── MapDrawer.tsx         # Slide-over preview for clicked hazard pins
 │   ├── mayor/
-│   │   └── MayorPortalView.tsx   # 5-tab controller ([Map] [Alerts] [Home] [Depts] [Contractors]); split into
-│   │                             # sub-components (e.g. MayorContractorsAudit.tsx) only if it grows too large
+│   │   ├── MayorPortalView.tsx   # 5-tab controller ([Map] [Alerts] [Home] [Depts] [Contractors])
+│   │   ├── MayorAlertsTab.tsx    # Critical escalations + Emergency Broadcast form
+│   │   └── MayorContractorsTab.tsx # Contractor audit + Freeze/Unfreeze Payout switches
 │   ├── reports/
 │   │   ├── MyReportsView.tsx     # Citizen's submitted ticket history
 │   │   └── LifecycleStepper.tsx  # Reported -> In Progress -> Sign-off -> Resolved
@@ -146,14 +154,17 @@ awaaz/
 │   │   ├── gemini.ts             # Server-side Gemini client configuration (@google/genai)
 │   │   ├── mocks.ts              # Deterministic mock fallbacks (DEMO-FALLBACK)
 │   │   ├── prompts.ts            # Urdu triage and vision verification prompts
-│   │   └── schemas.ts            # Zod schemas for structured AI input/output
+│   │   ├── schemas.ts            # Zod schemas for structured AI input/output
+│   │   └── verification.ts       # Pure verification response normalization & fail-closed rules
 │   ├── data/
+│   │   ├── landmarks.json        # 12 Islamabad landmarks + 4 sector centres (T4.2)
 │   │   ├── seedComplaints.json   # 12 Islamabad fixtures (F-10, F-6, G-9, I-9)
 │   │   ├── seedGroups.json       # 5 channels + seeded neighbour messages (T4.1)
 │   │   ├── seedContractors.json  # Contractor list + payout status (T4.3)
 │   │   └── storage.ts            # Hydration-safe localStorage helpers; appends history events; quota-safe writes
 │   ├── types.ts                  # Shared TypeScript interfaces (spec §3)
 │   ├── categories.ts             # Fixed category table: department, default urgency, titles, stock photo, keywords (T3.1)
+│   ├── i18n.ts                   # Trilingual EN / Urdu / Roman Urdu translations
 │   ├── image.ts                  # Client-side photo compression ≤800px JPEG 0.7 (T3.2)
 │   ├── labels.ts                 # Urgency, department, and status badges/colors
 │   └── utils.ts                  # cn() class merger (shadcn), Haversine distance (T4.2), civic health calculator (T4.4)

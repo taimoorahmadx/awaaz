@@ -15,7 +15,7 @@ Everyday citizens across Pakistani cities (piloted in Islamabad, architected nat
   3. *Zero Transparency:* No public visibility into contractor track records or neighborhood-level civic health.
 
 ## Magic Moment (The 1-2 Wow Combo — 30 seconds)
-1. **Urdu Live Voice + Photo Intake (15s):** Tariq taps the mic and speaks naturally in Urdu while snapping a photo: *"F-10 markaz mein road ke corner pe gutter ka dhakkan toota hua hai, paani nikal raha hai aur raat ko haadsa ho sakta hai."* In seconds, Gemini (`gemini-3.8-flash`) processes the audio directly, categorizes it to **CDA Sanitation**, flags urgency as **Critical Hazard**, extracts landmark context, and places a pulsating marker directly on the neighborhood map.
+1. **Urdu Live Voice + Photo Intake (15s):** Tariq taps the mic and speaks naturally in Urdu while snapping a photo: *"F-10 markaz mein road ke corner pe gutter ka dhakkan toota hua hai, paani nikal raha hai aur raat ko haadsa ho sakta hai."* In seconds, Gemini (`gemini-3.5-flash`) processes the audio directly, categorizes it to **CDA Sanitation**, flags urgency as **Critical Hazard**, extracts landmark context, and places a pulsating marker directly on the neighborhood map.
 2. **AI Anti-Ghosting Vision Proof (15s):** Field contractor uploads an "After" photo of the repair. Gemini Vision executes an on-screen Before-vs-After verification, confirms the hazard is resolved, rejects fraudulent uploads, and transitions the ticket to "Pending Community Sign-off."
 
 ## Golden Path (Pitch & Demo Script — PROVISIONAL)
@@ -37,7 +37,7 @@ Everyday citizens across Pakistani cities (piloted in Islamabad, architected nat
 
 **[2:45 – 3:15 | Citizen Sign-off & Hyper-Local Community Hub (30 sec)]**
 - Switch back to Citizen (Tariq). Ticket is now "Pending Community Sign-off".
-- Tariq taps "+1 Confirm Fix". Ticket turns vibrant green (`RESOLVED`). Ghost closure prevented!
+- Tariq taps "Confirm Fix". Ticket turns vibrant green (`RESOLVED`). Ghost closure prevented!
 - Switch to Groups Tab: Show active hyper-local sector channels (`# F-10/2 Residents`, `💧 Water Watch`) with seeded neighbour conversations, embedded interactive cards, and 1-tap "Convert Message to Ticket".
 
 **[3:15 – 3:30 | Mayor Executive Governance & Civic Health (15 sec)]**
@@ -63,7 +63,7 @@ Everyday citizens across Pakistani cities (piloted in Islamabad, architected nat
 - **Map Tab:** Interactive Leaflet map centered on Islamabad (F-10) with color-coded SVG pins (🔴 Critical, 🟠 High, 🟡 Medium, 🟢 Resolved) and slide-over drawer on pin click.
 - **Explore Tab (Feed):** Pre-seeded Islamabad complaints, sector/urgency filters, Reddit-style Upvote/Downvote counters, and flat comments.
 - **Complaint Detail Modal:** Full audit trail, Before/After slider/viewer, priority breakdown, and SLA hours.
-- **My Reports Tab:** Personal report lifecycle stepper (`Reported → In Progress → Pending Sign-off → Resolved`) and "+1 Confirm Fix" sign-off.
+- **My Reports Tab:** Personal report lifecycle stepper (`Reported → In Progress → Pending Sign-off → Resolved`) and "Confirm Fix" / "Not Fixed" sign-off.
 - **Groups Tab (Hyper-Local Chat Hub):**
   - Active channels categorized by locality (`# F-10/2 Residents`), market (`# F-10 Markaz Traders`), civic interest (`💧 Water Watch`, `⚡ IESCO Alerts`), and official broadcast.
   - Text chat with seeded neighbour conversations (no voice notes).
@@ -78,9 +78,9 @@ Everyday citizens across Pakistani cities (piloted in Islamabad, architected nat
   - Executive KPI summary and Islamabad Civic Health Index.
   - Interactive contractor audit with 1-tap "Freeze Contractor Payout" toggle.
   - Emergency Civic Broadcast trigger.
-- **Role Switcher & Header:** 1-click switcher (Tariq F-10, Ayesha F-6, Anonymous, Worker Sajid, Mayor Comm. Nasir), subtle sector badge, and "Reset Demo Data".
+- **Role Switcher, Language Switcher & Header:** 1-click role switcher (Tariq F-10, Ayesha F-6, Anonymous, Worker Sajid, Mayor Comm. Nasir), trilingual UI switcher (`EN`, `اردو`, `Roman`), offline status chip, and "Reset System Data".
 - **Offline Resilience:** Deterministic `// DEMO-FALLBACK` in all API routes returning in <300ms + authentic "Offline Mode (Synced locally)" status chip.
-- **Pre-seeded Dataset:** 12 realistic Islamabad complaints + 4 civic groups loaded locally.
+- **Pre-seeded Dataset:** 12 realistic Islamabad complaints + 5 civic groups loaded locally.
 
 ### ⚠️ SHOULD (Winning Differentiators)
 - **Proximity AI Duplicate Detection:** Haversine 50m check prompting "+1 Impacts Me Too" (merging & boosting urgency score) vs "Submit as Separate Ticket".
@@ -112,7 +112,7 @@ Everyday citizens across Pakistani cities (piloted in Islamabad, architected nat
 ## Constraints & Environment
 - **Framework:** Next.js 15 (App Router), TypeScript (strict), Tailwind CSS v3.4, Lucide icons.
 - **Geo:** Vanilla `leaflet` wrapped in `useRef`, dynamically imported with `{ ssr: false }`. `L.divIcon()` with SVG templates.
-- **AI:** Google Gemini via `@google/genai` (model from `GEMINI_MODEL`, default `gemini-3.8-flash`), server-side route handlers only.
+- **AI:** Google Gemini via `@google/genai` (model from `GEMINI_MODEL`, default `gemini-3.5-flash`), server-side route handlers only.
 - **Persistence:** Browser `localStorage` + seeded JSON. Zero database infrastructure overhead.
 - **Offline:** 100% of hazard images stored locally in `public/images/hazards/`. Deterministic API fallbacks.
 - **Target Device:** Mobile viewport (375px–430px) primary, desktop responsive.
