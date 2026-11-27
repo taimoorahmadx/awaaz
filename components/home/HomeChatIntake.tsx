@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, MapPin, Mic, Plus, Send, X } from "lucide-react";
+import { Check, Loader2, LocateFixed, MapPin, Mic, Plus, Send, Trash2, X } from "lucide-react";
 import type { Complaint, Department, GeoLocation, Urgency } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
 import { useLanguage } from "@/components/common/LanguageProvider";
@@ -10,10 +10,12 @@ import { categoryInfo } from "@/lib/categories";
 import { base64ToBlob, compressImage, type CompressedImage } from "@/lib/image";
 import { addImpactConfirmation, getComplaints, useComplaints } from "@/lib/data/storage";
 import {
+  SECTOR_CENTRES,
   findDuplicateComplaint,
   getCurrentGpsPosition,
   resolveComplaintLocation,
   type DuplicateMatch,
+  type GpsReading,
 } from "@/lib/utils";
 
 // INTEGRATOR NOTE: local mirror of AudioAnalysisResponse (lib/ai/schemas.ts) + route flags,
@@ -145,6 +147,10 @@ export default function HomeChatIntake({
   const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
   const [impactSubmitted, setImpactSubmitted] = useState(false);
   const [locationChip, setLocationChip] = useState<string>("");
+  const [selectedSector, setSelectedSector] = useState<string>("");
+  const [manualGps, setManualGps] = useState<GpsReading | null>(null);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const photoInputRef = useRef<HTMLInputElement | null>(null);
@@ -221,10 +227,11 @@ export default function HomeChatIntake({
         fd.append("photo", base64ToBlob(photo.base64, photo.mimeType), "photo.jpg");
       }
       if (note.trim()) fd.append("text", note.trim());
-      if (sector) fd.append("sectorHint", sector);
+      const effectiveHomeSector = selectedSector || sector;
+      if (effectiveHomeSector) fd.append("sectorHint", effectiveHomeSector);
 
-      // AC-11.3: request GPS in parallel with the AI triage call.
-      const gpsPromise = getCurrentGpsPosition();
+      // AC-11.3: request GPS in parallel with the AI triage call (or reuse manual GPS).
+      const gpsPromise = manualGps ? Promise.resolve(manualGps) : getCurrentGpsPosition();
       const [res, gps] = await Promise.all([
         fetch("/api/analyze-audio", { method: "POST", body: fd }),
         gpsPromise,
@@ -235,11 +242,11 @@ export default function HomeChatIntake({
       onFallbackChange?.(isFallback);
 
       const { location, chipLabel } = resolveComplaintLocation({
-        gps,
+        gps: selectedSector ? null : gps,
         aiLandmark: data.landmark,
         typedText: note,
-        aiSector: data.sector,
-        homeSector: sector,
+        aiSector: selectedSector || data.sector,
+        homeSector: effectiveHomeSector,
         city,
       });
       setLocationChip(chipLabel);
@@ -251,12 +258,10 @@ export default function HomeChatIntake({
         location: complaint.location,
       });
 
+      // Always show Draft Preview first — citizen explicitly clicks "Create Ticket" to publish.
+      setPendingComplaint(complaint);
       if (dup) {
-        setPendingComplaint(complaint);
         setDuplicateMatch(dup);
-      } else {
-        setCreated(complaint);
-        onComplaintCreated?.(complaint);
       }
       setText("");
       setAttachedPhoto(null);
@@ -277,6 +282,61 @@ export default function HomeChatIntake({
     setPendingComplaint(null);
   }
 
+  function handleDiscardDraft() {
+    setResult(null);
+    setPendingComplaint(null);
+    setDuplicateMatch(null);
+    setImpactSubmitted(false);
+    setLocationChip("");
+    setError(null);
+  }
+
+  async function handleUseGps() {
+    setGpsLoading(true);
+    setError(null);
+    const gps = await getCurrentGpsPosition();
+    setGpsLoading(false);
+    if (gps) {
+      setManualGps(gps);
+      setSelectedSector("");
+      setShowLocationPicker(false);
+    } else {
+      setError("GPS unavailable — pick a sector manually instead.");
+    }
+  }
+
+  function handleDraftSectorChange(newSector: string) {
+    setPendingComplaint((prev) => {
+      if (!prev) return prev;
+      const coords = SECTOR_CENTRES[newSector] ?? prev.location;
+      return {
+        ...prev,
+        location: {
+          ...prev.location,
+          sector: newSector,
+          lat: coords.lat,
+          lng: coords.lng,
+          landmark: prev.location.landmark || `${newSector} sector`,
+          source: "SECTOR_CENTRE",
+        },
+      };
+    });
+    setLocationChip(`📍 ${newSector}`);
+  }
+
+  function handleDraftLandmarkChange(newLandmark: string) {
+    setPendingComplaint((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        location: {
+          ...prev.location,
+          landmark: newLandmark,
+        },
+      };
+    });
+  }
+
   function handleSubmitSeparate() {
     if (!pendingComplaint) return;
     setCreated(pendingComplaint);
@@ -291,6 +351,25 @@ export default function HomeChatIntake({
     if (rec && rec.state !== "inactive") {
       rec.stop();
     }
+  }
+
+  function cancelRecording() {
+    const rec = recorderRef.current;
+    if (rec) {
+      rec.onstop = null;
+      if (rec.state !== "inactive") {
+        try {
+          rec.stop();
+        } catch {
+          // ignore
+        }
+      }
+      rec.stream.getTracks().forEach((t) => t.stop());
+      recorderRef.current = null;
+    }
+    chunksRef.current = [];
+    setRecordingStream(null);
+    setRecording(false);
   }
 
   async function startRecording() {
@@ -346,24 +425,7 @@ export default function HomeChatIntake({
             >
               {t.home.greeting(isRtl ? urduName : citizenName)}
             </p>
-            <p
-              dir={isRtl ? "rtl" : "ltr"}
-              lang={isRtl ? "ur" : "en"}
-              className={`text-civic-muted ${isRtl ? "urdu text-sm" : "text-sm"}`}
-            >
-              {t.home.subtitle}
-            </p>
           </>
-        )}
-
-        {recording && (
-          <div className="flex items-center gap-2 text-sm text-red-300" role="status">
-            <span className="relative flex h-3 w-3">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
-            </span>
-            Recording… tap ■ to stop
-          </div>
         )}
 
         {loading && (
@@ -446,13 +508,60 @@ export default function HomeChatIntake({
               {activeComplaint?.location.landmark ?? result.landmark}
               {activeComplaint?.location.sector ? ` · ${activeComplaint.location.sector}` : ""}
             </p>
+
+            {pendingComplaint && !duplicateMatch && (
+              <div className="mt-3 space-y-2 border-t border-civic-border pt-3">
+                <div className="flex items-center gap-2">
+                  <select
+                    aria-label="Ticket sector"
+                    value={pendingComplaint.location.sector}
+                    onChange={(e) => handleDraftSectorChange(e.target.value)}
+                    className="rounded-lg border border-civic-border bg-civic-surface px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-civic-accent"
+                  >
+                    {Object.keys(SECTOR_CENTRES).map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    aria-label="Landmark"
+                    value={pendingComplaint.location.landmark}
+                    onChange={(e) => handleDraftLandmarkChange(e.target.value)}
+                    placeholder="Landmark / street"
+                    className="min-w-0 flex-1 rounded-lg border border-civic-border bg-civic-surface px-2.5 py-1.5 text-xs text-slate-100 placeholder:text-civic-muted focus:outline-none focus:ring-2 focus:ring-civic-accent"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSubmitSeparate}
+                    className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-civic-accent px-3 py-2 text-xs font-semibold text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100"
+                  >
+                    <Check className="h-4 w-4" aria-hidden="true" />
+                    Create Ticket
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDiscardDraft}
+                    aria-label="Discard draft"
+                    className="inline-flex items-center justify-center gap-1 rounded-xl border border-civic-border bg-civic-surface px-3 py-2 text-xs font-medium text-slate-300 transition hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                    Discard
+                  </button>
+                </div>
+              </div>
+            )}
+
             {created ? (
               <p className="mt-2 text-xs text-emerald-300">✓ Filed — pin added to the map.</p>
             ) : impactSubmitted ? (
               <p className="mt-2 text-xs text-emerald-300">✓ Impact added to existing ticket.</p>
-            ) : (
+            ) : duplicateMatch ? (
               <p className="mt-2 text-xs text-amber-300">⚠ Possible duplicate nearby — review below.</p>
-            )}
+            ) : null}
           </article>
         )}
 
@@ -508,10 +617,57 @@ export default function HomeChatIntake({
           </div>
         )}
 
+        {showLocationPicker && !recording && (
+          <div className="mb-2 flex flex-wrap items-center gap-2 rounded-xl border border-civic-border bg-civic-raised p-2">
+            <select
+              aria-label="Choose sector"
+              value={selectedSector}
+              onChange={(e) => {
+                setSelectedSector(e.target.value);
+                if (e.target.value) setManualGps(null);
+              }}
+              className="min-w-0 flex-1 rounded-lg border border-civic-border bg-civic-surface px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-civic-accent"
+            >
+              <option value="">Location: Auto-detect</option>
+              {Object.keys(SECTOR_CENTRES).map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={handleUseGps}
+              disabled={gpsLoading}
+              className="inline-flex items-center gap-1 rounded-lg border border-civic-border bg-civic-surface px-2.5 py-1.5 text-xs font-medium text-slate-200 transition hover:text-civic-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent disabled:opacity-50"
+            >
+              {gpsLoading ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <LocateFixed className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {manualGps ? "GPS locked" : "Use GPS"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowLocationPicker(false)}
+              aria-label="Close location picker"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-civic-muted hover:bg-civic-surface hover:text-slate-100"
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
         {recording && recordingStream ? (
-          <WaveformVisualizer stream={recordingStream} onStop={stopRecording} onAutoStop={stopRecording} />
+          <WaveformVisualizer
+            stream={recordingStream}
+            onStop={stopRecording}
+            onCancel={cancelRecording}
+            onAutoStop={stopRecording}
+          />
         ) : (
-          <div className="flex items-center gap-2 rounded-full border border-civic-border bg-civic-raised px-2 py-1.5">
+          <div className="flex items-center gap-1.5 rounded-full border border-civic-border bg-civic-raised px-2 py-1.5">
             <button
               type="button"
               onClick={() => photoInputRef.current?.click()}
@@ -520,6 +676,23 @@ export default function HomeChatIntake({
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-civic-muted transition hover:text-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent disabled:opacity-50"
             >
               <Plus className="h-5 w-5" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowLocationPicker((v) => !v)}
+              disabled={loading}
+              aria-label="Set location"
+              aria-pressed={showLocationPicker}
+              className={`flex h-9 shrink-0 items-center justify-center gap-1 rounded-full px-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent disabled:opacity-50 ${
+                selectedSector || manualGps
+                  ? "bg-civic-accent/15 text-civic-accent"
+                  : "text-civic-muted hover:text-slate-100"
+              }`}
+            >
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              {(selectedSector || manualGps) && (
+                <span>{selectedSector || "GPS"}</span>
+              )}
             </button>
             <label htmlFor="intake-text" className="sr-only">
               Describe issue in Urdu or English
@@ -557,10 +730,6 @@ export default function HomeChatIntake({
             )}
           </div>
         )}
-
-        <p className="mt-1.5 text-center text-[11px] text-civic-muted">
-          Tap ➕ for photo · Tap 🎙️ for Urdu audio
-        </p>
       </form>
     </section>
   );

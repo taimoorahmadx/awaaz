@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Square } from "lucide-react";
+import { Send, Trash2 } from "lucide-react";
 
 interface WaveformVisualizerProps {
   stream: MediaStream;
   onStop: () => void;
+  onCancel?: () => void;
   onAutoStop: () => void;
   maxSeconds?: number;
 }
@@ -27,6 +28,7 @@ function formatTimer(seconds: number): string {
 export default function WaveformVisualizer({
   stream,
   onStop,
+  onCancel,
   onAutoStop,
   maxSeconds = DEFAULT_MAX_SECONDS,
 }: WaveformVisualizerProps) {
@@ -135,18 +137,26 @@ export default function WaveformVisualizer({
       if (audioCtx && audioCtx.state !== "closed") {
         void audioCtx.close().catch(() => {});
       }
-      stream.getTracks().forEach((track) => track.stop());
+      // Note: do not stop stream tracks here — HomeChatIntake owns the MediaStream lifecycle
+      // and React StrictMode's double-mount cleanup would otherwise kill recording immediately.
     };
   }, [stream, maxSeconds]);
 
   return (
     <div
       data-testid="waveform-bar"
-      className="flex items-center gap-2.5 rounded-full border border-red-500/50 bg-civic-raised px-3 py-1.5"
+      className="flex items-center gap-2.5 rounded-full border border-civic-border bg-civic-raised py-1.5 pl-3 pr-1.5"
     >
       <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden="true">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
         <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+      </span>
+
+      <span
+        data-testid="recording-timer"
+        className="shrink-0 font-mono text-xs font-medium tabular-nums text-slate-200"
+      >
+        {formatTimer(elapsed)}
       </span>
 
       <canvas
@@ -158,22 +168,28 @@ export default function WaveformVisualizer({
         className="h-8 min-w-0 flex-1"
       />
 
-      <span
-        data-testid="recording-timer"
-        className="shrink-0 font-mono text-xs font-medium tabular-nums text-slate-200"
-      >
-        {formatTimer(elapsed)} / {formatTimer(maxSeconds)}
-      </span>
+      <div className="flex shrink-0 items-center gap-1.5">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Cancel recording"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-civic-surface text-slate-300 ring-1 ring-civic-border transition hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          >
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
 
-      <button
-        type="button"
-        onClick={onStop}
-        aria-label="Stop recording"
-        aria-pressed={true}
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-500 text-white transition hover:bg-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100"
-      >
-        <Square className="h-4 w-4" aria-hidden="true" />
-      </button>
+        <button
+          type="button"
+          onClick={onStop}
+          aria-label="Stop recording"
+          aria-pressed={true}
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-civic-accent text-civic-bg transition hover:bg-civic-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-100"
+        >
+          <Send className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }

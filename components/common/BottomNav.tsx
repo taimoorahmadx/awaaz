@@ -1,6 +1,6 @@
 "use client";
 
-import { ClipboardList, Map, Mic, Newspaper, Users, type LucideIcon } from "lucide-react";
+import { ClipboardList, Map, Newspaper, Plus, Users, type LucideIcon } from "lucide-react";
 import { useLanguage } from "./LanguageProvider";
 
 export type CitizenTab = "explore" | "map" | "home" | "reports" | "groups";
@@ -8,7 +8,7 @@ export type CitizenTab = "explore" | "map" | "home" | "reports" | "groups";
 const TABS: { id: CitizenTab; icon: LucideIcon }[] = [
   { id: "explore", icon: Newspaper },
   { id: "map", icon: Map },
-  { id: "home", icon: Mic },
+  { id: "home", icon: Plus },
   { id: "reports", icon: ClipboardList },
   { id: "groups", icon: Users },
 ];

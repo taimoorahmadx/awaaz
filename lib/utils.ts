@@ -124,6 +124,17 @@ export function getCurrentGpsPosition(): Promise<GpsReading | null> {
  * 2. Landmark match against landmarks.json (no jitter)
  * 3. Sector centre + small jitter
  */
+export function extractSectorFromText(text: string): string {
+  const upper = text.toUpperCase();
+  for (const sector of Object.keys(SECTOR_CENTRES)) {
+    const escaped = sector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp(`(^|[^A-Z0-9])${escaped}([^A-Z0-9]|$)`).test(upper)) {
+      return sector;
+    }
+  }
+  return "";
+}
+
 export function resolveComplaintLocation(params: {
   gps: GpsReading | null;
   aiLandmark: string;
@@ -133,12 +144,15 @@ export function resolveComplaintLocation(params: {
   city: string;
 }): { location: GeoLocation; chipLabel: string } {
   const { gps, aiLandmark, typedText, aiSector, homeSector, city } = params;
+  const textSector = extractSectorFromText(typedText);
   const knownSector =
-    aiSector && SECTOR_CENTRES[aiSector]
-      ? aiSector
-      : homeSector && SECTOR_CENTRES[homeSector]
-        ? homeSector
-        : "";
+    textSector && SECTOR_CENTRES[textSector]
+      ? textSector
+      : aiSector && SECTOR_CENTRES[aiSector]
+        ? aiSector
+        : homeSector && SECTOR_CENTRES[homeSector]
+          ? homeSector
+          : "";
 
   if (gps && gps.accuracy <= GPS_MAX_ACCURACY_METERS && isInIslamabadBox(gps.lat, gps.lng)) {
     const sector = knownSector || nearestSector(gps.lat, gps.lng);

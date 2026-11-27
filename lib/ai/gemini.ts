@@ -3,10 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 
 // Server-side only. Never import this file from components/ or any client code.
 // gemini-2.0-flash was retired (API 404); use the model the API recommends.
-export const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
-// Configurable via AI_TIMEOUT_MS (ms). Default 5000 until live latency is measured (D7).
+export const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.5-flash";
+// Configurable via AI_TIMEOUT_MS (ms). Default 12000ms so full multimodal triage doesn't clip at 5s.
 const parsedTimeout = Number(process.env.AI_TIMEOUT_MS);
-export const AI_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 5000;
+export const AI_TIMEOUT_MS = Number.isFinite(parsedTimeout) && parsedTimeout > 0 ? parsedTimeout : 12000;
 
 let client: GoogleGenAI | null = null;
 
