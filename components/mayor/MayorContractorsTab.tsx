@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { toggleContractorPayout, useContractors } from "@/lib/data/storage";
 import { DEPARTMENT_LABELS } from "@/lib/labels";
+import { useLanguage } from "@/components/common/LanguageProvider";
+import { getComplaintTitle } from "@/lib/i18n";
 import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import type { Complaint, Contractor } from "@/lib/types";
 
@@ -16,6 +18,7 @@ interface MayorContractorsTabProps {
 
 /** Mayor Contractors tab: persisted contractor ledger with Freeze/Unfreeze Payout Switch (AC-10.3) + AI fraud flags. */
 export default function MayorContractorsTab({ complaints, onUpdateComplaint }: MayorContractorsTabProps) {
+  const { lang, t, isRtl } = useLanguage();
   const { contractors, hydrated } = useContractors();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = complaints.find((c) => c.id === selectedId) ?? null;
@@ -31,12 +34,12 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
   const rejectedComplaints = complaints.filter((c) => c.aiVerification?.passed === false);
 
   const kpis = [
-    { v: `🛡️ ${avgResolution}%`, l: "Avg Fix Integrity", s: "Confirmed by AI + Citizens" },
-    { v: `🚫 ${totalFlagged}`, l: "Flagged Incidents", s: "Tracked Across Vendors" },
-    { v: `💰 ₨ ${(frozenCount * 120000).toLocaleString()}`, l: "Protected", s: "Taxpayer Funds Preserved" },
+    { v: `🛡️ ${avgResolution}%`, l: t.mayor.avgIntegrity, s: "Confirmed by AI + Citizens" },
+    { v: `🚫 ${totalFlagged}`, l: t.mayor.flaggedIncidents, s: "Tracked Across Vendors" },
+    { v: `💰 ₨ ${(frozenCount * 120000).toLocaleString()}`, l: t.mayor.protectedFunds, s: "Taxpayer Funds Preserved" },
     {
       v: `🔒 ${frozenCount}`,
-      l: "Payouts Frozen",
+      l: t.mayor.payoutsFrozen,
       s: frozenCount === 1 ? "1 Contractor Held" : `${frozenCount} Contractors Held`,
     },
   ];
@@ -54,7 +57,7 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
   return (
     <div className="flex flex-col gap-3 p-3">
       <h2 className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-        Contractor Integrity &amp; Anti-Ghosting Audit
+        {t.mayor.contractorAuditTitle}
       </h2>
 
       <div className="grid grid-cols-2 gap-2">
@@ -72,7 +75,7 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
           id="contractor-roster-heading"
           className="text-[11px] font-semibold uppercase tracking-wide text-slate-400"
         >
-          Registered Contractors ({contractors.length})
+          {t.mayor.registeredContractors(contractors.length)}
         </h2>
 
         {!hydrated ? (
@@ -118,14 +121,14 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
 
                 <div className="mt-2 flex items-center gap-4 text-xs text-slate-300">
                   <span>
-                    Verified Resolution:{" "}
+                    {t.mayor.verifiedResolution}{" "}
                     <strong className="text-slate-100">{contractor.verifiedResolutionPct}%</strong>
                   </span>
                   <span className="flex items-center gap-1">
                     {contractor.flaggedIncidents > 0 && (
                       <AlertTriangle className="h-3 w-3 text-amber-400" aria-hidden="true" />
                     )}
-                    Flagged:{" "}
+                    {t.mayor.flagged}{" "}
                     <strong className="text-slate-100">{contractor.flaggedIncidents}</strong>
                   </span>
                 </div>
@@ -137,7 +140,7 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
                       isFrozen ? "text-red-300" : "text-slate-200"
                     }`}
                   >
-                    {isFrozen ? "Unfreeze Payout" : "Freeze Payout"}
+                    {isFrozen ? t.mayor.unfreezePayout : t.mayor.freezePayout}
                   </label>
                   <Switch
                     id={switchId}
@@ -158,12 +161,12 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
           id="flagged-audit-heading"
           className="text-[11px] font-semibold uppercase tracking-wide text-slate-400"
         >
-          Flagged Audit Incidents
+          {t.mayor.flaggedAuditHeading}
         </h2>
 
         {rejectedComplaints.length === 0 ? (
           <div className="rounded-xl border border-civic-border bg-civic-surface p-3 text-xs text-slate-400">
-            No AI-rejected incidents flagged right now.
+            {t.mayor.noFlaggedIncidents}
           </div>
         ) : (
           rejectedComplaints.map((c) => (
@@ -177,8 +180,11 @@ export default function MayorContractorsTab({ complaints, onUpdateComplaint }: M
                 <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
                 AI VERIFICATION REJECTED · {c.id.toUpperCase()}
               </p>
-              <p className="text-xs font-medium text-slate-200">
-                {c.title} · {DEPARTMENT_LABELS[c.department]} ({c.location.sector})
+              <p
+                dir={isRtl ? "rtl" : "ltr"}
+                className={`font-medium text-slate-200 ${isRtl ? "urdu text-right text-sm" : "text-xs"}`}
+              >
+                {getComplaintTitle(c, lang)} · {t.departments[c.department] ?? DEPARTMENT_LABELS[c.department]} ({c.location.sector})
               </p>
               {c.aiVerification && (
                 <p className="mt-1 text-[11px] italic text-slate-400">

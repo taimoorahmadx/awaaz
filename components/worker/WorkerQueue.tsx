@@ -33,7 +33,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
   if (openAll.length === 0) {
     return (
       <>
-        <p className="px-4 py-12 text-center text-sm text-civic-muted">No open tickets. Nice work.</p>
+        <p className="px-4 py-12 text-center text-sm text-civic-muted">{t.worker.noQueue}</p>
         <ComplaintDetailModal
           complaint={selected}
           viewerId="worker-sajid"
@@ -50,7 +50,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
       <div className="flex gap-1.5 overflow-x-auto border-b border-civic-border px-4 py-2.5 no-scrollbar">
         {DEPT_FILTERS.map((d) => {
           const active = deptFilter === d;
-          const label = d === "ALL" ? `All (${openAll.length})` : t.departments[d] ?? DEPARTMENT_LABELS[d];
+          const label = d === "ALL" ? `${t.worker.allDepts} (${openAll.length})` : t.departments[d] ?? DEPARTMENT_LABELS[d];
           return (
             <button
               key={d}
@@ -69,7 +69,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
       </div>
 
       {open.length === 0 ? (
-        <p className="px-4 py-12 text-center text-sm text-civic-muted">No open tickets for this department.</p>
+        <p className="px-4 py-12 text-center text-sm text-civic-muted">{t.worker.noDeptQueue}</p>
       ) : (
         <ul className="flex flex-col gap-3 p-4">
           {open.map((c) => (
@@ -91,7 +91,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
                     {t.statuses[c.status] ?? STATUS_LABELS[c.status]}
                   </span>
                   <span className={`ml-auto text-[11px] ${c.sla.isBreached ? "font-medium text-red-400" : "text-civic-muted"}`}>
-                    {c.sla.isBreached ? "Overdue" : `${c.sla.hoursRemaining}h left`}
+                    {c.sla.isBreached ? t.worker.overdue : t.worker.hoursLeft(c.sla.hoursRemaining)}
                   </span>
                 </div>
                 <div className="flex gap-3">
@@ -122,7 +122,7 @@ export default function WorkerQueue({ complaints, onUpdateComplaint }: WorkerQue
                 }}
                 className="rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950"
               >
-                Claim Ticket
+                {t.worker.claimTicket}
               </button>
             </li>
           ))}

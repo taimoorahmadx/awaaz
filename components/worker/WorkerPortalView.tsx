@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ClipboardList, Home, User } from "lucide-react";
 import { toast } from "sonner";
 import type { Complaint } from "@/lib/types";
+import { useLanguage } from "@/components/common/LanguageProvider";
 import WorkerQueue from "./WorkerQueue";
 import WorkerHome from "./WorkerHome";
 import WorkerProfile from "./WorkerProfile";
@@ -16,19 +17,20 @@ interface WorkerPortalViewProps {
   onUpdateComplaint: (complaint: Complaint) => void;
 }
 
-const TABS: { id: WorkerTab; label: string; icon: typeof Home }[] = [
-  { id: "queue", label: "Queue", icon: ClipboardList },
-  { id: "home", label: "Home", icon: Home },
-  { id: "profile", label: "Profile", icon: User },
-];
-
 /** Worker portal: Queue (claim) → Home (route card + upload fix + AI verify) → Profile. */
 export default function WorkerPortalView({
   complaints,
   workerId = "worker-sajid",
   onUpdateComplaint,
 }: WorkerPortalViewProps) {
+  const { t } = useLanguage();
   const [tab, setTab] = useState<WorkerTab>("queue");
+
+  const TABS: { id: WorkerTab; label: string; icon: typeof Home }[] = [
+    { id: "queue", label: t.worker.queueTab, icon: ClipboardList },
+    { id: "home", label: t.worker.homeTab, icon: Home },
+    { id: "profile", label: t.worker.profileTab, icon: User },
+  ];
 
   const activeWorkCount = complaints.filter(
     (c) => c.assignedTo?.workerId === workerId && c.status === "IN_PROGRESS",

@@ -44,7 +44,7 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
   if (myWork.length === 0) {
     return (
       <p className="px-4 py-12 text-center text-sm text-civic-muted">
-        No claimed tickets assigned to you. Claim one from the Queue.
+        {t.worker.noAssigned}
       </p>
     );
   }
@@ -53,10 +53,10 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
     <section className="flex flex-col gap-3 p-4">
       <div className="flex items-center justify-between text-xs text-civic-muted">
         <span className="font-semibold text-slate-200">
-          My Active Jobs ({inProgress.length} In Progress)
+          {t.worker.activeJobs(inProgress.length)}
         </span>
         {awaitingSignOff.length > 0 && (
-          <span>{awaitingSignOff.length} Awaiting Sign-off</span>
+          <span>{t.worker.awaitingSignOff(awaitingSignOff.length)}</span>
         )}
       </div>
 
@@ -91,7 +91,7 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
                   className="inline-flex items-center gap-1 rounded-md border border-civic-border px-2 py-0.5 text-[11px] text-civic-muted transition hover:border-red-500/40 hover:text-red-300"
                 >
                   <RotateCcw className="h-3 w-3" aria-hidden="true" />
-                  Unclaim
+                  {t.worker.unclaim}
                 </button>
               )}
             </div>
@@ -141,7 +141,7 @@ export default function WorkerHome({ complaints, workerId, onUpdateComplaint }: 
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 rounded-lg border border-civic-accent/40 bg-civic-accent/15 px-2.5 py-1.5 text-xs font-medium text-civic-accent transition hover:bg-civic-accent/25"
                   >
-                    <span>Open in Google Maps</span>
+                    <span>{t.worker.openInMaps}</span>
                     <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   </a>
                 </div>

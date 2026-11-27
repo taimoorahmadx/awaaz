@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Complaint, Department } from "@/lib/types";
 import { DEPARTMENT_LABELS } from "@/lib/labels";
+import { useLanguage } from "@/components/common/LanguageProvider";
 import { computeCityHealth, computeSectorHealth, gradeColorClasses } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MapView from "@/components/map/MapView";
@@ -32,7 +33,16 @@ export default function MayorPortalView({
   complaints = [],
   onUpdateComplaint,
 }: MayorPortalViewProps) {
+  const { t } = useLanguage();
   const [tab, setTab] = useState<MayorTab>("home");
+
+  const localizedTabs: { id: MayorTab; icon: string; label: string }[] = [
+    { id: "map", icon: "🗺️", label: t.mayor.mapTab },
+    { id: "alerts", icon: "🚨", label: t.mayor.alertsTab },
+    { id: "home", icon: "🏛️", label: t.mayor.homeTab },
+    { id: "depts", icon: "🏢", label: t.mayor.deptsTab },
+    { id: "contractors", icon: "🛡️", label: t.mayor.contractorsTab },
+  ];
 
   return (
     <Tabs
@@ -67,16 +77,16 @@ export default function MayorPortalView({
         className="sticky bottom-0 z-20 border-t border-civic-border bg-civic-surface"
       >
         <TabsList className="grid h-auto w-full grid-cols-5 rounded-none bg-transparent p-0">
-          {TABS.map((t) => (
+          {localizedTabs.map((item) => (
             <TabsTrigger
-              key={t.id}
-              value={t.id}
+              key={item.id}
+              value={item.id}
               className="flex flex-col items-center rounded-none py-2 text-[10px] font-medium text-slate-400 shadow-none data-[state=active]:bg-transparent data-[state=active]:text-amber-400 data-[state=active]:shadow-none"
             >
               <span className="text-lg" aria-hidden="true">
-                {t.icon}
+                {item.icon}
               </span>
-              {t.label}
+              {item.label}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -86,6 +96,7 @@ export default function MayorPortalView({
 }
 
 function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: MayorTab) => void }) {
+  const { t } = useLanguage();
   const sectorHealth = computeSectorHealth(complaints);
   const cityHealth = computeCityHealth(sectorHealth);
   const cityColors = gradeColorClasses(cityHealth.grade);
@@ -99,17 +110,17 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
   const pct = total ? ((resolved / total) * 100).toFixed(1) : "0.0";
 
   const kpis = [
-    { icon: "📥", value: total, label: "Total Filed", sub: `Across ${sectorHealth.length} Islamabad Sectors` },
-    { icon: "🟢", value: resolved, label: "Verified Fixed", sub: "Citizen + AI Verified" },
-    { icon: "🟡", value: inProgress, label: "In Progress", sub: "Field Teams Active" },
-    { icon: "🔴", value: critical, label: "Critical Open", sub: "Immediate Action Req" },
+    { icon: "📥", value: total, label: t.mayor.totalFiled, sub: `Across ${sectorHealth.length} Islamabad Sectors` },
+    { icon: "🟢", value: resolved, label: t.mayor.verifiedFixed, sub: "Citizen + AI Verified" },
+    { icon: "🟡", value: inProgress, label: t.mayor.inProgress, sub: "Field Teams Active" },
+    { icon: "🔴", value: critical, label: t.mayor.criticalOpen, sub: "Immediate Action Req" },
   ];
 
   return (
     <div className="flex flex-col gap-3 p-3">
       <div className={`${card} ${cityColors.border}`} data-testid="city-health-card">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-slate-400">Islamabad Civic Health Score</p>
+          <p className="text-xs text-slate-400">{t.mayor.cityScore}</p>
           <span
             data-testid="city-health-grade"
             className={`rounded-full border px-2 py-0.5 text-xs font-bold ${cityColors.badge}`}
@@ -127,7 +138,7 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
       </div>
 
       <div>
-        <h2 className={sectionTitle}>Executive KPI Summary</h2>
+        <h2 className={sectionTitle}>{t.mayor.execKpis}</h2>
         <div className="grid grid-cols-2 gap-2">
           {kpis.map((k) => (
             <div key={k.label} className={card} data-testid={`mayor-kpi-${k.label.toLowerCase().replace(/\s+/g, "-")}`}>
@@ -142,7 +153,7 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
       </div>
 
       <div className={card} data-testid="sector-health-scorecard">
-        <h2 className={sectionTitle}>Sector Civic Health Scorecard</h2>
+        <h2 className={sectionTitle}>{t.mayor.sectorScorecard}</h2>
         <ul className="flex flex-col gap-2.5">
           {sectorHealth.map((s) => {
             const colors = gradeColorClasses(s.grade);
@@ -187,14 +198,14 @@ function HomeTab({ complaints, onNav }: { complaints: Complaint[]; onNav: (t: Ma
           onClick={() => onNav("map")}
           className="rounded-lg border border-civic-border bg-civic-surface py-2 text-xs font-semibold text-slate-100"
         >
-          🗺️ View Problem Heatmap
+          {t.mayor.heatmapBtn}
         </button>
         <button
           type="button"
           onClick={() => onNav("contractors")}
           className="rounded-lg border border-civic-border bg-civic-surface py-2 text-xs font-semibold text-slate-100"
         >
-          🛡️ Contractor Audit
+          {t.mayor.contractorAuditBtn}
         </button>
       </div>
     </div>
@@ -210,6 +221,7 @@ const ALL_DEPTS: { id: Department; icon: string }[] = [
 ];
 
 function DeptsTab({ complaints }: { complaints: Complaint[] }) {
+  const { t } = useLanguage();
   const depts = ALL_DEPTS.map(({ id, icon }) => {
     const list = complaints.filter((c) => c.department === id);
     const total = list.length;
@@ -229,7 +241,7 @@ function DeptsTab({ complaints }: { complaints: Complaint[] }) {
 
     return {
       id,
-      name: `${icon} ${DEPARTMENT_LABELS[id]}`,
+      name: `${icon} ${t.departments[id] ?? DEPARTMENT_LABELS[id]}`,
       total,
       resolved,
       pctNum,
@@ -241,7 +253,7 @@ function DeptsTab({ complaints }: { complaints: Complaint[] }) {
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      <h2 className={sectionTitle}>Municipal Agency Leaderboard (Live)</h2>
+      <h2 className={sectionTitle}>{t.mayor.deptLeaderboard}</h2>
       {depts.map((d, i) => (
         <div key={d.id} className={card}>
           <div className="flex justify-between text-sm font-semibold text-slate-100">
@@ -249,9 +261,9 @@ function DeptsTab({ complaints }: { complaints: Complaint[] }) {
             <span>{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}</span>
           </div>
           <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-300">
-            <span>Complaints: {d.total}</span>
-            <span>Resolved: {d.resolved} ({d.pct}%)</span>
-            <span>On-Time Rate: {d.onTimeRate}</span>
+            <span>{t.mayor.complaintsCount}: {d.total}</span>
+            <span>{t.mayor.resolvedLabel}: {d.resolved} ({d.pct}%)</span>
+            <span>{t.mayor.onTimeRate}: {d.onTimeRate}</span>
           </div>
           <p className="mt-1 text-[11px] text-slate-400">{d.status}</p>
         </div>

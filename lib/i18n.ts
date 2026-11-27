@@ -101,6 +101,31 @@ export interface Translations {
     openInMaps: string;
     noAssigned: string;
     noQueue: string;
+    allDepts: string;
+    noDeptQueue: string;
+    overdue: string;
+    hoursLeft: (h: number) => string;
+    activeJobs: (n: number) => string;
+    awaitingSignOff: (n: number) => string;
+    unclaim: string;
+    before: string;
+    after: string;
+    noPhotoAttached: string;
+    uploadFix: string;
+    changePhoto: string;
+    fixNotePlaceholder: string;
+    markFixed: string;
+    verifyFixBtn: string;
+    onDuty: string;
+    aiApproval: string;
+    resolvedCount: string;
+    totalAssigned: string;
+    currentWorkload: string;
+    pendingSignOff: string;
+    assignmentDetails: string;
+    department: string;
+    assignedZone: string;
+    shiftHours: string;
   };
   mayor: {
     scorecardTab: string;
@@ -113,6 +138,39 @@ export interface Translations {
     broadcastPlaceholder: string;
     sendBroadcast: string;
     broadcastSent: string;
+    mapTab: string;
+    homeTab: string;
+    deptsTab: string;
+    totalFiled: string;
+    verifiedFixed: string;
+    inProgress: string;
+    criticalOpen: string;
+    execKpis: string;
+    sectorScorecard: string;
+    heatmapBtn: string;
+    contractorAuditBtn: string;
+    deptLeaderboard: string;
+    complaintsCount: string;
+    resolvedLabel: string;
+    onTimeRate: string;
+    broadcastSub: string;
+    noticeTitle: string;
+    advisoryMsg: string;
+    latestAlert: string;
+    criticalEscalations: (n: number) => string;
+    noCritical: string;
+    dispatchCrew: string;
+    dispatchActive: string;
+    contractorAuditTitle: string;
+    avgIntegrity: string;
+    flaggedIncidents: string;
+    protectedFunds: string;
+    payoutsFrozen: string;
+    registeredContractors: (n: number) => string;
+    verifiedResolution: string;
+    flagged: string;
+    flaggedAuditHeading: string;
+    noFlaggedIncidents: string;
   };
 }
 
@@ -233,20 +291,78 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       aiVerified: "AI Verified",
       aiRejected: "AI Rejected",
       openInMaps: "Open in Google Maps",
-      noAssigned: "No active tickets claimed yet. Claim one from the Queue tab.",
-      noQueue: "No open tickets in the queue.",
+      noAssigned: "No claimed tickets assigned to you. Claim one from the Queue.",
+      noQueue: "No open tickets. Nice work.",
+      allDepts: "All",
+      noDeptQueue: "No open tickets for this department.",
+      overdue: "Overdue",
+      hoursLeft: (h) => `${h}h left`,
+      activeJobs: (n) => `My Active Jobs (${n} In Progress)`,
+      awaitingSignOff: (n) => `${n} Awaiting Sign-off`,
+      unclaim: "Unclaim",
+      before: "Before",
+      after: "After",
+      noPhotoAttached: "No photo attached",
+      uploadFix: "Upload Fix",
+      changePhoto: "Change photo",
+      fixNotePlaceholder: "Optional fix note (e.g. leak sealed, supply restored)",
+      markFixed: "Mark Fixed & Request Sign-off",
+      verifyFixBtn: "Verify Fix",
+      onDuty: "On Duty",
+      aiApproval: "AI approval",
+      resolvedCount: "Resolved",
+      totalAssigned: "Total assigned",
+      currentWorkload: "Current Workload",
+      pendingSignOff: "Pending Sign-off",
+      assignmentDetails: "Assignment Details",
+      department: "Department:",
+      assignedZone: "Assigned Zone:",
+      shiftHours: "Shift Hours:",
     },
     mayor: {
       scorecardTab: "Scorecard",
-      contractorsTab: "Contractors",
+      contractorsTab: "Contrs",
       alertsTab: "Alerts",
-      cityScore: "Islamabad Civic Health",
+      cityScore: "Islamabad Civic Health Score",
       freezePayout: "Freeze Payout",
       unfreezePayout: "Unfreeze Payout",
-      broadcastTitle: "Emergency Broadcast",
-      broadcastPlaceholder: "Write an official alert for all Islamabad sectors…",
-      sendBroadcast: "Send Broadcast",
-      broadcastSent: "Broadcast sent to Municipal Alerts",
+      broadcastTitle: "Broadcast Emergency Notice",
+      broadcastPlaceholder: "Write official instructions for residents...",
+      sendBroadcast: "Broadcast Emergency Notice",
+      broadcastSent: "Emergency notice broadcast to Municipal Alerts",
+      mapTab: "Map",
+      homeTab: "Home",
+      deptsTab: "Depts",
+      totalFiled: "Total Filed",
+      verifiedFixed: "Verified Fixed",
+      inProgress: "In Progress",
+      criticalOpen: "Critical Open",
+      execKpis: "Executive KPI Summary",
+      sectorScorecard: "Sector Civic Health Scorecard",
+      heatmapBtn: "🗺️ View Problem Heatmap",
+      contractorAuditBtn: "🛡️ Contractor Audit",
+      deptLeaderboard: "Municipal Agency Leaderboard (Live)",
+      complaintsCount: "Complaints",
+      resolvedLabel: "Resolved",
+      onTimeRate: "On-Time Rate",
+      broadcastSub: "Posts an official alert to 📢 Municipal Alerts and pins the banner across all channels",
+      noticeTitle: "Notice Title",
+      advisoryMsg: "Advisory Message",
+      latestAlert: "Latest Official Alert",
+      criticalEscalations: (n) => `Critical Escalations (${n} Requiring Action)`,
+      noCritical: "No critical or overdue tickets open right now.",
+      dispatchCrew: "🚀 Dispatch Rapid Crew",
+      dispatchActive: "✓ Priority Dispatch Active",
+      contractorAuditTitle: "Contractor Integrity & Anti-Ghosting Audit",
+      avgIntegrity: "Avg Fix Integrity",
+      flaggedIncidents: "Flagged Incidents",
+      protectedFunds: "Protected",
+      payoutsFrozen: "Payouts Frozen",
+      registeredContractors: (n) => `Registered Contractors (${n})`,
+      verifiedResolution: "Verified Resolution:",
+      flagged: "Flagged:",
+      flaggedAuditHeading: "Flagged Audit Incidents",
+      noFlaggedIncidents: "No AI-rejected incidents flagged right now.",
     },
   },
 
@@ -367,19 +483,77 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       aiRejected: "AI نے مسترد کر دیا",
       openInMaps: "گوگل میپس میں کھولیں",
       noAssigned: "ابھی کوئی فعال ٹکٹ نہیں لیا گیا۔ قطار ٹیب سے ٹکٹ لیں۔",
-      noQueue: "قطار میں کوئی کھلا ٹکٹ موجود نہیں۔",
+      noQueue: "قطار میں کوئی کھلا ٹکٹ موجود نہیں۔ شاباش!",
+      allDepts: "تمام",
+      noDeptQueue: "اس محکمے کے لیے کوئی کھلا ٹکٹ نہیں۔",
+      overdue: "تاخیر شدہ",
+      hoursLeft: (h) => `${h} گھنٹے باقی`,
+      activeJobs: (n) => `میرے فعال کام (${n} جاری)`,
+      awaitingSignOff: (n) => `${n} شہری تصدیق کے منتظر`,
+      unclaim: "واپس کریں",
+      before: "پہلے",
+      after: "بعد میں",
+      noPhotoAttached: "کوئی تصویر منسلک نہیں",
+      uploadFix: "مرمت کی تصویر",
+      changePhoto: "تصویر بدلیں",
+      fixNotePlaceholder: "اختیاری نوٹ (مثلاً گیس لیک بند کر دی گئی)",
+      markFixed: "مرمت مکمل کریں اور تصدیق مانگیں",
+      verifyFixBtn: "مرمت کی تصدیق کریں",
+      onDuty: "ڈیوٹی پر",
+      aiApproval: "AI منظوری",
+      resolvedCount: "حل شدہ",
+      totalAssigned: "کل تفویض",
+      currentWorkload: "موجودہ کام",
+      pendingSignOff: "تصدیق کے منتظر",
+      assignmentDetails: "تعیناتی کی تفصیلات",
+      department: "محکمہ:",
+      assignedZone: "علاقہ:",
+      shiftHours: "شفٹ اوقات:",
     },
     mayor: {
       scorecardTab: "اسکور کارڈ",
       contractorsTab: "ٹھیکیدار",
       alertsTab: "اعلانات",
-      cityScore: "اسلام آباد شہری صحت",
+      cityScore: "اسلام آباد شہری صحت اسکور",
       freezePayout: "ادائیگی روکیں",
       unfreezePayout: "ادائیگی بحال کریں",
-      broadcastTitle: "ہنگامی اعلان",
-      broadcastPlaceholder: "اسلام آباد کے تمام سیکٹرز کے لیے سرکاری اعلان لکھیں…",
-      sendBroadcast: "اعلان بھیجیں",
-      broadcastSent: "اعلان میونسپل الرٹس میں بھیج دیا گیا",
+      broadcastTitle: "ہنگامی اعلان نشر کریں",
+      broadcastPlaceholder: "شہریوں کے لیے سرکاری ہدایات لکھیں...",
+      sendBroadcast: "ہنگامی اعلان بھیجیں",
+      broadcastSent: "ہنگامی اعلان میونسپل الرٹس میں بھیج دیا گیا",
+      mapTab: "نقشہ",
+      homeTab: "ہوم",
+      deptsTab: "محکمے",
+      totalFiled: "کل شکایات",
+      verifiedFixed: "تصدیق شدہ حل",
+      inProgress: "کام جاری",
+      criticalOpen: "انتہائی فوری",
+      execKpis: "ایگزیکٹو خلاصہ",
+      sectorScorecard: "سیکٹر شہری صحت اسکور کارڈ",
+      heatmapBtn: "🗺️ مسائل کا نقشہ دیکھیں",
+      contractorAuditBtn: "🛡️ ٹھیکیدار آڈٹ",
+      deptLeaderboard: "میونسپل محکموں کی کارکردگی (لائیو)",
+      complaintsCount: "شکایات",
+      resolvedLabel: "حل شدہ",
+      onTimeRate: "برقت شرح",
+      broadcastSub: "تمام چینلز اور 📢 میونسپل الرٹس میں سرکاری اعلان شائع کرتا ہے",
+      noticeTitle: "اعلان کا عنوان",
+      advisoryMsg: "ہدایتی پیغام",
+      latestAlert: "تازہ ترین سرکاری اعلان",
+      criticalEscalations: (n) => `فوری توجہ طلب معاملات (${n})`,
+      noCritical: "اس وقت کوئی انتہائی فوری یا تاخیر شدہ شکایت کھلی نہیں۔",
+      dispatchCrew: "🚀 فوری ٹیم روانہ کریں",
+      dispatchActive: "✓ فوری ٹیم روانہ کر دی گئی",
+      contractorAuditTitle: "ٹھیکیدار آڈٹ اور نگرانی",
+      avgIntegrity: "اوسط درستگی",
+      flaggedIncidents: "نشان زدہ واقعات",
+      protectedFunds: "محفوظ رقم",
+      payoutsFrozen: "منجمد ادائیگیاں",
+      registeredContractors: (n) => `رجسٹرڈ ٹھیکیدار (${n})`,
+      verifiedResolution: "تصدیق شدہ حل:",
+      flagged: "نشان زدہ:",
+      flaggedAuditHeading: "نشان زدہ آڈٹ واقعات",
+      noFlaggedIncidents: "اس وقت AI کی مسترد کردہ کوئی شکایت نہیں۔",
     },
   },
 
@@ -501,18 +675,76 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       openInMaps: "Google Maps mein Kholein",
       noAssigned: "Abhi koi active ticket nahi liya gaya. Qataar tab se ticket lein.",
       noQueue: "Qataar mein koi khula ticket mojood nahi.",
+      allDepts: "Tamam",
+      noDeptQueue: "Is mehkme ke liye koi khula ticket nahi.",
+      overdue: "Waqt guzar gaya",
+      hoursLeft: (h) => `${h}h baqi`,
+      activeJobs: (n) => `Mere Active Kaam (${n} Jari)`,
+      awaitingSignOff: (n) => `${n} Tasdeeq ke Muntazir`,
+      unclaim: "Wapis Karein",
+      before: "Pehle",
+      after: "Baad mein",
+      noPhotoAttached: "Koi tasveer nahi",
+      uploadFix: "Fix Tasveer",
+      changePhoto: "Tasveer badlein",
+      fixNotePlaceholder: "Ikhtiyari note (maslan leak band kar di)",
+      markFixed: "Fix Mukammal Karein",
+      verifyFixBtn: "Fix Tasdeeq Karein",
+      onDuty: "Duty Par",
+      aiApproval: "AI manzoori",
+      resolvedCount: "Hal shuda",
+      totalAssigned: "Kul kaam",
+      currentWorkload: "Mojooda Kaam",
+      pendingSignOff: "Tasdeeq Baqi",
+      assignmentDetails: "Tafseelat",
+      department: "Mehkma:",
+      assignedZone: "Ilaqa:",
+      shiftHours: "Shift Auqat:",
     },
     mayor: {
       scorecardTab: "Scorecard",
       contractorsTab: "Thekedaar",
       alertsTab: "Elanaat",
-      cityScore: "Islamabad Shehri Sehat",
+      cityScore: "Islamabad Shehri Sehat Score",
       freezePayout: "Adaigi Rokein",
       unfreezePayout: "Adaigi Bahal Karein",
-      broadcastTitle: "Hangami Elan",
-      broadcastPlaceholder: "Islamabad ke tamam sectors ke liye sarkari elan likhein…",
-      sendBroadcast: "Elan Bhejein",
+      broadcastTitle: "Hangami Elan Bhejein",
+      broadcastPlaceholder: "Shehriyon ke liye sarkari hadayat likhein...",
+      sendBroadcast: "Hangami Elan Bhejein",
       broadcastSent: "Elan Municipal Alerts mein bhej diya gaya",
+      mapTab: "Naqsha",
+      homeTab: "Home",
+      deptsTab: "Mehkme",
+      totalFiled: "Kul Shikayaat",
+      verifiedFixed: "Tasdeeq Shuda Hal",
+      inProgress: "Kaam Jari",
+      criticalOpen: "Fauri Masail",
+      execKpis: "Executive Khulasa",
+      sectorScorecard: "Sector Shehri Sehat Scorecard",
+      heatmapBtn: "🗺️ Masail ka Naqsha Dekhein",
+      contractorAuditBtn: "🛡️ Thekedaar Audit",
+      deptLeaderboard: "Mehkmon ki Karkardagi (Live)",
+      complaintsCount: "Shikayaat",
+      resolvedLabel: "Hal Shuda",
+      onTimeRate: "Waqt par Sharah",
+      broadcastSub: "Tamam channels aur 📢 Municipal Alerts mein sarkari elan shaya karta hai",
+      noticeTitle: "Elan ka Unwaan",
+      advisoryMsg: "Hadayati Paigham",
+      latestAlert: "Taza Tareen Sarkari Elan",
+      criticalEscalations: (n) => `Fauri Tawajjo Talab (${n})`,
+      noCritical: "Is waqt koi fauri ya overdue shikayat nahi.",
+      dispatchCrew: "🚀 Fauri Team Bhejein",
+      dispatchActive: "✓ Fauri Team Rawana Hai",
+      contractorAuditTitle: "Thekedaar Audit aur Nigrani",
+      avgIntegrity: "Ausat Durustgi",
+      flaggedIncidents: "Flagged Waqiaat",
+      protectedFunds: "Mehfooz Raqam",
+      payoutsFrozen: "Ruki Adaigiyan",
+      registeredContractors: (n) => `Registered Thekedaar (${n})`,
+      verifiedResolution: "Tasdeeq Shuda Hal:",
+      flagged: "Flagged:",
+      flaggedAuditHeading: "Flagged Audit Waqiaat",
+      noFlaggedIncidents: "Is waqt koi AI-rejected waqia nahi.",
     },
   },
 };

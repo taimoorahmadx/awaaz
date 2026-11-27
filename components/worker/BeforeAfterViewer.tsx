@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Loader2, Upload, XCircle } from "lucide-react";
 import type { AIVerificationResult, Complaint } from "@/lib/types";
 import OfflineBadge from "@/components/common/OfflineBadge";
+import { useLanguage } from "@/components/common/LanguageProvider";
 import { compressImage } from "@/lib/image";
 
 interface BeforeAfterViewerProps {
@@ -43,6 +44,7 @@ async function urlToDataUrl(url: string): Promise<string> {
 }
 
 export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: BeforeAfterViewerProps) {
+  const { t } = useLanguage();
   const [afterDataUrl, setAfterDataUrl] = useState<string | null>(complaint.afterPhotoUrl ?? null);
   const [resolutionNote, setResolutionNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -186,7 +188,7 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
     <div className="flex flex-col gap-3">
       <div className="grid grid-cols-2 gap-2">
         <figure className="flex flex-col gap-1">
-          <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">Before</figcaption>
+          <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">{t.worker.before}</figcaption>
           {complaint.beforePhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -196,12 +198,12 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
             />
           ) : (
             <div className="flex aspect-square w-full items-center justify-center rounded-xl border border-dashed border-civic-border bg-civic-surface text-xs text-civic-muted">
-              No photo attached
+              {t.worker.noPhotoAttached}
             </div>
           )}
         </figure>
         <figure className="flex flex-col gap-1">
-          <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">After</figcaption>
+          <figcaption className="text-[11px] uppercase tracking-wider text-civic-muted">{t.worker.after}</figcaption>
           {afterDataUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -212,7 +214,7 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
           ) : (
             <label className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-civic-border text-xs text-civic-muted hover:text-slate-200">
               <Upload className="h-5 w-5" aria-hidden="true" />
-              Upload Fix
+              {t.worker.uploadFix}
               <input type="file" accept="image/*" className="sr-only" onChange={handleFile} data-testid="after-photo-input" />
             </label>
           )}
@@ -226,14 +228,14 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
               type="text"
               value={resolutionNote}
               onChange={(e) => setResolutionNote(e.target.value)}
-              placeholder="Optional fix note (e.g. leak sealed, supply restored)"
+              placeholder={t.worker.fixNotePlaceholder}
               className="w-full rounded-lg border border-civic-border bg-civic-surface px-3 py-2 text-xs text-slate-200 placeholder:text-civic-muted focus:border-civic-accent focus:outline-none"
             />
           )}
           <div className="flex gap-2">
             {afterDataUrl && (
               <label className="cursor-pointer rounded-lg border border-civic-border px-3 py-2 text-xs text-civic-muted hover:text-slate-200">
-                Change photo
+                {t.worker.changePhoto}
                 <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
               </label>
             )}
@@ -245,7 +247,7 @@ export default function BeforeAfterViewer({ complaint, onUpdateComplaint }: Befo
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-civic-accent px-3 py-2 text-sm font-semibold text-slate-950 disabled:opacity-40"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-              {loading ? "Verifying…" : afterDataUrl ? "Verify Fix" : "Mark Fixed & Request Sign-off"}
+              {loading ? t.worker.verifying : afterDataUrl ? t.worker.verifyFixBtn : t.worker.markFixed}
             </button>
           </div>
         </div>
