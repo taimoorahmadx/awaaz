@@ -127,7 +127,7 @@ export default function ComplaintDetailModal({
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
         className={cn(
-          "max-w-md w-full overflow-y-auto max-h-[90dvh]",
+          "w-[calc(100%-2rem)] max-w-[416px] overflow-y-auto max-h-[82dvh] rounded-2xl",
           "border-civic-border bg-civic-raised text-slate-100 shadow-2xl",
           "gap-0 p-0",
         )}
