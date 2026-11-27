@@ -6,6 +6,7 @@ import {
   withTimeout,
   withTransientRetry,
 } from "@/lib/ai/gemini";
+import { GROQ_VISION_MODEL, groqChatCompletion, hasGroq, type GroqContentPart } from "@/lib/ai/groq";
 import { buildVerificationPrompt } from "@/lib/ai/prompts";
 import { buildVerifyFallback, buildVerifyRejection, UNREADABLE_PHOTO_REASONING } from "@/lib/ai/mocks";
 import { interpretVerificationReply } from "@/lib/ai/verification";
@@ -68,11 +69,48 @@ export async function POST(req: Request) {
     return NextResponse.json(buildVerifyRejection(complaintId, UNREADABLE_PHOTO_REASONING));
   };
 
-  const ai = getGemini();
-  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
+  const useGroq = hasGroq();
+  const ai = useGroq ? null : getGemini();
+  if (!useGroq && !ai) return fallback("AI unavailable (missing key or AI_FORCE_FALLBACK=1)");
   if (!after) return fallback("missing or unreadable After image");
   if (hasBeforeInput && !before) return reject("unreadable Before image");
   if (!after.mimeType || (before && !before.mimeType)) return reject("missing image MIME type");
+
+  if (useGroq) {
+    try {
+      const t0 = Date.now();
+      const groqParts: GroqContentPart[] = before
+        ? [
+            { type: "text", text: buildVerificationPrompt(category, { hasBefore: true }) },
+            { type: "text", text: "Image 1 (BEFORE):" },
+            { type: "image_url", image_url: { url: `data:${before.mimeType!};base64,${before.data}` } },
+            { type: "text", text: "Image 2 (AFTER):" },
+            { type: "image_url", image_url: { url: `data:${after.mimeType};base64,${after.data}` } },
+          ]
+        : [
+            { type: "text", text: buildVerificationPrompt(category, { hasBefore: false, summary }) },
+            { type: "text", text: "Image (AFTER):" },
+            { type: "image_url", image_url: { url: `data:${after.mimeType};base64,${after.data}` } },
+          ];
+
+      const raw = await groqChatCompletion({
+        messages: [{ role: "user", content: groqParts }],
+        model: GROQ_VISION_MODEL,
+        jsonMode: true,
+        maxTokens: 350,
+        timeoutMs: 20_000,
+      });
+
+      const { response, failure } = interpretVerificationReply(raw, complaintId);
+      if (failure) console.warn("[verify-fix] FAIL-CLOSED rejection:", failure);
+      console.info(`[verify-fix] groq vision in ${Date.now() - t0}ms`);
+      return NextResponse.json(response);
+    } catch (err) {
+      return fallback(err instanceof Error ? err.message : String(err));
+    }
+  }
+
+  if (!ai) return fallback("Gemini unavailable");
 
   const parts = before
     ? [

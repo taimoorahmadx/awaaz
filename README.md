@@ -109,7 +109,7 @@ flowchart TD
 | **Language** | TypeScript (Strict) | `5.9.3` | End-to-end type safety across UI, storage, and AI contracts |
 | **UI & Styling** | Tailwind CSS + shadcn/ui + Lucide | `3.4.19` / `2.3.0` | Dark civic theme, accessible Radix primitives, and icons |
 | **Mapping** | Leaflet | `1.9.4` | Interactive sector map with SSR-safe dynamic import and SVG pins |
-| **AI & Vision** | Google Gemini (`@google/genai`) | `2.28.0` (`gemini-3.5-flash`) | Multimodal intake chat, Urdu audio triage, and Before/After verification |
+| **AI & Vision** | Groq (`llama-3.3-70b-versatile`, `qwen/qwen3.8-27b`, `whisper-large-v3`) & Google Gemini (`@google/genai`) | `REST` / `2.28.0` | Multilingual voice transcription, triage chat, and Before/After vision verification |
 | **Validation** | Zod | `4.6.5` | Strict runtime schema validation for AI outputs |
 | **Testing** | Playwright | `1.64.0` | Chromium E2E verification across citizen, worker, and mayor flows |
 

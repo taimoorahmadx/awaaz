@@ -8,6 +8,15 @@ import {
   withTimeout,
   withTransientRetry,
 } from "@/lib/ai/gemini";
+import {
+  GROQ_TEXT_MODEL,
+  GROQ_VISION_MODEL,
+  groqChatCompletion,
+  groqTranscribeAudio,
+  hasGroq,
+  type GroqContentPart,
+  type GroqMessage,
+} from "@/lib/ai/groq";
 import { buildIntakeChatPrompt, buildIntakeSystemInstruction } from "@/lib/ai/prompts";
 import { IntakeChatResponseSchema } from "@/lib/ai/schemas";
 import { buildIntakeChatFallback } from "@/lib/ai/mocks";
@@ -79,11 +88,69 @@ export async function POST(req: Request) {
     return fallback("invalid form data");
   }
 
-  const ai = getGemini();
-  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
   if (!audio && !text && !photo) return fallback("empty turn", "error");
 
+  const useGroq = hasGroq();
+  const ai = useGroq ? null : getGemini();
+  if (!useGroq && !ai) return fallback("AI unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
+
   try {
+    let photoBase64 = "";
+    let photoMimeType = "image/jpeg";
+    if (photo) {
+      photoBase64 = Buffer.from(await photo.arrayBuffer()).toString("base64");
+      const rawMime = (photo.type || "image/jpeg").split(";")[0].trim() || "image/jpeg";
+      photoMimeType = rawMime.startsWith("image/") ? rawMime : "";
+    }
+
+    if (useGroq) {
+      const t0 = Date.now();
+      let userTranscript = text;
+      if (audio) {
+        const spoken = await groqTranscribeAudio(audio);
+        userTranscript = text ? `${spoken}\n${text}` : spoken;
+      }
+      if (!userTranscript && !photoBase64) {
+        return fallback("empty audio transcript", "error");
+      }
+
+      const groqMessages: GroqMessage[] = [
+        { role: "system", content: buildIntakeSystemInstruction(lang) },
+        ...history
+          .slice(-8)
+          .filter((h) => h.text.trim().length > 0)
+          .map((h) => ({ role: h.role, content: h.text })),
+      ];
+
+      const userText = userTranscript || "I attached this photo of the issue.";
+      if (photoBase64 && photoMimeType) {
+        const parts: GroqContentPart[] = [
+          { type: "text", text: userText },
+          { type: "image_url", image_url: { url: `data:${photoMimeType};base64,${photoBase64}` } },
+        ];
+        groqMessages.push({ role: "user", content: parts });
+      } else {
+        groqMessages.push({ role: "user", content: userText });
+      }
+
+      const reply = await groqChatCompletion({
+        messages: groqMessages,
+        model: photoBase64 && photoMimeType ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
+        maxTokens: 160,
+        timeoutMs: 15_000,
+      });
+
+      console.info(`[intake-chat] groq reply in ${Date.now() - t0}ms`);
+      return NextResponse.json({
+        userTranscript,
+        reply,
+        readyToGenerate: true,
+        isOfflineFallback: false,
+      });
+    }
+
+    if (!ai) return fallback("Gemini unavailable", "unavailable");
+
     // Build proper multi-turn contents (user / model), keeping last 8 turns for token efficiency.
     const contents: GeminiContent[] = history
       .slice(-8)
@@ -100,12 +167,8 @@ export async function POST(req: Request) {
       latestParts.push({ text: "I attached this photo of the issue." });
     }
 
-    if (photo) {
-      const data = Buffer.from(await photo.arrayBuffer()).toString("base64");
-      const mimeType = (photo.type || "image/jpeg").split(";")[0].trim() || "image/jpeg";
-      if (mimeType.startsWith("image/")) {
-        latestParts.push({ inlineData: { mimeType, data } });
-      }
+    if (photoBase64 && photoMimeType) {
+      latestParts.push({ inlineData: { mimeType: photoMimeType, data: photoBase64 } });
     }
 
     // Audio turns need JSON so we get both the Urdu transcript and conversational reply.

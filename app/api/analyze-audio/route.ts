@@ -8,6 +8,14 @@ import {
   withTimeout,
   withTransientRetry,
 } from "@/lib/ai/gemini";
+import {
+  GROQ_TEXT_MODEL,
+  GROQ_VISION_MODEL,
+  groqChatCompletion,
+  groqTranscribeAudio,
+  hasGroq,
+  type GroqContentPart,
+} from "@/lib/ai/groq";
 import { AUDIO_TRIAGE_PROMPT } from "@/lib/ai/prompts";
 import { AudioAnalysisResponseSchema } from "@/lib/ai/schemas";
 import { buildAudioFallback } from "@/lib/ai/mocks";
@@ -74,11 +82,67 @@ export async function POST(req: Request) {
     return fallback("invalid form data");
   }
 
-  const ai = getGemini();
-  if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
   if (!audio && !text && !photo && conversation.length === 0) return fallback("no audio, text, or photo provided", "error");
 
+  const useGroq = hasGroq();
+  const ai = useGroq ? null : getGemini();
+  if (!useGroq && !ai) return fallback("AI unavailable (missing key or AI_FORCE_FALLBACK=1)", "unavailable");
+
   try {
+    let photoBase64 = "";
+    let photoMimeType = "";
+    if (photo) {
+      photoBase64 = Buffer.from(await photo.arrayBuffer()).toString("base64");
+      const rawMime = (photo.type || "image/jpeg").split(";")[0].trim() || "image/jpeg";
+      if (rawMime.startsWith("image/")) photoMimeType = rawMime;
+    }
+
+    if (useGroq) {
+      const t0 = Date.now();
+      const contextLines: string[] = [];
+      if (conversation.length > 0) {
+        const transcript = conversation
+          .map((m) => `${m.role === "user" ? "Citizen" : "Awaaz AI"}: ${m.text}`)
+          .join("\n");
+        contextLines.push(
+          `Full intake conversation (prioritize the citizen's latest corrections, location updates, and details):\n${transcript}`,
+        );
+      }
+      if (audio) {
+        const spoken = await groqTranscribeAudio(audio);
+        if (spoken) contextLines.push(`Citizen voice transcript: ${spoken}`);
+      }
+      if (text) contextLines.push(`Citizen typed note: ${text}`);
+      if (sectorHint) contextLines.push(`Citizen's home sector (hint only): ${sectorHint}`);
+
+      const userText = contextLines.join("\n\n") || "Analyze the attached hazard photo.";
+      const userContent: string | GroqContentPart[] =
+        photoBase64 && photoMimeType
+          ? [
+              { type: "text", text: userText },
+              { type: "image_url", image_url: { url: `data:${photoMimeType};base64,${photoBase64}` } },
+            ]
+          : userText;
+
+      const raw = await groqChatCompletion({
+        messages: [
+          { role: "system", content: AUDIO_TRIAGE_PROMPT },
+          { role: "user", content: userContent },
+        ],
+        model: photoBase64 && photoMimeType ? GROQ_VISION_MODEL : GROQ_TEXT_MODEL,
+        jsonMode: true,
+        maxTokens: 600,
+        timeoutMs: 20_000,
+      });
+
+      const parsed = AudioAnalysisResponseSchema.safeParse(JSON.parse(raw));
+      if (!parsed.success) return fallback(`schema mismatch: ${parsed.error.message}`, "error");
+      console.info(`[analyze-audio] groq triage in ${Date.now() - t0}ms`);
+      return NextResponse.json({ ...parsed.data, isOfflineFallback: false });
+    }
+
+    if (!ai) return fallback("Gemini unavailable", "unavailable");
+
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
       { text: AUDIO_TRIAGE_PROMPT },
     ];
@@ -98,12 +162,8 @@ export async function POST(req: Request) {
       const mimeType = (audio.type || "audio/webm").split(";")[0];
       parts.push({ inlineData: { mimeType, data } });
     }
-    if (photo) {
-      const data = Buffer.from(await photo.arrayBuffer()).toString("base64");
-      const mimeType = (photo.type || "image/jpeg").split(";")[0].trim() || "image/jpeg";
-      if (mimeType.startsWith("image/")) {
-        parts.push({ inlineData: { mimeType, data } });
-      }
+    if (photoBase64 && photoMimeType) {
+      parts.push({ inlineData: { mimeType: photoMimeType, data: photoBase64 } });
     }
 
     const result = await withTimeout(
