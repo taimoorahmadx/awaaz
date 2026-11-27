@@ -6,7 +6,12 @@ import { buildAudioFallback } from "@/lib/ai/mocks";
 
 export const runtime = "nodejs";
 
-// INTEGRATOR NOTE (spec §4.1): request = multipart/form-data { audio?: Blob, photo?: Blob, text?: string, sectorHint?: string }.
+interface ConversationTurn {
+  role: "user" | "assistant";
+  text: string;
+}
+
+// INTEGRATOR NOTE (spec §4.1): request = multipart/form-data { audio?: Blob, photo?: Blob, text?: string, conversation?: string, sectorHint?: string }.
 // Response = AudioAnalysisResponse & { isOfflineFallback: boolean }.
 
 export async function POST(req: Request) {
@@ -14,11 +19,18 @@ export async function POST(req: Request) {
   let photo: File | null = null;
   let text = "";
   let sectorHint = "";
+  let conversation: ConversationTurn[] = [];
 
-  // DEMO-FALLBACK: instant, input-aware triage (keyword match on typed text) so the demo never stalls.
+  // DEMO-FALLBACK: instant, input-aware triage (keyword match on typed text / conversation) so the demo never stalls.
   const fallback = (reason: string) => {
     console.warn("[analyze-audio] DEMO-FALLBACK:", reason);
-    return NextResponse.json({ ...buildAudioFallback(text, sectorHint), isOfflineFallback: true });
+    const citizenHistoryText = conversation
+      .filter((t) => t.role === "user")
+      .map((t) => t.text)
+      .filter(Boolean)
+      .join(" ");
+    const combinedText = [citizenHistoryText, text].filter(Boolean).join(" ").trim();
+    return NextResponse.json({ ...buildAudioFallback(combinedText, sectorHint), isOfflineFallback: true });
   };
 
   try {
@@ -31,18 +43,38 @@ export async function POST(req: Request) {
     if (typeof t === "string") text = t.trim();
     const s = form.get("sectorHint");
     if (typeof s === "string") sectorHint = s.trim();
+    const c = form.get("conversation");
+    if (typeof c === "string" && c.trim()) {
+      const parsed = JSON.parse(c);
+      if (Array.isArray(parsed)) {
+        conversation = parsed.filter(
+          (item): item is ConversationTurn =>
+            Boolean(item) &&
+            (item.role === "user" || item.role === "assistant") &&
+            typeof item.text === "string",
+        );
+      }
+    }
   } catch {
     return fallback("invalid form data");
   }
 
   const ai = getGemini();
   if (!ai) return fallback("Gemini unavailable (missing key or AI_FORCE_FALLBACK=1)");
-  if (!audio && !text && !photo) return fallback("no audio, text, or photo provided");
+  if (!audio && !text && !photo && conversation.length === 0) return fallback("no audio, text, or photo provided");
 
   try {
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
       { text: AUDIO_TRIAGE_PROMPT },
     ];
+    if (conversation.length > 0) {
+      const transcript = conversation
+        .map((m) => `${m.role === "user" ? "Citizen" : "Awaaz AI"}: ${m.text}`)
+        .join("\n");
+      parts.push({
+        text: `Full intake conversation (prioritize the citizen's latest corrections, location updates, and details):\n${transcript}`,
+      });
+    }
     if (text) parts.push({ text: `Citizen typed note: ${text}` });
     if (sectorHint) parts.push({ text: `Citizen's home sector (hint only): ${sectorHint}` });
     if (audio) {
@@ -63,8 +95,12 @@ export async function POST(req: Request) {
       ai.models.generateContent({
         model: GEMINI_MODEL,
         contents: [{ role: "user", parts }],
-        config: { responseMimeType: "application/json" },
+        config: {
+          responseMimeType: "application/json",
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
+      audio || photo ? 22_000 : undefined,
     );
 
     const raw = result.text ?? "";

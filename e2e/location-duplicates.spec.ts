@@ -14,7 +14,12 @@ async function switchRole(page: Page, name: "Tariq" | "Ayesha" | "Anonymous Citi
 async function submitIntakeText(page: Page, text: string) {
   await page.locator("#intake-text").fill(text);
   await page.getByRole("button", { name: "Send complaint" }).click();
-  await expect(page.getByTestId("triage-card")).toBeVisible({ timeout: 10_000 });
+  const generateBtn = page.getByTestId("generate-ticket-btn");
+  await expect(generateBtn).toBeVisible({ timeout: 10_000 });
+  await generateBtn.click();
+  const card = page.getByTestId("triage-card");
+  await expect(card).toBeVisible({ timeout: 10_000 });
+  await card.getByTestId("approve-submit-ticket-btn").click();
 }
 
 function getStoredComplaints(page: Page) {

@@ -125,10 +125,11 @@ export function getCurrentGpsPosition(): Promise<GpsReading | null> {
  * 3. Sector centre + small jitter
  */
 export function extractSectorFromText(text: string): string {
-  const upper = text.toUpperCase();
+  // Normalize "f7", "f7/1", "F 7" -> "F-7" so sub-sector and hyphenless input match SECTOR_CENTRES.
+  const normalized = text.toUpperCase().replace(/\b([EFGHI])\s*(\d{1,2})(?=\/\d|\b)/g, "$1-$2");
   for (const sector of Object.keys(SECTOR_CENTRES)) {
     const escaped = sector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (new RegExp(`(^|[^A-Z0-9])${escaped}([^A-Z0-9]|$)`).test(upper)) {
+    if (new RegExp(`(^|[^A-Z0-9])${escaped}([^A-Z0-9]|$)`).test(normalized)) {
       return sector;
     }
   }
@@ -145,11 +146,12 @@ export function resolveComplaintLocation(params: {
 }): { location: GeoLocation; chipLabel: string } {
   const { gps, aiLandmark, typedText, aiSector, homeSector, city } = params;
   const textSector = extractSectorFromText(typedText);
+  const normalizedAiSector = extractSectorFromText(aiSector);
   const knownSector =
     textSector && SECTOR_CENTRES[textSector]
       ? textSector
-      : aiSector && SECTOR_CENTRES[aiSector]
-        ? aiSector
+      : normalizedAiSector && SECTOR_CENTRES[normalizedAiSector]
+        ? normalizedAiSector
         : homeSector && SECTOR_CENTRES[homeSector]
           ? homeSector
           : "";

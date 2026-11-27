@@ -75,7 +75,8 @@ test.describe("civic health scorecard (UI)", () => {
     await expect(queueCard).toBeVisible();
     await queueCard.getByRole("button", { name: "Claim Ticket" }).click();
 
-    // Portal automatically switches to Home after claim
+    // Navigate to Worker Home tab after claim
+    await page.getByRole("navigation", { name: "Worker navigation" }).getByRole("button", { name: /^Home/ }).click();
     const activeCard = page.locator('[data-testid="worker-ticket"][data-complaint-id="cmp-001"]');
     await expect(activeCard).toBeVisible();
     await activeCard.getByTestId("after-photo-input").setInputFiles(AFTER_PHOTO);

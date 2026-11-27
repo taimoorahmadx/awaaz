@@ -32,12 +32,20 @@ function pins(page: Page): Locator {
 }
 
 /** Files a complaint from the Home tab and returns the new complaint id. */
-async function fileTicket(page: Page, text: string = COMPLAINT_TEXT): Promise<string> {
+async function fileTicket(page: Page, text: string = COMPLAINT_TEXT, photoPath?: string): Promise<string> {
   await gotoTab(page, "Home");
+  if (photoPath) {
+    await page.getByTestId("intake-photo-input").setInputFiles(photoPath);
+    await expect(page.getByTestId("intake-photo-preview")).toBeVisible();
+  }
   await page.locator("#intake-text").fill(text);
   await page.getByRole("button", { name: "Send complaint" }).click();
+  const generateBtn = page.getByTestId("generate-ticket-btn");
+  await expect(generateBtn).toBeVisible({ timeout: 10_000 });
+  await generateBtn.click();
   const card = page.getByTestId("triage-card");
   await expect(card).toBeVisible({ timeout: 10_000 });
+  await card.getByTestId("approve-submit-ticket-btn").click();
   // T4.2: if a landmark duplicate is detected (e.g. F-10 Markaz open manhole matches cmp-001),
   // confirm submitting as a separate ticket for the golden path.
   const separateBtn = page.getByTestId("submit-separate-ticket-btn");
@@ -55,10 +63,10 @@ async function claimAndSubmitFix(page: Page, id: string, afterPhoto: string): Pr
   await expect(queued).toBeVisible();
   await queued.getByRole("button", { name: "Claim Ticket" }).click();
 
-  // The portal switches to the worker Home tab on its own after a claim.
-  await expect(
-    page.getByRole("navigation", { name: "Worker navigation" }).getByRole("button", { name: /^Home/ }),
-  ).toHaveAttribute("aria-current", "page");
+  // Navigate to Worker Home tab after claiming (toast may overlay bottom nav briefly).
+  const workerHomeBtn = page.getByRole("navigation", { name: "Worker navigation" }).getByRole("button", { name: /^Home/ });
+  await workerHomeBtn.click({ force: true });
+  await expect(workerHomeBtn).toHaveAttribute("aria-current", "page");
   const card = page.locator(`[data-testid="worker-ticket"][data-complaint-id="${id}"]`);
   await expect(card).toBeVisible();
 
@@ -191,7 +199,7 @@ test("verify badge shows spec'd confidence (≤ 100%) and reasoning", async ({ p
 });
 
 test("verify fallback rejects an After photo identical to the Before photo", async ({ page }) => {
-  const id = await fileTicket(page);
+  const id = await fileTicket(page, COMPLAINT_TEXT, BEFORE_PHOTO);
   const workerCard = await claimAndSubmitFix(page, id, BEFORE_PHOTO);
 
   const rejected = workerCard.getByTestId("ai-rejected-badge");

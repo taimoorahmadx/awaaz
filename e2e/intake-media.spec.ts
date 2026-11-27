@@ -25,17 +25,21 @@ test("citizen photo attachment compresses to JPEG ≤800px and persists on creat
   await expect(preview).toBeVisible();
   await expect(preview.locator("img")).toHaveAttribute("src", /^data:image\/jpeg;base64,/);
 
-  await page.getByRole("button", { name: "Remove attached photo" }).click();
+  await page.getByRole("button", { name: "Remove photo" }).click();
   await expect(preview).toHaveCount(0);
 
   await input.setInputFiles(POTHOLE_PHOTO);
   await expect(preview).toBeVisible();
 
   await page.locator("#intake-text").fill("Gali mein bara pothole hai");
+  await page.getByRole("button", { name: "Send complaint" }).click();
+  const generateBtn = page.getByTestId("generate-ticket-btn");
+  await expect(generateBtn).toBeVisible({ timeout: 10_000 });
+
   const requestPromise = page.waitForRequest(
     (req) => req.url().includes("/api/analyze-audio") && req.method() === "POST",
   );
-  await page.getByRole("button", { name: "Send complaint" }).click();
+  await generateBtn.click();
 
   // Verify multipart payload includes compressed photo and sectorHint.
   const req = await requestPromise;
@@ -46,6 +50,7 @@ test("citizen photo attachment compresses to JPEG ≤800px and persists on creat
 
   const triage = page.getByTestId("triage-card");
   await expect(triage).toBeVisible({ timeout: 10_000 });
+  await triage.getByTestId("approve-submit-ticket-btn").click();
   const id = await triage.getAttribute("data-complaint-id");
   expect(id).toMatch(/^cmp-\d+$/);
 
@@ -86,12 +91,16 @@ test("mic recording shows live waveform canvas, advancing timer, and submits on 
   expect((box?.width ?? 0) > 50 && (box?.height ?? 0) > 10).toBe(true);
 
   const timer = page.getByTestId("recording-timer");
-  await expect(timer).toHaveText(/^\d+:\d{2} \/ 0:30$/);
+  await expect(timer).toHaveText(/^\d+:\d{2}$/);
   // Wait for timer to advance at least 1 second.
-  await expect(timer).not.toHaveText("0:00 / 0:30", { timeout: 5_000 });
+  await expect(timer).not.toHaveText("0:00", { timeout: 5_000 });
 
   await page.getByRole("button", { name: "Stop recording" }).click();
   await expect(canvas).toHaveCount(0);
+
+  const generateBtn = page.getByTestId("generate-ticket-btn");
+  await expect(generateBtn).toBeVisible({ timeout: 10_000 });
+  await generateBtn.click();
 
   const triage = page.getByTestId("triage-card");
   await expect(triage).toBeVisible({ timeout: 10_000 });
@@ -107,9 +116,13 @@ test("QuotaExceededError shows friendly Sonner toast without crashing and keeps 
 
   await page.locator("#intake-text").fill("F-10 mein kachra hai");
   await page.getByRole("button", { name: "Send complaint" }).click();
+  const generateBtn = page.getByTestId("generate-ticket-btn");
+  await expect(generateBtn).toBeVisible({ timeout: 10_000 });
+  await generateBtn.click();
 
   const triage = page.getByTestId("triage-card");
   await expect(triage).toBeVisible({ timeout: 10_000 });
+  await triage.getByTestId("approve-submit-ticket-btn").click();
   const id = await triage.getAttribute("data-complaint-id");
   expect(id).toMatch(/^cmp-\d+$/);
   await expect(page.getByText("Storage is full — use Reset System Data in the header")).toBeVisible();

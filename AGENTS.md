@@ -60,7 +60,7 @@ The Playwright smoke test (`e2e/golden-path.spec.ts`, task T3.0) encodes this fl
 - `npm run dev` — local dev server (user runs this manually; agents never start it except via Playwright's `webServer`)
 - `npm run build` — must pass before declaring any task done
 - `npm run lint` — must pass before declaring any task done
-- `npm run test:e2e` — Playwright golden-path smoke test (added in T3.0); must pass before declaring any task done
+- `npm run test:e2e` — Playwright E2E tests. **Never run E2E tests (`npm run test:e2e` or `npx playwright test`) unless the user explicitly says so.**
 
 ---
 
@@ -99,7 +99,7 @@ docs/                         # brief.md, spec.md, plan.md, tasks.md, progress.m
 1. Read `docs/progress.md`: current task, open decisions, blocked items.
 2. Take the next `[ ]` task from `docs/tasks.md` in order. Skip any task marked BLOCKED.
 3. Implement it against its acceptance criteria in `docs/spec.md`.
-4. Run the gate: `npm run build && npm run lint && npm run test:e2e`. Extend the e2e test when the task adds user-visible behavior.
+4. Run the gate: `npm run build && npm run lint`. **Never run E2E tests (`npm run test:e2e` / `npx playwright test`) unless the user explicitly says so.**
 5. Update `docs/progress.md` (task log line + any decisions made).
 6. Commit (see Git rules). Move to the next task.
 
@@ -148,4 +148,4 @@ When the user is present (attended), stop after each task for review and ask ins
 ---
 
 ## Definition of done (per task)
-`npm run build` + `npm run lint` + `npm run test:e2e` pass → golden path still works → `docs/progress.md` updated → committed on the current branch.
+`npm run build` + `npm run lint` pass → (only run `npm run test:e2e` if the user explicitly asks) → `docs/progress.md` updated → committed on the current branch.

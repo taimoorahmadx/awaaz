@@ -68,7 +68,7 @@ export const CATEGORY_TABLE: Record<IssueCategory, CategoryInfo> = {
     titleUrdu: "سڑک پر گڑھا",
     titleRoman: "Sarak par garha report hua hai",
     photo: "/images/hazards/pothole.jpg",
-    keywords: ["pothole", "potholes", "pot hole", "khadda", "khada", "gadha", "garha", "road", "roads", "sarak", "sadak", "گڑھا", "کھڈا", "سڑک"],
+    keywords: ["pothole", "potholes", "pot hole", "khadda", "khada", "gadha", "garha", "broken road", "damaged road", "tooti sarak", "گڑھا", "کھڈا"],
   },
   "Sewage Leak": {
     category: "Sewage Leak",

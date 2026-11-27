@@ -67,6 +67,7 @@ export default function WorkerPortalView({
           <button
             key={id}
             type="button"
+            aria-label={label}
             onClick={() => setTab(id)}
             aria-current={tab === id ? "page" : undefined}
             className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${

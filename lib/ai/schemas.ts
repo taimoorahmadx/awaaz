@@ -66,5 +66,13 @@ export function normalizeConfidence(c: number): number | null {
   return null;
 }
 
+export const IntakeChatResponseSchema = z.object({
+  userTranscript: z.string().catch(""),
+  reply: z.string().trim().min(1),
+  readyToGenerate: z.boolean().catch(true),
+  isOfflineFallback: z.boolean().optional(),
+});
+
 export type AudioAnalysisResponse = z.infer<typeof AudioAnalysisResponseSchema>;
 export type FixVerificationModelOutput = z.infer<typeof FixVerificationModelSchema>;
+export type IntakeChatResponse = z.infer<typeof IntakeChatResponseSchema>;

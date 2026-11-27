@@ -48,6 +48,29 @@ export interface Translations {
     viewInReports: string;
     reportAnother: string;
     locationLabel: string;
+    chatSubtitle: string;
+    generateTicket: string;
+    updateTicket: string;
+    generatingTicket: string;
+    thinkingReply: string;
+    draftBadge: string;
+    editDetails: string;
+    doneEditing: string;
+    approveSubmit: string;
+    discardDraft: string;
+    clearChat: string;
+    titleLabel: string;
+    descriptionLabel: string;
+    categoryLabel: string;
+    departmentLabel: string;
+    urgencyLabel: string;
+    sectorLabel: string;
+    landmarkLabel: string;
+    replacePhoto: string;
+    removeAttachedPhoto: string;
+    addPhoto: string;
+    voiceNoteBadge: string;
+    editTip: string;
   };
   feed: {
     title: string;
@@ -240,6 +263,29 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewInReports: "View in My Reports",
       reportAnother: "Report another issue",
       locationLabel: "Location",
+      chatSubtitle: "Chat with Awaaz AI, attach a photo, or send an Urdu voice note. Tap Generate Ticket when ready.",
+      generateTicket: "Generate Ticket",
+      updateTicket: "Update Ticket from Chat",
+      generatingTicket: "Preparing ticket preview…",
+      thinkingReply: "Awaaz AI is replying…",
+      draftBadge: "Draft Preview — Review & Edit",
+      editDetails: "Edit Details",
+      doneEditing: "Done Editing",
+      approveSubmit: "Approve & Submit Ticket",
+      discardDraft: "Discard",
+      clearChat: "Clear chat",
+      titleLabel: "Title",
+      descriptionLabel: "Description",
+      categoryLabel: "Category",
+      departmentLabel: "Department",
+      urgencyLabel: "Urgency",
+      sectorLabel: "Sector",
+      landmarkLabel: "Landmark / street",
+      replacePhoto: "Replace photo",
+      removeAttachedPhoto: "Remove photo",
+      addPhoto: "Add photo",
+      voiceNoteBadge: "Voice note",
+      editTip: "You can edit fields above or keep chatting below, then approve to publish.",
     },
     feed: {
       title: "Community Feed",
@@ -431,6 +477,29 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewInReports: "میری رپورٹس دیکھیں",
       reportAnother: "ایک اور مسئلہ رپورٹ کریں",
       locationLabel: "مقام",
+      chatSubtitle: "آواز AI سے بات کریں، تصویر لگائیں یا اردو وائس نوٹ بھیجیں۔ تیار ہونے پر ٹکٹ بنائیں دبائیں۔",
+      generateTicket: "ٹکٹ بنائیں",
+      updateTicket: "چیٹ سے ٹکٹ اپڈیٹ کریں",
+      generatingTicket: "ٹکٹ کا جائزہ تیار ہو رہا ہے…",
+      thinkingReply: "آواز AI جواب دے رہا ہے…",
+      draftBadge: "ڈرافٹ جائزہ — ترمیم اور منظوری",
+      editDetails: "تفصیلات بدلیں",
+      doneEditing: "ترمیم مکمل",
+      approveSubmit: "منظور کریں اور ٹکٹ جمع کریں",
+      discardDraft: "مسترد کریں",
+      clearChat: "چیٹ صاف کریں",
+      titleLabel: "عنوان",
+      descriptionLabel: "تفصیل",
+      categoryLabel: "زمرہ",
+      departmentLabel: "محکمہ",
+      urgencyLabel: "اہمیت",
+      sectorLabel: "سیکٹر",
+      landmarkLabel: "قریبی مقام / گلی",
+      replacePhoto: "تصویر بدلیں",
+      removeAttachedPhoto: "تصویر ہٹائیں",
+      addPhoto: "تصویر لگائیں",
+      voiceNoteBadge: "وائس نوٹ",
+      editTip: "آپ اوپر تفصیلات بدل سکتے ہیں یا نیچے مزید بات کر کے منظور کریں۔",
     },
     feed: {
       title: "عوامی فیڈ",
@@ -622,6 +691,29 @@ export const TRANSLATIONS: Record<Language, Translations> = {
       viewInReports: "Meri Reports Dekhein",
       reportAnother: "Ek aur masla report karein",
       locationLabel: "Maqam",
+      chatSubtitle: "Awaaz AI se baat karein, tasveer lagayein ya Urdu voice note bhejein. Tayyar hone par Ticket Banayein dabayein.",
+      generateTicket: "Ticket Banayein",
+      updateTicket: "Chat se Ticket Update Karein",
+      generatingTicket: "Ticket preview tayyar ho raha hai…",
+      thinkingReply: "Awaaz AI jawab de raha hai…",
+      draftBadge: "Draft Preview — Edit & Approve",
+      editDetails: "Tafseelat Badlein",
+      doneEditing: "Edit Mukammal",
+      approveSubmit: "Manzoor Karein aur Ticket Bhejein",
+      discardDraft: "Chhor Dein",
+      clearChat: "Chat saaf karein",
+      titleLabel: "Unwan",
+      descriptionLabel: "Tafseel",
+      categoryLabel: "Zimra",
+      departmentLabel: "Mehkma",
+      urgencyLabel: "Ahmiyat",
+      sectorLabel: "Sector",
+      landmarkLabel: "Qareebi maqam / gali",
+      replacePhoto: "Tasveer badlein",
+      removeAttachedPhoto: "Tasveer hatayein",
+      addPhoto: "Tasveer lagayein",
+      voiceNoteBadge: "Voice note",
+      editTip: "Aap upar tafseelat badal sakte hain ya neeche mazeed baat kar ke manzoor karein.",
     },
     feed: {
       title: "Awami Feed",
