@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, Droplets, Hash, Lock, Megaphone, Store, Zap, type LucideIcon } from "lucide-react";
+import { ChevronRight, Droplets, Hash, Lock, Megaphone, Pin, Store, Zap, type LucideIcon } from "lucide-react";
 import ComplaintDetailModal from "@/components/feed/ComplaintDetailModal";
 import { useComplaints, useGroupMessages, useGroups } from "@/lib/data/storage";
 import { timeAgo } from "@/lib/labels";
-import type { CivicGroup, CivicGroupType, Complaint, GroupMessage } from "@/lib/types";
+import type { CivicGroup, Complaint, GroupMessage } from "@/lib/types";
 import { useLanguage } from "@/components/common/LanguageProvider";
 import GroupChatView from "./GroupChatView";
 
@@ -17,13 +17,6 @@ interface GroupsShellProps {
   onUpdateComplaint: (complaint: Complaint) => void;
 }
 
-const SECTION_ORDER: { type: CivicGroupType; label: string }[] = [
-  { type: "LOCALITY", label: "Locality" },
-  { type: "MARKET", label: "Market" },
-  { type: "CIVIC_TOPIC", label: "Civic Interest" },
-  { type: "OFFICIAL_BROADCAST", label: "Official Broadcast" },
-];
-
 function channelIcon(group: CivicGroup): LucideIcon {
   if (group.type === "OFFICIAL_BROADCAST") return Megaphone;
   if (group.type === "MARKET") return Store;
@@ -32,7 +25,7 @@ function channelIcon(group: CivicGroup): LucideIcon {
   return Hash;
 }
 
-/** Groups tab — 5 neighborhood channels grouped by type, live text chat, and complaint embeds. */
+/** Groups tab — WhatsApp-style flat channel list sorted by latest activity (official alerts pinned). */
 export default function GroupsShell({
   viewerId,
   viewerName,
@@ -63,6 +56,17 @@ export default function GroupsShell({
     return map;
   }, [messages]);
 
+  const sortedGroups = useMemo(() => {
+    const lastTs = (groupId: string) => {
+      const list = messagesByGroup.get(groupId);
+      return list && list.length > 0 ? list[list.length - 1].createdAt : "";
+    };
+    return [...groups].sort((a, b) => {
+      if (a.isOfficial !== b.isOfficial) return a.isOfficial ? -1 : 1;
+      return lastTs(b.id).localeCompare(lastTs(a.id));
+    });
+  }, [groups, messagesByGroup]);
+
   const latestBroadcast = useMemo(() => {
     const officialIds = new Set(groups.filter((g) => g.isOfficial).map((g) => g.id));
     const broadcasts = messages.filter((m) => m.isOfficialAlert || officialIds.has(m.groupId));
@@ -88,16 +92,11 @@ export default function GroupsShell({
           onConvertToTicket={onConvertToTicket}
         />
       ) : (
-        <section className="flex flex-1 flex-col gap-4 px-4 py-4" data-testid="groups-channel-list">
-          <div className="flex items-baseline justify-between">
-            <div>
-              <h2 className="text-base font-semibold text-slate-50">{t.groups.title}</h2>
-              <p className="text-xs text-civic-muted">{t.groups.subtitle}</p>
-            </div>
-          </div>
+        <section className="flex flex-1 flex-col" data-testid="groups-channel-list">
+          <h2 className="px-4 pb-2 pt-3 text-base font-semibold text-slate-50">{t.groups.title}</h2>
 
           {!groupsHydrated ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 px-3">
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
@@ -106,74 +105,62 @@ export default function GroupsShell({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              {SECTION_ORDER.map(({ type, label }) => {
-                const sectionGroups = groups.filter((g) => g.type === type);
-                if (sectionGroups.length === 0) return null;
+            <ul className="divide-y divide-civic-border/60 border-t border-civic-border/60">
+              {sortedGroups.map((group) => {
+                const Icon = channelIcon(group);
+                const groupMsgs = messagesByGroup.get(group.id) ?? [];
+                const lastMsg = groupMsgs[groupMsgs.length - 1];
                 return (
-                  <div key={type} className="flex flex-col gap-2">
-                    <h3 className="text-[11px] font-semibold uppercase tracking-wider text-civic-muted">
-                      {label}
-                    </h3>
-                    <ul className="flex flex-col gap-2">
-                      {sectionGroups.map((group) => {
-                        const Icon = channelIcon(group);
-                        const groupMsgs = messagesByGroup.get(group.id) ?? [];
-                        const lastMsg = groupMsgs[groupMsgs.length - 1];
-                        return (
-                          <li key={group.id}>
-                            <button
-                              type="button"
-                              onClick={() => setSelectedGroupId(group.id)}
-                              data-testid="group-channel-card"
-                              data-group-id={group.id}
-                              className="flex w-full items-center gap-3 rounded-xl border border-civic-border bg-civic-raised px-3 py-3 text-left transition hover:border-civic-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-civic-accent"
-                            >
-                              <span
-                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                                  group.isOfficial
-                                    ? "bg-amber-500/15 text-amber-300"
-                                    : "bg-civic-surface text-civic-accent"
-                                }`}
-                              >
-                                <Icon className="h-5 w-5" aria-hidden="true" />
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-1.5">
-                                  <p className="truncate text-sm font-medium text-slate-100">
-                                    {group.name}
-                                  </p>
-                                  {group.isOfficial && (
-                                    <Lock
-                                      className="h-3 w-3 shrink-0 text-amber-300"
-                                      aria-label="Read-only channel"
-                                    />
-                                  )}
-                                </div>
-                                <p className="truncate text-xs text-civic-muted">
-                                  {lastMsg
-                                    ? `${lastMsg.senderName}: ${lastMsg.text}`
-                                    : group.description}
-                                </p>
-                              </div>
-                              <div className="flex shrink-0 flex-col items-end gap-0.5">
-                                <span className="text-[10px] text-civic-muted">
-                                  {lastMsg ? timeAgo(lastMsg.createdAt) : `${group.memberCount} members`}
-                                </span>
-                                <ChevronRight
-                                  className="h-4 w-4 text-civic-muted"
-                                  aria-hidden="true"
-                                />
-                              </div>
-                            </button>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+                  <li key={group.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGroupId(group.id)}
+                      data-testid="group-channel-card"
+                      data-group-id={group.id}
+                      className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition hover:bg-civic-raised/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-civic-accent"
+                    >
+                      <span
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                          group.isOfficial
+                            ? "bg-amber-500/15 text-amber-300"
+                            : "bg-civic-raised text-civic-accent"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <p className="truncate text-sm font-medium text-slate-100">
+                              {group.name}
+                            </p>
+                            {group.isOfficial && (
+                              <Lock
+                                className="h-3 w-3 shrink-0 text-amber-300"
+                                aria-label="Read-only channel"
+                              />
+                            )}
+                          </div>
+                          <span className="flex shrink-0 items-center gap-1 text-[10px] text-civic-muted">
+                            {group.isOfficial && <Pin className="h-2.5 w-2.5 text-amber-300/80" aria-hidden="true" />}
+                            {lastMsg ? timeAgo(lastMsg.createdAt) : `${group.memberCount} members`}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-civic-muted">
+                          {lastMsg
+                            ? `${lastMsg.senderName}: ${lastMsg.text}`
+                            : group.description}
+                        </p>
+                      </div>
+                      <ChevronRight
+                        className="h-4 w-4 shrink-0 text-civic-muted/70"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
         </section>
       )}
