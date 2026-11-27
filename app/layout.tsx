@@ -38,7 +38,7 @@ export default function RootLayout({
       <body className="min-h-dvh font-sans">
         <LanguageProvider>
           {/* Mobile-first container, centered on desktop */}
-          <div className="relative mx-auto flex min-h-dvh max-w-md flex-col border-x border-civic-border/60 bg-civic-surface shadow-2xl shadow-black/50">
+          <div className="civic-textured-bg relative mx-auto flex min-h-dvh max-w-md flex-col border-x border-civic-border/60 shadow-2xl shadow-black/50">
             {children}
           </div>
           <Toaster />
