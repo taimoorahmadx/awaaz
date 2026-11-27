@@ -21,7 +21,11 @@ void main() {
 // Sculpted 3D noise-fold surface with directional + Fresnel lighting and film grain,
 // inspired by ShaderGradient's dark grainy mesh waves, tuned to Awaaz's civic-bg & emerald palette.
 const FRAGMENT_SHADER = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+#else
+precision mediump float;
+#endif
 
 varying vec2 vUv;
 uniform float uTime;
@@ -226,6 +230,7 @@ export default function ShaderWaveBg({ active = false, dim = false }: ShaderWave
     ro.observe(canvas);
 
     const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const speedScale = reducedMotion ? 0.45 : 1.0;
 
     let rafId = 0;
     let lastTs = performance.now();
@@ -238,15 +243,13 @@ export default function ShaderWaveBg({ active = false, dim = false }: ShaderWave
 
       const targetEnergy = activeRef.current ? 1.0 : 0.0;
       smoothEnergy += (targetEnergy - smoothEnergy) * 0.08;
-      simTime += dt * (1.0 + smoothEnergy * 1.15);
+      simTime += dt * speedScale * (1.0 + smoothEnergy * 1.15);
 
       gl.uniform1f(uTime, simTime);
       gl.uniform1f(uEnergy, smoothEnergy);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-      if (!reducedMotion) {
-        rafId = requestAnimationFrame(renderFrame);
-      }
+      rafId = requestAnimationFrame(renderFrame);
     };
 
     rafId = requestAnimationFrame(renderFrame);
