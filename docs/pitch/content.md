@@ -38,7 +38,7 @@ Edit any slide below, then tell me to sync it into `pitch-deck.html`.
   2. **Field Worker** — AI Before/After repair proof
   3. **Mayor Desk** — Civic Health & payout freezes
 - **Visual:** `images/app-home.jpg` (live chatbot UI)
-- **Cue:** Live Product Demo
+- **Live Link & QR:** `https://try-awaaz.vercel.app/` (`images/qrcode_try-awaaz.vercel.app.png`)
 
 ---
 

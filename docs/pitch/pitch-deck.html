@@ -420,25 +420,28 @@
       <div class="grid-3">
         <div class="card card-red">
           <img class="card-img" src="images/open-manhole.jpg" alt="Open manhole hazard" />
-          <div class="stat red">27</div>
-          <div class="card-title">Open Manhole Deaths (2025)</div>
-          <p class="card-text">Karachi alone — including <strong>22+ children</strong>.</p>
+          <div class="stat red" style="font-size: clamp(22px, 2vw, 28px); line-height: 1.15;">
+            27 <span style="color: #f8fafc; font-weight: 700;">Open Manhole Deaths</span>
+          </div>
+          <p class="card-text">Karachi alone in 2025 — including <strong>22+ children</strong>.</p>
           <p class="card-source">Source: The Express Tribune (2025)</p>
         </div>
 
-        <div class="card card-amber">
+        <div class="card card-red">
           <img class="card-img" src="images/live-wire.jpg" alt="Exposed live wire hazard" />
-          <div class="stat amber">35</div>
-          <div class="card-title">Monsoon Electrocutions</div>
+          <div class="stat red" style="font-size: clamp(22px, 2vw, 28px); line-height: 1.15;">
+            35 <span style="color: #f8fafc; font-weight: 700;">Electrocutions</span>
+          </div>
           <p class="card-text">Killed in one Karachi monsoon (19 utility failures).</p>
           <p class="card-source">Source: NEPRA / The Express Tribune</p>
         </div>
 
         <div class="card card-red">
           <img class="card-img" src="images/garbage-heap.jpg" alt="Uncollected garbage and street decay" />
-          <div class="stat red">30–40%</div>
-          <div class="card-title">Uncollected Urban Waste</div>
-          <p class="card-text">Left on streets, choking drains &amp; worsening floods.</p>
+          <div class="stat red" style="font-size: clamp(22px, 2vw, 28px); line-height: 1.15;">
+            30–40% <span style="color: #f8fafc; font-weight: 700;">Uncollected</span>
+          </div>
+          <p class="card-text">Urban waste left on streets, choking drains &amp; worsening floods.</p>
           <p class="card-source">Source: SSWMB / The Express Tribune</p>
         </div>
       </div>
@@ -449,11 +452,11 @@
       <h2><span style="color: var(--emerald);">02</span> • Why Current Systems Fail</h2>
 
       <div class="grid-3">
-        <div class="card card-amber">
+        <div class="card card-red">
           <img class="card-img" src="images/paperwork-clerk.jpg" alt="Overwhelmed municipal clerk with towering paperwork" style="height: 130px; object-position: center 20%;" />
-          <div class="stat amber">~99%</div>
-          <div class="card-title">“Resolved” on Paper</div>
-          <p class="card-text">6M+ PCP complaints closed with zero visual proof.</p>
+          <div class="stat red">Fake Closures</div>
+          <div class="card-title">~99% Closed on Paper</div>
+          <p class="card-text">6M+ PCP complaints marked “resolved” with zero visual proof.</p>
           <p class="card-source">Source: Pakistan Citizen Portal Reports</p>
         </div>
 
@@ -497,8 +500,14 @@
             </div>
           </div>
 
-          <div style="margin-top: 30px;">
-            <span class="pill" style="font-size: 14px; padding: 10px 18px;">● Live Product Demo</span>
+          <div style="margin-top: 28px; display: flex; align-items: center; gap: 20px;">
+            <a href="https://try-awaaz.vercel.app/" target="_blank" rel="noopener noreferrer" style="display: block; flex-shrink: 0; background: #ffffff; padding: 8px; border-radius: 16px; border: 1px solid rgba(16,185,129,0.45);">
+              <img src="images/qrcode_try-awaaz.vercel.app.png" alt="QR code for try-awaaz.vercel.app" style="width: 160px; height: 160px; display: block; border-radius: 10px;" />
+            </a>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--emerald);">Try It Live</span>
+              <a href="https://try-awaaz.vercel.app/" target="_blank" rel="noopener noreferrer" style="color: #f8fafc; font-size: 20px; font-weight: 700; text-decoration: none; letter-spacing: -0.01em;">try-awaaz.vercel.app</a>
+            </div>
           </div>
         </div>
 
