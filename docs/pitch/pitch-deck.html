@@ -367,25 +367,48 @@
       color: #64748b;
     }
 
-    @media (max-width: 900px) {
+    @media screen and (max-width: 900px) {
       .slide { padding: 28px 24px 84px; overflow-y: auto; justify-content: flex-start; }
       .hero-wrap, .grid-3, .grid-2, .grid-4 { grid-template-columns: 1fr; }
       .logo-squircle { width: 130px; height: 130px; }
     }
 
     @media print {
-      @page { size: 16in 9in; margin: 0; }
-      body { overflow: visible; }
-      .controls, .progress { display: none !important; }
-      .deck { height: auto; }
+      @page { size: 1280px 720px; margin: 0; }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      html, body {
+        width: 1280px;
+        height: auto;
+        overflow: visible;
+        background: var(--bg);
+      }
+      .controls, .progress, .deck-bg { display: none !important; }
+      .deck { width: 1280px; height: auto; }
       .slide {
         position: relative;
+        width: 1280px;
+        height: 720px;
+        padding: 48px 64px;
+        overflow: hidden;
         opacity: 1 !important;
         transform: none !important;
+        transition: none !important;
         pointer-events: auto;
-        width: 100vw;
-        height: 100vh;
+        break-after: page;
         page-break-after: always;
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(circle at 80% 15%, rgba(16, 185, 129, 0.12), transparent 42%),
+          radial-gradient(circle at 15% 85%, rgba(56, 189, 248, 0.07), transparent 40%),
+          radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 24px 24px;
+      }
+      .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
       }
     }
   </style>
